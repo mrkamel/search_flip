@@ -41,9 +41,13 @@ module ElasticSearch
         RestClient.post "#{elastic_search_base_url}/_refresh", "{}"
       end
 
+      def elastic_search_index_scope
+        all
+      end
+
       def elastic_search_index(options = {}, &callback) 
         ElasticSearch::Bulk.new("#{elastic_search_url}/_bulk", ElasticSearch::Config[:bulk_limit], callback) do |indexer|
-          find_each do |image|
+          elastic_search_index_scope.find_each do |image|
             indexer.index image.id, image.to_elastic_search_json
           end 
         end 

@@ -5,7 +5,7 @@ module ElasticSearch
 
     def initialize(relation, response)
       self.relation = relation
-      self.response = JSON.parse(response)
+      self.response = response
     end
 
     def total_entries
@@ -77,7 +77,7 @@ module ElasticSearch
     end
 
     def facets(name = nil)
-      return response["facets"] unless name
+      return response["facets"] || {} unless name
 
       @facets ||= Hash.new do |cache, key|
         cache[key] =
@@ -92,12 +92,12 @@ module ElasticSearch
     end
 
     def aggregations(name = nil)
-      return response["aggregations"] unless name
+      return response["aggregations"] || {} unless name
 
       @aggregations ||= Hash.new do |cache, key|
         cache[key] =
           if response["aggregations"].blank? || response["aggregations"][key].blank?
-            {}
+            Hashr.new
           elsif response["aggregations"][key]["buckets"].is_a?(Array)
             response["aggregations"][key]["buckets"].each_with_object({}) { |bucket, hash| hash[bucket["key"]] = Hashr.new(bucket) }
           elsif response["aggregations"][key]["buckets"].is_a?(Hash)

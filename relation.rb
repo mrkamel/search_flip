@@ -10,7 +10,7 @@ module ElasticSearch
     include ElasticSearch::AggregatableRelation
     include ElasticSearch::FacetableRelation
 
-    attr_accessor :sort_values, :offset_value, :limit_value, :query_value, :target, :includes_values, :eager_load_values, :preload_values
+    attr_accessor :sort_values, :offset_value, :limit_value, :query_value, :target, :includes_values, :eager_load_values, :preload_values, :failsafe_value
 
     def initialize(options = {})
       options.each do |key, value|
@@ -19,6 +19,7 @@ module ElasticSearch
 
       self.offset_value ||= 0
       self.limit_value ||= 30
+      self.failsafe_value ||= false
     end
 
     def request
@@ -188,7 +189,26 @@ module ElasticSearch
     end
 
     def response
-      @response ||= ElasticSearch::Response.new(self, RestClient.post("#{ElasticSearch::Config[:base_url]}/#{target.elastic_search_index_name}/#{target.elastic_search_type_name}/_search", request.to_json))
+      begin
+        @response ||= ElasticSearch::Response.new(self, JSON.parse(RestClient.post("#{ElasticSearch::Config[:base_url]}/#{target.elastic_search_index_name}/#{target.elastic_search_type_name}/_search", request.to_json)))
+      rescue RestClient::BadRequest, RestClient::InternalServerError, RestClient::ServiceUnavailable, Errno::ECONNREFUSED => e
+        raise e unless failsafe_value
+
+        @response = ElasticSearch::Response.new(self, "took" => 0, "hits" => { "total" => 0, "hits" => [] })
+      end
+    end
+
+    def failsafe!(value)
+      clear_cache!
+
+      self.failsafe_value = value
+      self
+    end
+
+    def failsafe(value)
+      dup.tap do |relation|
+        relation.failsafe! value
+      end
     end
 
     def clear_cache!
