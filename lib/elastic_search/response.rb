@@ -1,6 +1,8 @@
 
 module ElasticSearch
   class Response
+    extend Forwardable
+
     attr_accessor :relation, :response
 
     def initialize(relation, response)
@@ -44,6 +46,10 @@ module ElasticSearch
       response["hits"]
     end
 
+    def scroll_id
+      response["_scroll_id"]
+    end
+
     def records(options = {})
       @records ||= begin
         sort_map = ids.each_with_index.each_with_object({}) { |(id, index), hash| hash[id.to_s] = index }
@@ -53,7 +59,7 @@ module ElasticSearch
     end
 
     def scope
-      res = relation.target.where(:id => ids).unscope(:order)
+      res = relation.target.model.where(:id => ids).unscope(:order)
 
       res = res.includes(*relation.includes_values) if relation.includes_values
       res = res.eager_load(*relation.eager_load_values) if relation.eager_load_values
@@ -66,7 +72,7 @@ module ElasticSearch
       @ids ||= hits["hits"].collect { |hit| hit["_id"] }
     end
 
-    delegate :size, :count, :length, :to => :ids
+    delegate [:size, :count, :length] => :ids
 
     def took
       response["took"]
@@ -97,13 +103,13 @@ module ElasticSearch
       @aggregations ||= Hash.new do |cache, key|
         cache[key] =
           if response["aggregations"].blank? || response["aggregations"][key].blank?
-            Hashr.new
+            Hashy.new
           elsif response["aggregations"][key]["buckets"].is_a?(Array)
-            response["aggregations"][key]["buckets"].each_with_object({}) { |bucket, hash| hash[bucket["key"]] = Hashr.new(bucket) }
+            response["aggregations"][key]["buckets"].each_with_object({}) { |bucket, hash| hash[bucket["key"]] = Hashy.new(bucket) }
           elsif response["aggregations"][key]["buckets"].is_a?(Hash)
-            Hashr.new response["aggregations"][key]["buckets"]
+            Hashy.new response["aggregations"][key]["buckets"]
           else
-            Hashr.new response["aggregations"][key]
+            Hashy.new response["aggregations"][key]
           end
       end
 

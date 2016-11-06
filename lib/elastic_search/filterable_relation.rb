@@ -79,6 +79,22 @@ module ElasticSearch
     def match_all
       filter :match_all => {}
     end
+
+    def exists!(field)
+      filter! :exists => { :field => field }
+    end
+
+    def exists(field)
+      filter :exists => { :field => field }
+    end
+
+    def exists_not!(field)
+      filter! :bool => { :must_not => { :exists => { :field => field }}}
+    end
+
+    def exists_not(field)
+      filter :bool => { :must_not => { :exists => { :field => field }}}
+    end
   end
 end
 

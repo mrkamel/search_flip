@@ -1,7 +1,4 @@
 
-require File.expand_path("../filterable_relation", __FILE__)
-require File.expand_path("../aggregatable_relation", __FILE__)
-
 module ElasticSearch
   class AggregationRelation
     include ElasticSearch::FilterableRelation
@@ -10,7 +7,7 @@ module ElasticSearch
     def to_hash
       res = {}
       res[:aggregations] = aggregation_values if aggregation_values.present?
-      res[:filter] = { :and => filter_values } if filter_values.present?
+      res[:filter] = filter_values.size > 1 ? { :and => filter_values } : filter_values.first if filter_values.present?
       res
     end
 
