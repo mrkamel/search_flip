@@ -14,6 +14,7 @@ module ElasticSearch
 
       if block
         relation = ElasticSearch::FacetRelation.new
+
         block.call(relation)
 
         field_or_hash.is_a?(Hash) ? hash[field_or_hash.keys.first].merge!(relation.to_hash) : hash[field_or_hash].merge!(relation.to_hash)

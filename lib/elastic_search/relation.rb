@@ -8,8 +8,7 @@ module ElasticSearch
     include ElasticSearch::AggregatableRelation
     include ElasticSearch::FacetableRelation
 
-    attr_accessor :profile_value, :source_value, :sort_values, :offset_value, :limit_value, :query_value, :target,
-      :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args
+    attr_accessor :target, :profile_value, :source_value, :sort_values, :offset_value, :limit_value, :query_value, :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args
 
     def initialize(options = {})
       options.each do |key, value|
@@ -284,15 +283,12 @@ module ElasticSearch
     def method_missing(name, *args, &block)
       if target.scopes.key?(name.to_s)
         instance_exec(*args, &target.scopes[name.to_s])
-      elsif target.respond_to?(name, *args)
-        instance_exec(*args, &target.method(name))
       else
         super
       end
     end
 
-    delegate [:total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids, :count,
-      :size, :length, :took, :aggregations, :facets, :scope, :results, :records, :scroll_id] => :response
+    delegate [:total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :facets, :scope, :results, :records, :scroll_id] => :response
   end
 end
 
