@@ -1,7 +1,7 @@
 
 module ElasticSearch
   def self.version
-    @version ||= JSON.parse(RestClient.get("#{Config[:base_url]}/"))["version"]["number"]
+    @version ||= JSON.parse(RestClient.get("#{Config[:base_url]}/", :content_type => "application/json"))["version"]["number"]
   end
 
   Config = {

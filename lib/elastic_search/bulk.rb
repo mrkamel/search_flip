@@ -24,7 +24,7 @@ module ElasticSearch
     end
 
     def upload
-      response = RestClient.put(url, @payload, :params => ignore_errors.blank? ? { :filter_path => "errors" } : {})
+      response = RestClient.put(url, @payload, :params => ignore_errors.blank? ? { :filter_path => "errors" } : {}, :content_type => "application/json")
 
       return if options[:raise] == false
 

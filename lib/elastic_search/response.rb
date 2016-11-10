@@ -78,10 +78,6 @@ module ElasticSearch
       response["took"]
     end
 
-    def aggregations
-      response["aggregations"]
-    end
-
     def facets(name = nil)
       return response["facets"] || {} unless name
 

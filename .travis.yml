@@ -4,9 +4,16 @@ rvm:
   - 2.2.5
   - 2.3.1
 
+services:
+  - elasticsearch
+
+before_script:
+  - sleep 10
+
 install:
   - "travis_retry bundle install"
 
 script: "bundle exec rake test"
+
 sudo: false
 

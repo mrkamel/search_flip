@@ -47,12 +47,6 @@ module ElasticSearch
         index_scopes.inject(scope) { |orig, cur| cur.call scope }
       end
 
-      def get(object)
-        docs = scope.collect { |object| { :_id => object.id }.merge(index_options(object).symbolize_keys.slice(:routing, :_routing)) }
-
-        JSON.parse(RestClient.post("#{type_url}/_mget", JSON.generate(:docs => docs)))["docs"].collect { |doc| Hashy.new doc }
-      end
-
       def relation
         default_scopes.inject(ElasticSearch::Relation.new(:target => self)) { |relation, scope| relation.instance_exec(&scope) }
       end
@@ -66,23 +60,31 @@ module ElasticSearch
       end
 
       def type_name
-        name.pluralize.underscore
+        raise NotImplementedError
       end
 
       def index_name
-        [ElasticSearch::Config[:index_prefix], type_name].join("-")
+        [ElasticSearch::Config[:index_prefix], type_name].reject(&:blank?).join("-")
       end
 
       def index_settings
         {}
       end
 
+      def index_exists?
+        get_mapping
+
+        true
+      rescue RestClient::NotFound
+        false
+      end
+
       def create_index
-        RestClient.put index_url, JSON.generate(index_settings)
+        RestClient.put index_url, JSON.generate(index_settings), :content_type => "application/json"
       end
 
       def delete_index
-        RestClient.delete index_url
+        RestClient.delete index_url, :content_type => "application/json"
       end
 
       def mapping
@@ -90,15 +92,15 @@ module ElasticSearch
       end
 
       def update_mapping
-        RestClient.put "#{type_url}/_mapping", JSON.generate(mapping)
+        RestClient.put "#{type_url}/_mapping", JSON.generate(mapping), :content_type => "application/json"
       end
 
       def get_mapping
-        JSON.parse RestClient.get("#{type_url}/_mapping")
+        JSON.parse RestClient.get("#{type_url}/_mapping", :content_type => "application/json")
       end
 
       def refresh
-        RestClient.post "#{index_url}/_refresh", "{}"
+        RestClient.post "#{index_url}/_refresh", "{}", :content_type => "application/json"
       end
 
       def index(scope, options = {}, _index_options = {})
@@ -137,7 +139,7 @@ module ElasticSearch
 
       def delete(scope, options = {}, _index_options = {})
         bulk options do |indexer|
-          (scope.respond_to?(:find_each) ? find_each : Array(scope)).each do |object|
+          (scope.respond_to?(:find_each) ? scope.find_each : Array(scope)).each do |object|
             indexer.delete object.id, index_options(object).merge(_index_options)
           end
         end
