@@ -9,7 +9,7 @@ jdk:
 
 install:
   - curl -s https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.4.1/elasticsearch-2.4.1.tar.gz | tar xz -C /tmp
-  - cd /tmp/elasticsearch-2.4.1 && bin/elasticsearch -d
+  - /tmp/elasticsearch-2.4.1/bin/elasticsearch -d
   - travis_retry bundle install
 
 before_script:
