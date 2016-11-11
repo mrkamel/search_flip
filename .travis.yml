@@ -5,7 +5,7 @@ rvm:
   - 2.3.1
 
 jdk:
-  - openjdk-7
+  - openjdk7
 
 install:
   - curl -s https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.4.1/elasticsearch-2.4.1.tar.gz | tar xz -C /tmp
