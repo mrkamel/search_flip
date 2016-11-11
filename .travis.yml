@@ -7,13 +7,18 @@ rvm:
 services:
   - elasticsearch
 
+before_install:
+  - curl -O https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-2.4.1.deb && sudo dpkg -i --force-confnew elasticsearch-2.4.1.deb
+  - sudo /usr/share/elasticsearch/bin/plugin install delete-by-query
+  - sudo service elasticsearch restart
+
+install:
+  - travis_retry bundle install
+
 before_script:
   - sleep 10
 
-install:
-  - "travis_retry bundle install"
-
-script: "bundle exec rake test"
+script: bundle exec rake test
 
 sudo: false
 

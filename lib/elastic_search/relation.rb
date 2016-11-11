@@ -70,7 +70,7 @@ module ElasticSearch
     end
 
     def delete
-      RestClient::Request.execute :method => :delete, :url => "#{target.type_url}/_query", :payload => JSON.generate(request.except(:from, :size)), :content_type => "application/json"
+      RestClient::Request.execute :method => :delete, :url => "#{target.type_url}/_query", :payload => JSON.generate(request.except(:from, :size)), :headers => { :content_type => "application/json" }
 
       target.refresh if ElasticSearch::Config[:environment] == "test"
     end
