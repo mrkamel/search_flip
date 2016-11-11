@@ -64,7 +64,7 @@ ProductIndex.update_mapping
 
 class ElasticSearch::TestCase < MiniTest::Test
   def teardown
-    ProductIndex.match_all.delete
+    ProductIndex.delete Product.all
     Product.delete_all
   end
 end
