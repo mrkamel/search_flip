@@ -4,11 +4,8 @@ rvm:
   - 2.2.5
   - 2.3.1
 
-services:
-  - elasticsearch
-
 before_install:
-  - curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.4.1/elasticsearch-2.4.1.deb && sudo dpkg -i --force-confnew elasticsearch-2.4.1.deb
+  - curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.4.1/elasticsearch-2.4.1.deb && sudo dpkg elasticsearch-2.4.1.deb
 
 install:
   - travis_retry bundle install
