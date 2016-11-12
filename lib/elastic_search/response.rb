@@ -1,8 +1,6 @@
 
 module ElasticSearch
   class Response
-    extend Forwardable
-
     attr_accessor :relation, :response
 
     def initialize(relation, response)
@@ -72,7 +70,7 @@ module ElasticSearch
       @ids ||= hits["hits"].collect { |hit| hit["_id"] }
     end
 
-    delegate [:size, :count, :length] => :ids
+    delegate :size, :count, :length, :to => :ids
 
     def took
       response["took"]

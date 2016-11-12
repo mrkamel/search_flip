@@ -1,6 +1,7 @@
 
 require "minitest"
 require "minitest/autorun"
+require "mocha/mini_test"
 require "elastic_search"
 require "active_record"
 require "factory_girl"
@@ -8,10 +9,7 @@ require "yaml"
 
 ActiveRecord::Base.establish_connection YAML.load_file(File.expand_path("../database.yml", __FILE__))
 
-FactoryGirl.define do
-  factory :product do
-  end
-end
+ElasticSearch::Config[:environment] = "test"
 
 ActiveRecord::Base.connection.execute "DROP TABLE IF EXISTS products"
 
@@ -23,6 +21,11 @@ ActiveRecord::Base.connection.create_table :products do |t|
 end
 
 class Product < ActiveRecord::Base; end
+
+FactoryGirl.define do
+  factory :product do
+  end
+end
 
 class ProductIndex
   include ElasticSearch::Index
@@ -63,8 +66,10 @@ ProductIndex.create_index
 ProductIndex.update_mapping
 
 class ElasticSearch::TestCase < MiniTest::Test
+  include FactoryGirl::Syntax::Methods
+
   def teardown
-    ProductIndex.match_all.delete
+    ProductIndex.delete Product.all
     Product.delete_all
   end
 end

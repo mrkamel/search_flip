@@ -51,13 +51,9 @@ module ElasticSearch
         default_scopes.inject(ElasticSearch::Relation.new(:target => self)) { |relation, scope| relation.instance_exec(&scope) }
       end
 
-      [:profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where, :post_where_not, :post_filter, :post_range,
+      delegate :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where, :post_where_not, :post_filter, :post_range,
         :post_exists, :post_exists_not, :aggregate, :facet, :scroll, :source, :includes, :eager_load, :preload, :sort, :order, :offset, :limit,
-        :paginate, :query, :search, :find_in_batches, :find_each, :failsafe, :total_entries].each do |method|
-          define_method method do |*args, &block|
-            relation.send(:"#{method}", *args, &block)
-          end
-      end
+        :paginate, :query, :search, :find_in_batches, :find_each, :failsafe, :total_entries, :to => :relation
 
       def type_name
         raise NotImplementedError

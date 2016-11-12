@@ -1,8 +1,6 @@
 
 module ElasticSearch
   class Relation
-    extend Forwardable
-
     include ElasticSearch::FilterableRelation
     include ElasticSearch::PostFilterableRelation
     include ElasticSearch::AggregatableRelation
@@ -288,7 +286,7 @@ module ElasticSearch
       end
     end
 
-    delegate [:total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :facets, :scope, :results, :records, :scroll_id] => :response
+    delegate :total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :facets, :scope, :results, :records, :scroll_id, :to => :response
   end
 end
 
