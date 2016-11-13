@@ -2,6 +2,11 @@
 require File.expand_path("../test_helper", __FILE__)
 
 class IndexTest < ElasticSearch::TestCase
+  should_delegate_methods :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where,
+    :post_where_not, :post_filter, :post_range, :post_exists, :post_exists_not, :aggregate, :facet, :scroll, :source,
+    :includes, :eager_load, :preload, :sort, :order, :offset, :limit, :paginate, :query, :search, :find_in_batches,
+    :find_each, :failsafe, :total_entries, :to => :relation, :subject => ProductIndex
+
   def test_create_index
     assert TestIndex.create_index
     assert TestIndex.index_exists?
@@ -43,108 +48,36 @@ class IndexTest < ElasticSearch::TestCase
     ProductIndex.import create(:product)
 
     assert ProductIndex.refresh
+
+    assert_equal 1, ProductIndex.total_entries
   end
 
-  def test_delegation
-    relation = mock
+  def test_base_url
+    assert_equal "http://127.0.0.1:9200", ProductIndex.base_url
+  end
 
-    ProductIndex.stubs(:relation).returns(relation)
+  def test_index_url
+    assert_equal "http://127.0.0.1:9200/products", ProductIndex.index_url
 
-    relation.expects(:profile)
-    ProductIndex.profile(true)
+    ProductIndex.stubs(:type_name).returns("products2")
 
-    relation.expects(:where)
-    ProductIndex.where(:key => "value")
+    assert_equal "http://127.0.0.1:9200/products2", ProductIndex.index_url
 
-    relation.expects(:where_not)
-    ProductIndex.where_not(:field => "value")
+    ElasticSearch::Config[:index_prefix] = "prefix-"
 
-    relation.expects(:filter)
-    ProductIndex.filter(:terms => { :field => "value" })
+    assert_equal "http://127.0.0.1:9200/prefix-products2", ProductIndex.index_url
 
-    relation.expects(:range)
-    ProductIndex.range(:field, :gt => 0, :lt => 2)
+    ProductIndex.stubs(:index_name).returns("products3")
 
-    relation.expects(:match_all)
-    ProductIndex.match_all
+    assert_equal "http://127.0.0.1:9200/prefix-products3", ProductIndex.index_url
+  end
 
-    relation.expects(:exists)
-    ProductIndex.exists(:field)
+  def test_type_url
+    assert_equal "http://127.0.0.1:9200/products/products", ProductIndex.type_url
 
-    relation.expects(:exists_not)
-    ProductIndex.exists_not(:field)
+    ProductIndex.stubs(:type_name).returns("products2")
 
-    relation.expects(:post_where)
-    ProductIndex.post_where(:field => "value")
-
-    relation.expects(:post_where_not)
-    ProductIndex.post_where_not(:field => "value")
-
-    relation.expects(:post_filter)
-    ProductIndex.post_filter(:terms => { :field => "value" })
-
-    relation.expects(:post_range)
-    ProductIndex.post_range(:field, :gt => 0, :lt => 2)
-
-    relation.expects(:post_exists)
-    ProductIndex.post_exists(:field)
-
-    relation.expects(:post_exists_not)
-    ProductIndex.post_exists_not(:field)
-
-    relation.expects(:aggregate)
-    ProductIndex.aggregate(:field)
-
-    relation.expects(:facet)
-    ProductIndex.facet(:field)
-
-    relation.expects(:scroll)
-    ProductIndex.scroll
-
-    relation.expects(:source)
-    ProductIndex.source([:field1, :field2])
-
-    relation.expects(:includes)
-    ProductIndex.includes(:association)
-
-    relation.expects(:eager_load)
-    ProductIndex.eager_load(:assocation)
-
-    relation.expects(:preload)
-    ProductIndex.preload(:assocation)
-
-    relation.expects(:sort)
-    ProductIndex.sort(:field)
-
-    relation.expects(:order)
-    ProductIndex.order(:field)
-
-    relation.expects(:offset)
-    ProductIndex.offset(30)
-
-    relation.expects(:limit)
-    ProductIndex.limit(30)
-
-    relation.expects(:paginate)
-    ProductIndex.paginate(:page => 1)
-
-    relation.expects(:query)
-    ProductIndex.query("query")
-
-    relation.expects(:search)
-    ProductIndex.search("query")
-
-    relation.expects(:find_in_batches)
-    ProductIndex.find_in_batches
-
-    relation.expects(:find_each)
-    ProductIndex.find_each
-
-    relation.expects(:failsafe)
-    ProductIndex.failsafe(true)
-
-    relation.expects(:total_entries)
-    ProductIndex.total_entries
+    assert_equal "http://127.0.0.1:9200/products2/products2", ProductIndex.type_url
   end
 end
 

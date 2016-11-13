@@ -59,8 +59,12 @@ module ElasticSearch
         raise NotImplementedError
       end
 
+      def index_name_with_prefix
+        "#{ElasticSearch::Config[:index_prefix]}#{index_name}"
+      end
+
       def index_name
-        [ElasticSearch::Config[:index_prefix], type_name].reject(&:blank?).join("-")
+        type_name
       end
 
       def index_settings
@@ -156,7 +160,7 @@ module ElasticSearch
       end
 
       def index_url
-        "#{base_url}/#{index_name}"
+        "#{base_url}/#{index_name_with_prefix}"
       end
 
       def base_url
