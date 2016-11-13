@@ -93,10 +93,8 @@ class ElasticSearch::TestCase < MiniTest::Test
     end
   end
 
-  def teardown
-    mocha_teardown
-
-    ProductIndex.match_all.delete
+  def setup
+    ProductIndex.delete Product.all
     Product.delete_all
   end
 end

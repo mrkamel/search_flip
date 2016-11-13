@@ -70,6 +70,8 @@ class IndexTest < ElasticSearch::TestCase
     ProductIndex.stubs(:index_name).returns("products3")
 
     assert_equal "http://127.0.0.1:9200/prefix-products3", ProductIndex.index_url
+
+    ElasticSearch::Config[:index_prefix] = nil
   end
 
   def test_type_url
