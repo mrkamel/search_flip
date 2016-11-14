@@ -99,8 +99,16 @@ module ElasticSearch
         JSON.parse RestClient.get("#{type_url}/_mapping", :content_type => "application/json")
       end
 
+      def get(id)
+        JSON.parse RestClient.get("#{type_url}/#{id}", :content_type => "application/json")
+      end
+
       def refresh
         RestClient.post "#{index_url}/_refresh", "{}", :content_type => "application/json"
+      end
+
+      def import(*args)
+        index(*args)
       end
 
       def index(scope, options = {}, _index_options = {})
@@ -111,10 +119,6 @@ module ElasticSearch
         end
 
         scope
-      end
-
-      def import(*args)
-        index(*args)
       end
 
       def create(scope, options = {}, _index_options = {})

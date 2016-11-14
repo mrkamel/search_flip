@@ -9,7 +9,7 @@ module ElasticSearch
       self.url = url
       self.count = count
       self.options = options
-      self.ignore_errors = options[:ignore_errors].to_set if options[:ignore_errors]
+      self.ignore_errors = Array(options[:ignore_errors]).to_set
 
       init
 

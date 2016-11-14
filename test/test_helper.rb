@@ -17,6 +17,7 @@ ActiveRecord::Base.connection.create_table :products do |t|
   t.string :title
   t.text :description
   t.float :price
+  t.integer :version, default: 1
   t.timestamps null: false
 end
 
@@ -41,6 +42,12 @@ class ProductIndex
   def self.model
     Product
   end
+
+  def self.serialize(product)
+    {
+      id: product.id
+    }
+  end
 end
 
 class TestIndex
@@ -48,9 +55,9 @@ class TestIndex
 
   def self.mapping
     {
-      :test => {
-        :properties => {
-          :test_field => { :type => "string" }
+      test: {
+        properties: {
+          test_field: { type: "string" }
         }
       }
     }
@@ -91,6 +98,24 @@ class ElasticSearch::TestCase < MiniTest::Test
     methods.each do |method|
       should_delegate_method method, to: to, subject: subject
     end
+  end
+
+  def assert_difference(expressions, difference = 1, &block)
+    callables = Array(expressions).map { |e| lambda { eval(e, block.binding) } }
+
+    before = callables.map(&:call)
+
+    res = yield
+
+    Array(expressions).zip(callables).each_with_index do |(code, callable), i|
+      assert_equal before[i] + difference, callable.call, "#{code.inspect} didn't change by #{difference}"
+    end
+
+    res
+  end
+
+  def assert_no_difference(expressions, &block)
+    assert_difference(expressions, 0, &block)
   end
 
   def setup
