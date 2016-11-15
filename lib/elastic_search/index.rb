@@ -37,7 +37,7 @@ module ElasticSearch
       end
 
       def index_scope_for(scope)
-        index_scopes.inject(scope) { |orig, cur| cur.call(orig) }
+        index_scopes.inject(scope) { |memo, cur| cur.call(memo) }
       end
 
       def relation
