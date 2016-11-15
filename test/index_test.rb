@@ -16,17 +16,27 @@ class IndexTest < ElasticSearch::TestCase
     refute TestIndex.index_exists?
   end
 
+  def test_create_index_with_index_settings
+    TestIndex.stubs(:index_settings).returns(settings: { :number_of_shards => 3 })
+
+    assert TestIndex.create_index
+    assert TestIndex.index_exists?
+
+    assert 3, TestIndex.get_index_settings["test"]["settings"]["index"]["number_of_shards"]
+  ensure
+    TestIndex.delete_index if TestIndex.index_exists?
+  end
+
+  def test_get_index_settings
+    # Already tested
+  end
+
   def test_index_exists?
     # Already tested
   end
 
   def test_delete_index
-    TestIndex.create_index
-
-    assert TestIndex.index_exists?
-    assert TestIndex.delete_index
-
-    refute TestIndex.index_exists?
+    # Already tested
   end
 
   def test_update_mapping
@@ -149,6 +159,18 @@ class IndexTest < ElasticSearch::TestCase
     end
   end
 
+  def test_create_already_created
+    products = create_list(:product, 2)
+
+    assert_difference "ProductIndex.total_entries", 2 do
+      ProductIndex.create products
+    end
+
+    assert_raises ElasticSearch::Bulk::Error do
+      ProductIndex.create products
+    end
+  end
+
   def test_create_with_param_options
     products = create_list(:product, 2)
 
@@ -185,20 +207,64 @@ class IndexTest < ElasticSearch::TestCase
     assert_equal [2, 2], products.map { |product| ProductIndex.get(product.id)["_version"] }
   end
 
-  def test_create_already_created
-    products = create_list(:product, 2)
-
-    assert_difference "ProductIndex.total_entries", 2 do
-      ProductIndex.create products
-    end
-
-    assert_raises ElasticSearch::Bulk::Error do
-      ProductIndex.create products
-    end
-  end
-
   def test_get
     # Already tested
+  end
+
+  def test_scope
+    ProductIndex.scope(:with_title) { |title| where(title: title) }
+
+    expected = create(:product, title: "expected")
+    rejected = create(:product, title: "rejected")
+
+    ProductIndex.import [expected, rejected]
+
+    results = ProductIndex.with_title("expected").records
+
+    assert_includes results, expected
+    refute_includes results, rejected
+  ensure
+    ProductIndex.scopes = []
+  end
+
+  def test_index_scope
+    product1, product2, product3 = create_list(:product, 3)
+
+    ProductIndex.index_scope { |products| products.where.not(:id => product1.id) }
+    ProductIndex.index_scope { |products| products.where.not(:id => product2.id) }
+
+    ProductIndex.import Product.all
+
+    results = ProductIndex.match_all.records
+
+    refute_includes results, product1
+    refute_includes results, product2
+    assert_includes results, product3
+  ensure
+    ProductIndex.index_scopes = []
+  end
+
+  def test_bulk
+    assert_difference "ProductIndex.total_entries", 2 do
+      ProductIndex.bulk do |indexer|
+        indexer.index 1, JSON.generate(id: 1)
+        indexer.index 2, JSON.generate(id: 2)
+      end
+    end
+
+    assert_no_difference "ProductIndex.total_entries" do
+      assert_raises "ElasticSearch::Bulk::Error" do
+        ProductIndex.bulk do |indexer|
+          indexer.index 1, JSON.generate(id: 1), version: 1, version_type: "external"
+          indexer.index 2, JSON.generate(id: 2), version: 1, version_type: "external"
+        end
+      end
+
+      ProductIndex.bulk :ignore_errors => [409] do |indexer|
+        indexer.index 1, JSON.generate(id: 1), version: 1, version_type: "external"
+        indexer.index 2, JSON.generate(id: 2), version: 1, version_type: "external"
+      end
+    end
   end
 end
 

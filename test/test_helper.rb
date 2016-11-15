@@ -24,8 +24,7 @@ end
 class Product < ActiveRecord::Base; end
 
 FactoryGirl.define do
-  factory :product do
-  end
+  factory :product
 end
 
 class ProductIndex
@@ -45,10 +44,15 @@ class ProductIndex
 
   def self.serialize(product)
     {
-      id: product.id
+      id: product.id,
+      title: product.title
     }
   end
 end
+
+ProductIndex.delete_index if ProductIndex.index_exists?
+ProductIndex.create_index
+ProductIndex.update_mapping
 
 class TestIndex
   include ElasticSearch::Index
@@ -68,9 +72,7 @@ class TestIndex
   end
 end
 
-ProductIndex.delete_index if ProductIndex.index_exists?
-ProductIndex.create_index
-ProductIndex.update_mapping
+TestIndex.delete_index if TestIndex.index_exists?
 
 class ElasticSearch::TestCase < MiniTest::Test
   include FactoryGirl::Syntax::Methods

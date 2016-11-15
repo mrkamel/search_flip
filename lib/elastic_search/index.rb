@@ -4,9 +4,6 @@ module ElasticSearch
     def self.included(base)
       base.extend ClassMethods
 
-      base.class_attribute :default_scopes
-      base.default_scopes = []
-
       base.class_attribute :index_scopes
       base.index_scopes = []
 
@@ -23,10 +20,6 @@ module ElasticSearch
         {}
       end
 
-      def default_scope(&block)
-        self.default_scopes = default_scopes + [block]
-      end
-
       def scope(name, &block)
         define_singleton_method name do |*args, &blk|
           relation.send(name, *args, &blk)
@@ -39,16 +32,16 @@ module ElasticSearch
         if block_given?
           self.index_scopes = index_scopes + [block]
         else
-          index_scope_for model
+          index_scope_for(model)
         end
       end
 
       def index_scope_for(scope)
-        index_scopes.inject(scope) { |orig, cur| cur.call scope }
+        index_scopes.inject(scope) { |orig, cur| cur.call(orig) }
       end
 
       def relation
-        default_scopes.inject(ElasticSearch::Relation.new(:target => self)) { |relation, scope| relation.instance_exec(&scope) }
+        ElasticSearch::Relation.new(:target => self)
       end
 
       delegate :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where, :post_where_not, :post_filter, :post_range,
@@ -79,12 +72,16 @@ module ElasticSearch
         false
       end
 
+      def get_index_settings
+        JSON.parse RestClient.get("#{index_url}/_settings", content_type: "application/json")
+      end
+
       def create_index
-        RestClient.put index_url, JSON.generate(index_settings), :content_type => "application/json"
+        RestClient.put index_url, JSON.generate(index_settings), content_type: "application/json"
       end
 
       def delete_index
-        RestClient.delete index_url, :content_type => "application/json"
+        RestClient.delete index_url, content_type: "application/json"
       end
 
       def mapping
@@ -92,19 +89,19 @@ module ElasticSearch
       end
 
       def update_mapping
-        RestClient.put "#{type_url}/_mapping", JSON.generate(mapping), :content_type => "application/json"
+        RestClient.put "#{type_url}/_mapping", JSON.generate(mapping), content_type: "application/json"
       end
 
       def get_mapping
-        JSON.parse RestClient.get("#{type_url}/_mapping", :content_type => "application/json")
+        JSON.parse RestClient.get("#{type_url}/_mapping", content_type: "application/json")
       end
 
       def get(id)
-        JSON.parse RestClient.get("#{type_url}/#{id}", :content_type => "application/json")
+        JSON.parse RestClient.get("#{type_url}/#{id}", content_type: "application/json")
       end
 
       def refresh
-        RestClient.post "#{index_url}/_refresh", "{}", :content_type => "application/json"
+        RestClient.post "#{index_url}/_refresh", "{}", content_type: "application/json"
       end
 
       def import(*args)
