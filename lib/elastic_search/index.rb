@@ -45,8 +45,8 @@ module ElasticSearch
       end
 
       delegate :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where, :post_where_not, :post_filter, :post_range,
-        :post_exists, :post_exists_not, :aggregate, :facet, :scroll, :source, :includes, :eager_load, :preload, :sort, :order, :offset, :limit,
-        :paginate, :query, :search, :find_in_batches, :find_each, :failsafe, :total_entries, :to => :relation
+        :post_exists, :post_exists_not, :aggregate, :scroll, :source, :includes, :eager_load, :preload, :sort, :order, :offset, :limit, :paginate, :query,
+        :search, :find_in_batches, :find_each, :failsafe, :total_entries, :to => :relation
 
       def type_name
         raise NotImplementedError

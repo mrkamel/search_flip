@@ -4,7 +4,6 @@ module ElasticSearch
     include ElasticSearch::FilterableRelation
     include ElasticSearch::PostFilterableRelation
     include ElasticSearch::AggregatableRelation
-    include ElasticSearch::FacetableRelation
 
     attr_accessor :target, :profile_value, :source_value, :sort_values, :offset_value, :limit_value, :query_value, :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args
 
@@ -33,7 +32,6 @@ module ElasticSearch
 
       res[:sort] = sort_values if sort_values
       res[:aggregations] = aggregation_values if aggregation_values
-      res[:facets] = facet_values if facet_values
       res[:post_filter] = post_filter_values.size > 1 ? { :and => post_filter_values } : post_filter_values.first if post_filter_values
       res[:_source] = source_value unless source_value.nil?
       res[:profile] = true if profile_value
@@ -286,7 +284,7 @@ module ElasticSearch
       end
     end
 
-    delegate :total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :facets, :scope, :results, :records, :scroll_id, :to => :response
+    delegate :total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :scope, :results, :records, :scroll_id, :to => :response
   end
 end
 

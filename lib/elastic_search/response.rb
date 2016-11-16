@@ -76,21 +76,6 @@ module ElasticSearch
       response["took"]
     end
 
-    def facets(name = nil)
-      return response["facets"] || {} unless name
-
-      @facets ||= Hash.new do |cache, key|
-        cache[key] =
-          if response["facets"].blank? || response["facets"][key].blank?
-            {}
-          else
-            response["facets"][key]["terms"].each_with_object({}) { |term, hash| hash[term["term"]] = term["count"] }
-          end
-      end
-
-      @facets[name.to_s]
-    end
-
     def aggregations(name = nil)
       return response["aggregations"] || {} unless name
 
