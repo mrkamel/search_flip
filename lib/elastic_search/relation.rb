@@ -83,12 +83,22 @@ module ElasticSearch
 
     def sort(*args)
       fresh.tap do |relation|
+        relation.sort_values = (sort_values || []) + args
+      end
+    end
+
+    def resort(*args)
+      fresh.tap do |relation|
         relation.sort_values = args
       end
     end
 
     def order(*args)
       sort(*args)
+    end
+
+    def reorder(*args)
+      resort(*args)
     end
 
     def offset(n)
