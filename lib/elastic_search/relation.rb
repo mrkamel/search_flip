@@ -39,29 +39,15 @@ module ElasticSearch
       res
     end
 
-    def profile!(value)
-      clear_cache!
-
-      self.profile_value = value
-      self
-    end
-
     def profile(value)
-      dup.tap do |relation|
-        relation.profile!(value)
+      fresh.tap do |relation|
+        relation.profile_value = value
       end
     end
 
-    def scroll!(id = nil, timeout = "1m")
-      clear_cache!
-
-      self.scroll_args = { :id => id, :timeout => timeout }
-      self
-    end
-
-    def scroll(*args)
-      dup.tap do |relation|
-        relation.scroll!(*args)
+    def scroll(id = nil, timeout = "1m")
+      fresh.tap do |relation|
+        relation.scroll_args = { :id => id, :timeout => timeout }
       end
     end
 
@@ -71,72 +57,33 @@ module ElasticSearch
       target.refresh if ElasticSearch::Config[:environment] == "test"
     end
 
-    def source!(value)
-      clear_cache!
-
-      self.source_value = value
-      self
-    end
-
     def source(value)
-      dup.tap do |relation|
-        relation.source!(value)
+      fresh.tap do |relation|
+        relation.source_value = value
       end
-    end
-
-    def includes!(*args)
-      clear_cache!
-
-      self.includes_values = (includes_values || []) + args
-      self
     end
 
     def includes(*args)
-      dup.tap do |relation|
-        relation.includes!(*args)
+      fresh.tap do |relation|
+        relation.includes_values = (includes_values || []) + args
       end
-    end
-
-    def eager_load!(*args)
-      clear_cache!
-
-      self.eager_load_values = (eager_load_values || []) + args
-      self
     end
 
     def eager_load(*args)
-      dup.tap do |relation|
-        relation.eager_load!(*args)
+      fresh.tap do |relation|
+        relation.eager_load_values = (eager_load_values || []) + args
       end
-    end
-
-    def preload!(*args)
-      clear_cache!
-
-      self.preload_values = (preload_values || []) + args
-      self
     end
 
     def preload(*args)
-      dup.tap do |relation|
-        relation.preload!(*args)
+      fresh.tap do |relation|
+        relation.preload_values = (preload_values || []) + args
       end
     end
 
-    def sort!(*args)
-      clear_cache!
-
-      self.sort_values = args
-      self
-    end
-
-    def order!(*args)
-      sort!(*args)
-    end
-
     def sort(*args)
-      dup.tap do |relation|
-        relation.sort!(*args)
+      fresh.tap do |relation|
+        relation.sort_values = args
       end
     end
 
@@ -144,62 +91,28 @@ module ElasticSearch
       sort(*args)
     end
 
-    def offset!(n)
-      clear_cache!
-
-      self.offset_value = n.to_i
-      self
-    end
-
     def offset(n)
-      dup.tap do |relation|
-        relation.offset!(n)
+      fresh.tap do |relation|
+        relation.offset_value = n.to_i
       end
-    end
-
-    def limit!(n)
-      clear_cache!
-
-      self.limit_value = n.to_i
-      self
     end
 
     def limit(n)
-      dup.tap do |relation|
-        relation.limit! n
+      fresh.tap do |relation|
+        relation.limit_value = n.to_i
       end
-    end
-
-    def paginate!(options = {})
-      page = [(options[:page] || 1).to_i, 1].max
-      per_page = (options[:per_page] || 30).to_i
-
-      offset!((page - 1) * per_page).limit!(per_page)
     end
 
     def paginate(options = {})
-      dup.tap do |relation|
-        relation.paginate!(options)
-      end
-    end
+      page = [(options[:page] || 1).to_i, 1].max
+      per_page = (options[:per_page] || 30).to_i
 
-    def query!(q, options = {})
-      clear_cache!
-
-      if q.present?
-        self.query_value = { :default_operator => :AND }.merge(options).merge(:query => q)
-      end
-
-      self
-    end
-
-    def search!(*args)
-      query!(*args)
+      offset((page - 1) * per_page).limit(per_page)
     end
 
     def query(q, options = {})
-      dup.tap do |relation|
-        relation.query! q, options
+      fresh.tap do |relation|
+        self.query_value = { :default_operator => :AND }.merge(options).merge(:query => q) if q.present?
       end
     end
 
@@ -251,25 +164,16 @@ module ElasticSearch
       end
     end
 
-    def failsafe!(value)
-      clear_cache!
-
-      self.failsafe_value = value
-      self
-    end
-
     def failsafe(value)
-      dup.tap do |relation|
-        relation.failsafe! value
+      fresh.tap do |relation|
+        relation.failsafe_value = value
       end
     end
 
-    def clear_cache!
-      @response = nil
-    end
-
     def fresh
-      dup.tap(&:clear_cache!)
+      dup.tap do |relation|
+        relation.instance_variable_set(:@response, nil)
+      end
     end
 
     def respond_to?(name, *args)

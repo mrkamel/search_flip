@@ -11,8 +11,8 @@ module ElasticSearch
       res
     end
 
-    def clear_cache!
-      # Nothing
+    def fresh
+      dup
     end
   end
 end
