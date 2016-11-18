@@ -16,6 +16,7 @@ ActiveRecord::Base.connection.execute "DROP TABLE IF EXISTS products"
 ActiveRecord::Base.connection.create_table :products do |t|
   t.string :title
   t.text :description
+  t.string :category
   t.float :price
   t.integer :version, default: 1
   t.timestamps null: false
@@ -45,7 +46,10 @@ class ProductIndex
   def self.serialize(product)
     {
       id: product.id,
-      title: product.title
+      title: product.title,
+      description: product.description,
+      category: product.category,
+      price: product.price
     }
   end
 end

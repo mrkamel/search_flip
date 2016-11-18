@@ -27,7 +27,7 @@ module ElasticSearch
           if value.is_a?(Array)
             { :not => { :terms => { key => value } } }
           elsif value.is_a?(Range)
-            { :not => { :range => { key => { :gte => value.min, :lt => value.max } } } }
+            { :not => { :range => { key => { :gte => value.min, :lte => value.max } } } }
           else
             { :not => { :term => { key => value } } }
           end

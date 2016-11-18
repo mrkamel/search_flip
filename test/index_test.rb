@@ -224,7 +224,7 @@ class IndexTest < ElasticSearch::TestCase
     assert_includes results, expected
     refute_includes results, rejected
   ensure
-    ProductIndex.scopes = []
+    ProductIndex.scopes = {}
   end
 
   def test_index_scope
