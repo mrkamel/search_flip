@@ -340,7 +340,7 @@ class IndexTest < ElasticSearch::TestCase
     assert_equal Hash["category1" => 2, "category2" => 1], query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
   end
 
-  def test_exists
+  def test_post_exists
     product1 = create(:product, title: "title1", description: "description1", category: "category1")
     product2 = create(:product, title: "title2", description: nil, category: "category2")
     product3 = create(:product, title: nil, description: "description2", category: "category1")
@@ -362,7 +362,7 @@ class IndexTest < ElasticSearch::TestCase
     assert_equal Hash["category1" => 2, "category2" => 1], query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
   end
 
-  def test_exists_not
+  def test_post_exists_not
     product1 = create(:product, title: nil, description: nil, category: "category1")
     product2 = create(:product, title: nil, description: "description2", category: "category2")
     product3 = create(:product, title: "title3", description: "description3", category: "category1")
@@ -385,7 +385,44 @@ class IndexTest < ElasticSearch::TestCase
   end
 
   def test_aggregate
+    ProductIndex.import create_list(:product, 3, category: "category1", price: 10)
+    ProductIndex.import create_list(:product, 2, category: "category2", price: 20)
+    ProductIndex.import create_list(:product, 1, category: "category3", price: 30)
+
+    query = ProductIndex.aggregate(:category, size: 2).aggregate(price_sum: { sum: { field: "price" }})
+
+    category_aggregations = query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    price_aggregation = query.aggregations(:price_sum).value
+
+    assert_equal Hash["category1" => 3, "category2" => 2], category_aggregations
+    assert_equal 100, price_aggregation
   end
+
+  def test_aggregate_with_hash
+    ProductIndex.import create_list(:product, 3, category: "category1")
+    ProductIndex.import create_list(:product, 2, category: "category2")
+    ProductIndex.import create_list(:product, 1, category: "category3")
+
+    aggregations = ProductIndex.aggregate(category: { terms: { field: :category }}).aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+
+    assert_equal Hash["category1" => 3, "category2" => 2, "category3" => 1], aggregations
+  end
+
+  def test_aggregate_with_subaggregation
+    ProductIndex.import create_list(:product, 3, category: "category1", price: 15)
+    ProductIndex.import create_list(:product, 2, category: "category2", price: 20)
+    ProductIndex.import create_list(:product, 1, category: "category3", price: 25)
+
+    query = ProductIndex.aggregate(:category) do |aggregation|
+      aggregation.aggregate(price_sum: { sum: { field: "price" }})
+    end
+
+    category_aggregations = query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    price_sum_aggregations = query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.price_sum.value }
+
+    assert_equal Hash["category1" => 3, "category2" => 2, "category3" => 1], category_aggregations
+    assert_equal Hash["category1" => 45, "category2" => 40, "category3" => 25], price_sum_aggregations
+   end
 
   def test_profile
   end

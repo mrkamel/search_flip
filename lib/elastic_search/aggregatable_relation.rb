@@ -12,9 +12,7 @@ module ElasticSearch
         hash = field_or_hash.is_a?(Hash) ? field_or_hash : { field_or_hash => { :terms => { :field => field_or_hash }.merge(options) } }
 
         if block
-          aggregation_relation = ElasticSearch::AggregationRelation.new
-
-          block.call aggregation_relation
+          aggregation_relation = block.call(ElasticSearch::AggregationRelation.new)
 
           field_or_hash.is_a?(Hash) ? hash[field_or_hash.keys.first].merge!(aggregation_relation.to_hash) : hash[field_or_hash].merge!(aggregation_relation.to_hash)
         end
