@@ -8,6 +8,10 @@ module ElasticSearch
       self.response = response
     end
 
+    def raw_response
+      response
+    end
+
     def total_entries
       hits["total"]
     end

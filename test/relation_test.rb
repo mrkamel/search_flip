@@ -3,8 +3,8 @@ require File.expand_path("../test_helper", __FILE__)
 
 class IndexTest < ElasticSearch::TestCase
   should_delegate_methods :total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids,
-    :count, :size, :length, :took, :aggregations, :scope, :results, :records, :scroll_id, to: :response,
-    subject: ElasticSearch::Relation.new(:target => ProductIndex)
+    :count, :size, :length, :took, :aggregations, :scope, :results, :records, :scroll_id, :raw_response,
+    to: :response, subject: ElasticSearch::Relation.new(:target => ProductIndex)
 
   def test_where
     product1 = create(:product, price: 100, category: "category1")
@@ -425,12 +425,38 @@ class IndexTest < ElasticSearch::TestCase
    end
 
   def test_profile
+    refute_nil ProductIndex.profile(true).raw_response["profile"]
   end
 
   def test_scroll
+    products = create_list(:product, 15)
+
+    ProductIndex.import products
+
+    relation = ProductIndex.limit(10).scroll(timeout: "1m")
+
+    result = []
+    iterations = 0
+
+    while records = relation.records.presence
+      result += records
+      iterations += 1
+
+      relation = relation.scroll(id: relation.scroll_id, timeout: "1m")
+    end
+
+    assert_equal result.to_set, products.to_set
+    assert_equal 2, iterations
   end
 
   def test_delete
+    product1, product2, product3 = create_list(:product, 3)
+
+    ProductIndex.import [product1, product2, product3]
+
+    assert_difference "ProductIndex.total_entries", -2 do
+      ProductIndex.where(:id => [product1.id, product2.id]).delete
+    end
   end
 
   def test_source

@@ -45,7 +45,7 @@ module ElasticSearch
       end
     end
 
-    def scroll(id = nil, timeout = "1m")
+    def scroll(id: nil, timeout: "1m")
       fresh.tap do |relation|
         relation.scroll_args = { :id => id, :timeout => timeout }
       end
@@ -134,13 +134,14 @@ module ElasticSearch
       return enum_for(:find_in_batches, options) unless block_given?
 
       batch_size = options[:batch_size] || 1_000
+      timeout = options[:timeout] || "1m"
 
-      relation = limit(batch_size).scroll
+      relation = limit(batch_size).scroll(timeout: timeout)
 
       while records = relation.records.presence
         yield records
 
-        relation = relation.scroll(relation.scroll_id)
+        relation = relation.scroll(id: relation.scroll_id, timeout: timeout)
       end
     end
 
@@ -198,7 +199,7 @@ module ElasticSearch
       end
     end
 
-    delegate :total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :scope, :results, :records, :scroll_id, :to => :response
+    delegate :total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :scope, :results, :records, :scroll_id, :raw_response, :to => :response
   end
 end
 
