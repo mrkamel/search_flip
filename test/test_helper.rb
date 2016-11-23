@@ -124,6 +124,22 @@ class ElasticSearch::TestCase < MiniTest::Test
     assert_difference(expressions, 0, &block)
   end
 
+  def assert_present(object)
+    assert object.present?, "should be present"
+  end
+
+  def assert_blank(object)
+    assert object.blank?, "should be blank"
+  end
+
+  def refute_present(object)
+    refute object.present?, "shouldn't be present"
+  end
+
+  def refute_blank(object)
+    refute object.blank?, "shouldn't be blank"
+  end
+
   def setup
     ProductIndex.delete Product.all
     Product.delete_all

@@ -422,7 +422,7 @@ class IndexTest < ElasticSearch::TestCase
 
     assert_equal Hash["category1" => 3, "category2" => 2, "category3" => 1], category_aggregations
     assert_equal Hash["category1" => 45, "category2" => 40, "category3" => 25], price_sum_aggregations
-   end
+  end
 
   def test_profile
     refute_nil ProductIndex.profile(true).raw_response["profile"]
@@ -460,6 +460,21 @@ class IndexTest < ElasticSearch::TestCase
   end
 
   def test_source
+    product = create(:product, :title => "Title", :price => 10)
+
+    ProductIndex.import product
+
+    results = ProductIndex.where(:id => product.id).results
+
+    assert_present results.first.id
+    assert_equal "Title", results.first.title
+    assert_equal 10, results.first.price
+
+    results = ProductIndex.where(:id => product.id).source([:id, :price]).results
+
+    assert_present results.first.id
+    assert_blank results.first.title
+    assert_present results.first.price
   end
 
   def test_includes
