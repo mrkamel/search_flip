@@ -16,23 +16,62 @@ ActiveRecord::Base.connection.execute "DROP TABLE IF EXISTS products"
 ActiveRecord::Base.connection.create_table :products do |t|
   t.string :title
   t.text :description
-  t.string :category
   t.float :price
+  t.string :category
   t.integer :version, default: 1
+  t.integer :user_id
   t.timestamps null: false
 end
 
-class Product < ActiveRecord::Base; end
+ActiveRecord::Base.connection.add_index :products, :user_id
+
+class Product < ActiveRecord::Base
+  belongs_to :user
+  has_many :comments
+end
 
 FactoryGirl.define do
   factory :product
+end
+
+ActiveRecord::Base.connection.execute "DROP TABLE IF EXISTS users"
+
+ActiveRecord::Base.connection.create_table :users do |t|
+  t.string :name
+  t.timestamps null: false
+end
+
+class User < ActiveRecord::Base
+  has_many :products
+end
+
+FactoryGirl.define do
+  factory :user
+end
+
+ActiveRecord::Base.connection.execute "DROP TABLE IF EXISTS comments"
+
+ActiveRecord::Base.connection.create_table :comments do |t|
+  t.text :message
+  t.integer :product_id
+  t.timestamps null: false
+end
+
+ActiveRecord::Base.connection.add_index :comments, :product_id
+
+class Comment < ActiveRecord::Base
+  belongs_to :product
+end
+
+FactoryGirl.define do
+  factory :comment
 end
 
 class ProductIndex
   include ElasticSearch::Index
 
   def self.mapping
-    { :products => {} }
+    { products: {} }
   end
 
   def self.type_name
@@ -122,6 +161,10 @@ class ElasticSearch::TestCase < MiniTest::Test
 
   def assert_no_difference(expressions, &block)
     assert_difference(expressions, 0, &block)
+  end
+
+  def assert_not_nil(object)
+    assert !object.nil?, "shouldn't be nil"
   end
 
   def assert_present(object)

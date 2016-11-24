@@ -425,7 +425,7 @@ class IndexTest < ElasticSearch::TestCase
   end
 
   def test_profile
-    refute_nil ProductIndex.profile(true).raw_response["profile"]
+    assert_not_nil ProductIndex.profile(true).raw_response["profile"]
   end
 
   def test_scroll
@@ -455,22 +455,22 @@ class IndexTest < ElasticSearch::TestCase
     ProductIndex.import [product1, product2, product3]
 
     assert_difference "ProductIndex.total_entries", -2 do
-      ProductIndex.where(:id => [product1.id, product2.id]).delete
+      ProductIndex.where(id: [product1.id, product2.id]).delete
     end
   end
 
   def test_source
-    product = create(:product, :title => "Title", :price => 10)
+    product = create(:product, title: "Title", price: 10)
 
     ProductIndex.import product
 
-    results = ProductIndex.where(:id => product.id).results
+    results = ProductIndex.where(id: product.id).results
 
     assert_present results.first.id
     assert_equal "Title", results.first.title
     assert_equal 10, results.first.price
 
-    results = ProductIndex.where(:id => product.id).source([:id, :price]).results
+    results = ProductIndex.where(id: product.id).source([:id, :price]).results
 
     assert_present results.first.id
     assert_blank results.first.title
@@ -478,12 +478,45 @@ class IndexTest < ElasticSearch::TestCase
   end
 
   def test_includes
+    user = create(:user)
+    comments = create_list(:comment, 2)
+    product = create(:product, :user => user, :comments => comments)
+
+    ProductIndex.import product
+
+    record = ProductIndex.includes(:user).includes(:comments).records.first
+
+    assert_not_nil record
+    assert_equal user, record.user
+    assert_equal comments.to_set, record.comments.to_set
   end
 
   def test_eager_load
+    user = create(:user)
+    comments = create_list(:comment, 2)
+    product = create(:product, :user => user, :comments => comments)
+
+    ProductIndex.import product
+
+    record = ProductIndex.eager_load(:user).eager_load(:comments).records.first
+
+    assert_not_nil record
+    assert_equal user, record.user
+    assert_equal comments.to_set, record.comments.to_set
   end
 
   def test_preload
+    user = create(:user)
+    comments = create_list(:comment, 2)
+    product = create(:product, :user => user, :comments => comments)
+
+    ProductIndex.import product
+
+    record = ProductIndex.preload(:user).preload(:comments).records.first
+
+    assert_not_nil record
+    assert_equal user, record.user
+    assert_equal comments.to_set, record.comments.to_set
   end
 
   def test_sort
