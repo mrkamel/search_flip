@@ -19,6 +19,7 @@ ActiveRecord::Base.connection.create_table :products do |t|
   t.float :price
   t.string :category
   t.integer :version, default: 1
+  t.integer :rank, :default => 0
   t.integer :user_id
   t.timestamps null: false
 end
@@ -88,7 +89,8 @@ class ProductIndex
       title: product.title,
       description: product.description,
       category: product.category,
-      price: product.price
+      price: product.price,
+      rank: product.rank
     }
   end
 end
@@ -120,20 +122,20 @@ TestIndex.delete_index if TestIndex.index_exists?
 class ElasticSearch::TestCase < MiniTest::Test
   include FactoryGirl::Syntax::Methods
 
-  def self.should_delegate_method(method, to:, subject:)
+  def self.should_delegate_method(method, to:, subject:, as: method)
     define_method :"test_delegate_#{method}_to_#{to}" do
       assert subject.respond_to?(method), "subject doesn't respond to #{method}"
 
       target = subject.send(to)
 
-      assert target.respond_to?(method), "#{to} doesn't respond to #{method}"
-
-      mock_target = mock
-      mock_target.expects(method)
-
-      subject.stubs(to).returns(mock_target)
+      assert target.respond_to?(as), "#{to} doesn't respond to #{as}"
 
       params = subject.method(method).arity.abs.times.map { |i| "param-#{i}" }
+
+      mock_target = mock
+      mock_target.expects(as).with(*params)
+
+      subject.stubs(to).returns(mock_target)
 
       subject.send(method, *params)
     end

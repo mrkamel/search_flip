@@ -4,7 +4,7 @@ require File.expand_path("../test_helper", __FILE__)
 class IndexTest < ElasticSearch::TestCase
   should_delegate_methods :total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids,
     :count, :size, :length, :took, :aggregations, :scope, :results, :records, :scroll_id, :raw_response,
-    to: :response, subject: ElasticSearch::Relation.new(:target => ProductIndex)
+    to: :response, subject: ElasticSearch::Relation.new(target: ProductIndex)
 
   def test_where
     product1 = create(:product, price: 100, category: "category1")
@@ -480,7 +480,7 @@ class IndexTest < ElasticSearch::TestCase
   def test_includes
     user = create(:user)
     comments = create_list(:comment, 2)
-    product = create(:product, :user => user, :comments => comments)
+    product = create(:product, user: user, comments: comments)
 
     ProductIndex.import product
 
@@ -494,7 +494,7 @@ class IndexTest < ElasticSearch::TestCase
   def test_eager_load
     user = create(:user)
     comments = create_list(:comment, 2)
-    product = create(:product, :user => user, :comments => comments)
+    product = create(:product, user: user, comments: comments)
 
     ProductIndex.import product
 
@@ -508,7 +508,7 @@ class IndexTest < ElasticSearch::TestCase
   def test_preload
     user = create(:user)
     comments = create_list(:comment, 2)
-    product = create(:product, :user => user, :comments => comments)
+    product = create(:product, user: user, comments: comments)
 
     ProductIndex.import product
 
@@ -520,15 +520,28 @@ class IndexTest < ElasticSearch::TestCase
   end
 
   def test_sort
+    product1 = create(:product, rank: 2, price: 100)
+    product2 = create(:product, rank: 2, price: 90)
+    product3 = create(:product, rank: 1, price: 120)
+    product4 = create(:product, rank: 0, price: 110)
+
+    ProductIndex.import [product1, product2, product3, product4]
+
+    assert_equal [product2, product1, product3, product4], ProductIndex.sort(rank: :desc, price: :asc).records
+    assert_equal [product2, product1, product3, product4], ProductIndex.sort(rank: :desc).sort(:price).records
+    assert_equal [product2, product1, product4, product3], ProductIndex.sort(:price).sort(rank: :desc).records
   end
 
   def test_resort
-  end
+    product1 = create(:product, rank: 2, price: 100)
+    product2 = create(:product, rank: 2, price: 90)
+    product3 = create(:product, rank: 1, price: 120)
+    product4 = create(:product, rank: 0, price: 110)
 
-  def test_order
-  end
+    ProductIndex.import [product1, product2, product3, product4]
 
-  def test_reorder
+    assert_equal [product2, product1, product3, product4], ProductIndex.sort(:price).resort(rank: :desc, price: :asc).records
+    assert_equal [product2, product1, product4, product3], ProductIndex.sort(rank: :desc).resort(:price).records
   end
 
   def test_offset

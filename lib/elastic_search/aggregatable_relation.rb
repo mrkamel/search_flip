@@ -9,7 +9,7 @@ module ElasticSearch
 
     def aggregate(field_or_hash, options = {}, &block)
       fresh.tap do |relation|
-        hash = field_or_hash.is_a?(Hash) ? field_or_hash : { field_or_hash => { :terms => { :field => field_or_hash }.merge(options) } }
+        hash = field_or_hash.is_a?(Hash) ? field_or_hash : { field_or_hash => { terms: { field: field_or_hash }.merge(options) } }
 
         if block
           aggregation_relation = block.call(ElasticSearch::AggregationRelation.new)

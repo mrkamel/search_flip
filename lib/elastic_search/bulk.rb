@@ -24,7 +24,7 @@ module ElasticSearch
     end
 
     def upload
-      response = RestClient.put(url, @payload, :params => ignore_errors.blank? ? { :filter_path => "errors" } : {}, :content_type => "application/json")
+      response = RestClient.put(url, @payload, params: ignore_errors.blank? ? { filter_path: "errors" } : {}, content_type: "application/json")
 
       return if options[:raise] == false
 
@@ -66,7 +66,7 @@ module ElasticSearch
     end
 
     def perform(action, id, json = nil, options = {})
-      @payload << { action => options.merge(:_id => id) }.to_json
+      @payload << { action => options.merge(_id: id) }.to_json
       @payload << "\n"
 
       if json

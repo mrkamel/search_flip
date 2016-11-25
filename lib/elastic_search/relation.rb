@@ -87,19 +87,15 @@ module ElasticSearch
       end
     end
 
+    alias_method :order, :sort
+
     def resort(*args)
       fresh.tap do |relation|
         relation.sort_values = args
       end
     end
 
-    def order(*args)
-      sort(*args)
-    end
-
-    def reorder(*args)
-      resort(*args)
-    end
+    alias_method :reorder, :resort
 
     def offset(n)
       fresh.tap do |relation|
@@ -126,9 +122,7 @@ module ElasticSearch
       end
     end
 
-    def search(*args)
-      query(*args)
-    end
+    alias_method :search, :query
 
     def find_in_batches(options = {})
       return enum_for(:find_in_batches, options) unless block_given?
@@ -158,7 +152,7 @@ module ElasticSearch
     def response
       @response ||= begin
         if scroll_args && scroll_args[:id]
-          if ElasticSearch.version >= "2"
+          if ElasticSearch.version.to_i >= 2
             ElasticSearch::Response.new self, JSON.parse(RestClient.post("#{target.base_url}/_search/scroll", JSON.generate(:scroll => scroll_args[:timeout], :scroll_id => scroll_args[:id]), :content_type => "application/json"))
           else
             ElasticSearch::Response.new self, JSON.parse(RestClient.post("#{target.base_url}/_search/scroll?scroll=#{scroll_args[:timeout]}", scroll_args[:id], :content_type => "application/json"))

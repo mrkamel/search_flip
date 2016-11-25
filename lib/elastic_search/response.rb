@@ -61,7 +61,7 @@ module ElasticSearch
     end
 
     def scope
-      res = relation.target.model.where(:id => ids).unscope(:order)
+      res = relation.target.model.where(:id => ids)
 
       res = res.includes(*relation.includes_values) if relation.includes_values
       res = res.eager_load(*relation.eager_load_values) if relation.eager_load_values
