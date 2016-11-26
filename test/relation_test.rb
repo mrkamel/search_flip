@@ -545,12 +545,42 @@ class IndexTest < ElasticSearch::TestCase
   end
 
   def test_offset
+    product1 = create(:product, rank: 1)
+    product2 = create(:product, rank: 2)
+    product3 = create(:product, rank: 3)
+
+    ProductIndex.import [product1, product2, product3]
+
+    query = ProductIndex.sort(:rank).offset(1)
+
+    assert_equal [product2, product3], query.records
+    assert_equal [product3], query.offset(2).records
   end
 
   def test_limit
+    product1 = create(:product, rank: 1)
+    product2 = create(:product, rank: 2)
+    product3 = create(:product, rank: 3)
+
+    ProductIndex.import [product1, product2, product3]
+
+    query = ProductIndex.sort(:rank).limit(1)
+
+    assert_equal [product1], query.records
+    assert_equal [product1, product2], query.limit(2).records
   end
 
   def test_paginate
+    product1 = create(:product, rank: 1)
+    product2 = create(:product, rank: 2)
+    product3 = create(:product, rank: 3)
+
+    ProductIndex.import [product1, product2, product3]
+
+    query = ProductIndex.sort(:rank).paginate(page: 1, per_page: 2)
+
+    assert_equal [product1, product2], query.records
+    assert_equal [product3], query.paginate(page: 2, per_page: 2).records
   end
 
   def test_query
