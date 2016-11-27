@@ -21,9 +21,9 @@ module ElasticSearch
       res = {}
 
       if query_value.present? && filter_values
-        res[:query] = { :filtered => { :query => { :query_string => query_value }, :filter => filter_values.size > 1 ? { :and => filter_values } : filter_values.first } }
+        res[:query] = { :filtered => { :query => query_value, :filter => filter_values.size > 1 ? { :and => filter_values } : filter_values.first } }
       elsif query_value.present?
-        res[:query] = { :query_string => query_value }
+        res[:query] = query_value
       elsif filter_values.present?
         res[:query] = { :filtered => { :filter => filter_values.size > 1 ? { :and => filter_values } : filter_values.first } }
       end
@@ -116,13 +116,17 @@ module ElasticSearch
       offset((page - 1) * per_page).limit(per_page)
     end
 
-    def query(q, options = {})
+    def search(q, options = {})
       fresh.tap do |relation|
-        self.query_value = { :default_operator => :AND }.merge(options).merge(:query => q) if q.present?
+        relation.query_value = { :query_string => { :query => q, :default_operator => :AND }.merge(options) } if q.present?
       end
     end
 
-    alias_method :search, :query
+    def query(q)
+      fresh.tap do |relation|
+        relation.query_value = q
+      end
+    end
 
     def find_in_batches(options = {})
       return enum_for(:find_in_batches, options) unless block_given?

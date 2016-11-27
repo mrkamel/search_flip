@@ -583,10 +583,28 @@ class IndexTest < ElasticSearch::TestCase
     assert_equal [product3], query.paginate(page: 2, per_page: 2).records
   end
 
-  def test_query
+  def test_search
+    product1 = create(:product, title: "Title1", description: "Description1", price: 10)
+    product2 = create(:product, title: "Title2", description: "Description2", price: 20)
+    product3 = create(:product, title: "Title3", description: "Description2", price: 30)
+
+    ProductIndex.import [product1, product2, product3]
+
+    assert_equal [product1, product3].to_set, ProductIndex.search("Title1 OR Title3").records.to_set
+    assert_equal [product1, product3].to_set, ProductIndex.search("Title1 Title3", default_operator: :OR).records.to_set
+    assert_equal [product2, product3].to_set, ProductIndex.search("nothing").search("price:>15").records.to_set
   end
 
-  def test_search
+  def test_query
+    product1 = create(:product, title: "Title1", description: "Description1", price: 10)
+    product2 = create(:product, title: "Title2", description: "Description2", price: 20)
+    product3 = create(:product, title: "Title3", description: "Description2", price: 30)
+
+    ProductIndex.import [product1, product2, product3]
+
+    assert_equal [product1, product3].to_set, ProductIndex.query(query_string: { query: "Title1 OR Title3", default_operator: :AND }).records.to_set
+    assert_equal [product1, product3].to_set, ProductIndex.query(query_string: { query: "Title1 Title3", default_operator: :OR }).records.to_set
+    assert_equal [product2, product3].to_set, ProductIndex.query(query_string: { query: "nothing" }).query(query_string: { query: "price:>15" }).records.to_set
   end
 
   def test_find_in_batches
