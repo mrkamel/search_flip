@@ -1,7 +1,7 @@
 
-require File.expand_path("../test_helper", __FILE__)
+require File.expand_path("../../test_helper", __FILE__)
 
-class IndexTest < ElasticSearch::TestCase
+class ElasticSearch::IndexTest < ElasticSearch::TestCase
   should_delegate_methods :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where,
     :post_where_not, :post_filter, :post_range, :post_exists, :post_exists_not, :aggregate, :scroll, :source, :includes,
     :eager_load, :preload, :sort, :order, :offset, :limit, :paginate, :query, :search, :find_in_batches, :find_each,

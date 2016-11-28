@@ -1,7 +1,7 @@
 
-require File.expand_path("../test_helper", __FILE__)
+require File.expand_path("../../test_helper", __FILE__)
 
-class IndexTest < ElasticSearch::TestCase
+class ElasticSearch::IndexTest < ElasticSearch::TestCase
   should_delegate_methods :total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids,
     :count, :size, :length, :took, :aggregations, :scope, :results, :records, :scroll_id, :raw_response,
     to: :response, subject: ElasticSearch::Relation.new(target: ProductIndex)
