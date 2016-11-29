@@ -212,36 +212,36 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
   end
 
   def test_scope
-    ProductIndex.scope(:with_title) { |title| where(title: title) }
+    temp_product_index = Class.new(ProductIndex)
+
+    temp_product_index.scope(:with_title) { |title| where(title: title) }
 
     expected = create(:product, title: "expected")
     rejected = create(:product, title: "rejected")
 
-    ProductIndex.import [expected, rejected]
+    temp_product_index.import [expected, rejected]
 
-    results = ProductIndex.with_title("expected").records
+    results = temp_product_index.with_title("expected").records
 
     assert_includes results, expected
     refute_includes results, rejected
-  ensure
-    ProductIndex.scopes = {}
   end
 
   def test_index_scope
+    temp_product_index = Class.new(ProductIndex)
+
     product1, product2, product3 = create_list(:product, 3)
 
-    ProductIndex.index_scope { |products| products.where.not(:id => product1.id) }
-    ProductIndex.index_scope { |products| products.where.not(:id => product2.id) }
+    temp_product_index.index_scope { |products| products.where.not(:id => product1.id) }
+    temp_product_index.index_scope { |products| products.where.not(:id => product2.id) }
 
-    ProductIndex.import Product.all
+    temp_product_index.import Product.all
 
-    results = ProductIndex.match_all.records
+    results = temp_product_index.match_all.records
 
     refute_includes results, product1
     refute_includes results, product2
     assert_includes results, product3
-  ensure
-    ProductIndex.index_scopes = []
   end
 
   def test_bulk

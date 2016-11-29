@@ -186,7 +186,7 @@ module ElasticSearch
     end
 
     def respond_to?(name, *args)
-      super || target.scopes.key?(name.to_s) || target.respond_to?(name, *args)
+      super || target.scopes.key?(name.to_s)
     end
 
     def method_missing(name, *args, &block)

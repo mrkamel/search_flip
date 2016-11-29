@@ -28,7 +28,4 @@ TODO replace with
 
 * Highlighting
 * Suggestions
-* Implement Relation#query to take raw query args and only Relation#search to
-  create a comprehensive query string query. Alternatively, remove Relation#search
-  alltogether to let the user implement it easily on top.
 

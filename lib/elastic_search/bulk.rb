@@ -66,7 +66,7 @@ module ElasticSearch
     end
 
     def perform(action, id, json = nil, options = {})
-      @payload << { action => options.merge(_id: id) }.to_json
+      @payload << JSON.generate(action => options.merge(_id: id))
       @payload << "\n"
 
       if json

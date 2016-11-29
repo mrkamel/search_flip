@@ -608,21 +608,77 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
   end
 
   def test_find_in_batches
+    expected1 = create(:product, title: "expected", rank: 1)
+    expected2 = create(:product, title: "expected", rank: 2)
+    expected3 = create(:product, title: "expected", rank: 3)
+    rejected = create(:product, title: "rejected")
+
+    create :product, title: "rejected"
+
+    ProductIndex.import [expected1, expected2, expected3, rejected]
+
+    assert_equal [[expected1, expected2], [expected3]], ProductIndex.where(title: "expected").sort(:rank).find_in_batches(batch_size: 2).to_a
   end
 
   def test_find_each
+    expected1 = create(:product, title: "expected", rank: 1)
+    expected2 = create(:product, title: "expected", rank: 2)
+    expected3 = create(:product, title: "expected", rank: 3)
+    rejected = create(:product, title: "rejected")
+
+    create :product, title: "rejected"
+
+    ProductIndex.import [expected1, expected2, expected3, rejected]
+
+    assert_equal [expected1, expected2, expected3], ProductIndex.where(title: "expected").sort(:rank).find_each(batch_size: 2).to_a
   end
 
   def test_failsafe
+    assert_raises RestClient::BadRequest do
+      ProductIndex.search("syntax/error").records
+    end
+
+    query = ProductIndex.failsafe(true).search("syntax/error")
+
+    assert_equal [], query.records
+    assert_equal 0, query.total_entries
   end
 
   def test_fresh
+    create :product
+
+    query = ProductIndex.relation.tap(&:records)
+
+    assert_not_nil query.instance_variable_get(:@response)
+
+    refute query.fresh === query
+    assert_nil query.fresh.instance_variable_get(:@response)
   end
 
   def test_respond_to?
+    temp_index = Class.new(ProductIndex)
+
+    refute temp_index.relation.respond_to?(:test_scope)
+
+    temp_index.scope(:test_scope) { match_all }
+
+    assert temp_index.relation.respond_to?(:test_scope)
   end
 
   def test_method_missing
+    temp_index = Class.new(ProductIndex)
+
+    expected = create(:product, title: "expected")
+    rejected = create(:product, title: "rejected")
+
+    temp_index.import [expected, rejected]
+
+    temp_index.scope(:with_title) { |title| where(title: title) }
+
+    records = temp_index.relation.with_title("expected").records
+
+    assert_includes records, expected
+    refute_includes records, rejected
   end
 end
 
