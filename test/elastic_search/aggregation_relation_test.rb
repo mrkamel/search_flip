@@ -103,12 +103,51 @@ class ElasticSearch::AggregationRelationTest < ElasticSearch::TestCase
   end
 
   def test_filter
+    product1 = create(:product, category: "category1", title: "title", price: 100)
+    product2 = create(:product, category: "category2", title: "title", price: 150)
+    product3 = create(:product, category: "category1", title: "title", price: 200)
+    product4 = create(:product, category: "category2", title: "other", price: 200)
+    product5 = create(:product, category: "category1", title: "title", price: 250)
+
+    ProductIndex.import [product1, product2, product3, product4, product5]
+
+    query = ProductIndex.aggregate(category: {}) do |aggregation|
+      aggregation.filter(range: { price: { gte: 100, lte: 200 }}).filter(term: { title: "title" }).aggregate(:category)
+    end
+
+    assert_equal Hash["category1" => 2, "category2" => 1], query.aggregations(:category).category.buckets.each_with_object({}) { |bucket, hash| hash[bucket[:key]] = bucket.doc_count }
   end
 
   def test_range
+    product1 = create(:product, category: "category1", title: "title1", price: 100)
+    product2 = create(:product, category: "category2", title: "title2", price: 150)
+    product3 = create(:product, category: "category1", title: "title3", price: 200)
+    product4 = create(:product, category: "category2", title: "title4", price: 250)
+    product5 = create(:product, category: "category1", title: "title5", price: 300)
+    product6 = create(:product, category: "category2", title: "title6", price: 350)
+    product7 = create(:product, category: "category1", title: "title7", price: 400)
+
+    ProductIndex.import [product1, product2, product3, product4, product5, product6, product7]
+
+    query = ProductIndex.aggregate(category: {}) do |aggregation|
+      aggregation.range(:price, gte: 100, lte: 200).range(:title, gte: "title1", lte: "title3").aggregate(:category)
+    end
+
+    assert_equal Hash["category1" => 2, "category2" => 1], query.aggregations(:category).category.buckets.each_with_object({}) { |bucket, hash| hash[bucket[:key]] = bucket.doc_count }
   end
 
   def test_match_all
+    product1 = create(:product, category: "category1")
+    product2 = create(:product, category: "category2")
+    product3 = create(:product, category: "category1")
+
+    ProductIndex.import [product1, product2, product3]
+
+    query = ProductIndex.aggregate(category: {}) do |aggregation|
+      aggregation.match_all.aggregate(:category)
+    end
+
+    assert_equal Hash["category1" => 2, "category2" => 1], query.aggregations(:category).category.buckets.each_with_object({}) { |bucket, hash| hash[bucket[:key]] = bucket.doc_count }
   end
 
   def test_exists
