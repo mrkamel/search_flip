@@ -151,9 +151,35 @@ class ElasticSearch::AggregationRelationTest < ElasticSearch::TestCase
   end
 
   def test_exists
+    product1 = create(:product, category: "category1", title: "title1", price: 10)
+    product2 = create(:product, category: "category2", title: "title2")
+    product3 = create(:product, category: "category1", title: "title3", price: 20)
+    product4 = create(:product, category: "category2", title: "title4", price: 30)
+    product5 = create(:product, category: "category1", price: 40)
+
+    ProductIndex.import [product1, product2, product3, product4, product5]
+
+    query = ProductIndex.aggregate(category: {}) do |aggregation|
+      aggregation.exists(:title).exists(:price).aggregate(:category)
+    end
+
+    assert_equal Hash["category1" => 2, "category2" => 1], query.aggregations(:category).category.buckets.each_with_object({}) { |bucket, hash| hash[bucket[:key]] = bucket.doc_count }
   end
 
   def test_exists_not
+    product1 = create(:product, category: "category1")
+    product2 = create(:product, category: "category2", title: "title2")
+    product3 = create(:product, category: "category1")
+    product4 = create(:product, category: "category2")
+    product5 = create(:product, category: "category1", price: 40)
+
+    ProductIndex.import [product1, product2, product3, product4, product5]
+
+    query = ProductIndex.aggregate(category: {}) do |aggregation|
+      aggregation.exists_not(:title).exists_not(:price).aggregate(:category)
+    end
+
+    assert_equal Hash["category1" => 2, "category2" => 1], query.aggregations(:category).category.buckets.each_with_object({}) { |bucket, hash| hash[bucket[:key]] = bucket.doc_count }
   end
 
   def test_aggregate
