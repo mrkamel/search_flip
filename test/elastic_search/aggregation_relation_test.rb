@@ -183,6 +183,30 @@ class ElasticSearch::AggregationRelationTest < ElasticSearch::TestCase
   end
 
   def test_aggregate
+    product1 = create(:product, category: "category1", title: "title1", price: 10)
+    product2 = create(:product, category: "category1", title: "title2", price: 15)
+    product3 = create(:product, category: "category1", title: "title1", price: 20)
+    product4 = create(:product, category: "category2", title: "title2", price: 25)
+    product5 = create(:product, category: "category2", title: "title1", price: 30)
+    product6 = create(:product, category: "category2", title: "title2", price: 35)
+
+    ProductIndex.import [product1, product2, product3, product4, product5, product6]
+
+    query = ProductIndex.aggregate(:category) do |aggregation|
+      aggregation.aggregate(:title) do |_aggregation|
+        _aggregation.aggregate(price: { sum: { field: "price" }})
+      end
+    end
+
+    assert_equal Hash["category1" => 3, "category2" => 3], query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+
+    assert_equal Hash["title1" => 2, "title2" => 1], query.aggregations(:category)["category1"].title.buckets.each_with_object({}) { |bucket, hash| hash[bucket[:key]] = bucket.doc_count }
+    assert_equal Hash["title1" => 1, "title2" => 2], query.aggregations(:category)["category2"].title.buckets.each_with_object({}) { |bucket, hash| hash[bucket[:key]] = bucket.doc_count }
+
+    assert_equal 30, query.aggregations(:category)["category1"].title.buckets.detect { |bucket| bucket[:key] == "title1" }.price.value
+    assert_equal 15, query.aggregations(:category)["category1"].title.buckets.detect { |bucket| bucket[:key] == "title2" }.price.value
+    assert_equal 30, query.aggregations(:category)["category2"].title.buckets.detect { |bucket| bucket[:key] == "title1" }.price.value
+    assert_equal 60, query.aggregations(:category)["category2"].title.buckets.detect { |bucket| bucket[:key] == "title2" }.price.value
   end
 end
 
