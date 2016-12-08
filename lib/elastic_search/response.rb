@@ -41,7 +41,7 @@ module ElasticSearch
     end
 
     def results
-      @results ||= hits["hits"].collect { |hit| Result.new hit["_source"] }
+      @results ||= hits["hits"].map { |hit| Result.new hit["_source"] }
     end
 
     def hits
@@ -71,7 +71,7 @@ module ElasticSearch
     end
 
     def ids
-      @ids ||= hits["hits"].collect { |hit| hit["_id"] }
+      @ids ||= hits["hits"].map { |hit| hit["_id"] }
     end
 
     delegate :size, :count, :length, :to => :ids
