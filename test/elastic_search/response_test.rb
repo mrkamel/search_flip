@@ -29,7 +29,7 @@ class ElasticSearch::ResponseTest < ElasticSearch::TestCase
   def test_previous_page
     ProductIndex.import create_list(:product, 3)
 
-    assert_equal nil, ProductIndex.paginate(page: 1, per_page: 2).previous_page
+    assert_nil ProductIndex.paginate(page: 1, per_page: 2).previous_page
     assert_equal 1, ProductIndex.paginate(page: 2, per_page: 2).previous_page
     assert_equal 2, ProductIndex.paginate(page: 3, per_page: 2).previous_page
   end
@@ -38,7 +38,7 @@ class ElasticSearch::ResponseTest < ElasticSearch::TestCase
     ProductIndex.import create_list(:product, 3)
 
     assert_equal 2, ProductIndex.paginate(page: 1, per_page: 2).next_page
-    assert_equal nil, ProductIndex.paginate(page: 2, per_page: 2).next_page
+    assert_nil ProductIndex.paginate(page: 2, per_page: 2).next_page
   end
 
   def test_results

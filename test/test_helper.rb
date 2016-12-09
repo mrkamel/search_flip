@@ -186,7 +186,7 @@ class ElasticSearch::TestCase < MiniTest::Test
   end
 
   def setup
-    ProductIndex.delete Product.all
+    ProductIndex.match_all.delete
     Product.delete_all
   end
 end

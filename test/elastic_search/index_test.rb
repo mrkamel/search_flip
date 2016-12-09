@@ -5,7 +5,7 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
   should_delegate_methods :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where,
     :post_where_not, :post_filter, :post_range, :post_exists, :post_exists_not, :aggregate, :scroll, :source, :includes,
     :eager_load, :preload, :sort, :order, :offset, :limit, :paginate, :query, :search, :find_in_batches, :find_each,
-    :failsafe, :total_entries, :to => :relation, subject: ProductIndex
+    :failsafe, :total_entries, to: :relation, subject: ProductIndex
 
   def test_create_index
     assert TestIndex.create_index
@@ -17,7 +17,7 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
   end
 
   def test_create_index_with_index_settings
-    TestIndex.stubs(:index_settings).returns(settings: { :number_of_shards => 3 })
+    TestIndex.stubs(:index_settings).returns(settings: { number_of_shards: 3 })
 
     assert TestIndex.create_index
     assert TestIndex.index_exists?
@@ -135,8 +135,16 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
     assert_equal [3, 3], products.map { |product| ProductIndex.get(product.id)["_version"] }
   end
 
-  def test_index
-    # Already tested
+  def test_index_array
+    assert_difference "ProductIndex.total_entries", 2 do
+      ProductIndex.index create_list(:product, 2)
+    end
+  end
+
+  def test_index_array
+    assert_difference "ProductIndex.total_entries", 2 do
+      ProductIndex.index Product.where(id: create_list(:product, 2).map(&:id))
+    end
   end
 
   def test_create_array
@@ -155,7 +163,55 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
 
   def test_create_scope
     assert_difference "ProductIndex.total_entries", 2 do
-      ProductIndex.create create_list(:product, 2)
+      ProductIndex.create Product.where(id: create_list(:product, 2).map(&:id))
+    end
+  end
+
+  def test_update_array
+    products = create_list(:product, 2)
+
+    assert_difference "ProductIndex.total_entries", 2 do
+      ProductIndex.import products
+    end
+
+    assert_no_difference "ProductIndex.total_entries" do
+      ProductIndex.update products
+    end
+  end
+
+  def test_update_scope
+    products = create_list(:product, 2)
+
+    assert_difference "ProductIndex.total_entries", 2 do
+      ProductIndex.import products
+    end
+
+    assert_no_difference "ProductIndex.total_entries" do
+      ProductIndex.update Product.where(id: products.map(&:id))
+    end
+  end
+
+  def test_delete_array
+    products = create_list(:product, 2)
+
+    assert_difference "ProductIndex.total_entries", 2 do
+      ProductIndex.import products
+    end
+
+    assert_difference "ProductIndex.total_entries", -2 do
+      ProductIndex.delete products
+    end
+  end
+
+  def test_delete_scope
+    products = create_list(:product, 2)
+
+    assert_difference "ProductIndex.total_entries", 2 do
+      ProductIndex.import products
+    end
+
+    assert_difference "ProductIndex.total_entries", -2 do
+      ProductIndex.delete Product.where(id: Product.where(id: products.map(&:id)))
     end
   end
 
@@ -179,7 +235,7 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
     end
 
     assert_no_difference "ProductIndex.total_entries" do
-      ProductIndex.create products, :ignore_errors => [409]
+      ProductIndex.create products, ignore_errors: [409]
     end
 
     products = create_list(:product, 2)
@@ -232,8 +288,8 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
 
     product1, product2, product3 = create_list(:product, 3)
 
-    temp_product_index.index_scope { |products| products.where.not(:id => product1.id) }
-    temp_product_index.index_scope { |products| products.where.not(:id => product2.id) }
+    temp_product_index.index_scope { |products| products.where.not(id: product1.id) }
+    temp_product_index.index_scope { |products| products.where.not(id: product2.id) }
 
     temp_product_index.import Product.all
 
@@ -260,7 +316,7 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
         end
       end
 
-      ProductIndex.bulk :ignore_errors => [409] do |indexer|
+      ProductIndex.bulk ignore_errors: [409] do |indexer|
         indexer.index 1, JSON.generate(id: 1), version: 1, version_type: "external"
         indexer.index 2, JSON.generate(id: 2), version: 1, version_type: "external"
       end
