@@ -5,17 +5,29 @@
 
 ## Non-ActiveRecord models
 
-To use with non-ActiveRecord models the model must implement:
+The ElasticSearch gem ships with built-in support for ActiveRecord models, but
+using non-ActiveRecord models is very easy. The Index class needs to implement
+`Index.record_id` and `Index.fetch_records`. The default implementations are as
+follows:
 
-* `Model#id`
-* `Model.find_each`
-* `Model.where(:id => [...])`
+```ruby
+class MyIndex
+  include ElasticSearch::Index
 
-TODO replace with
+  def self.record_id(object)
+    object.id
+  end
 
-* `Index.record_id`
-* `Model.find_each`
-* `Index.fetch_records`
+  def self.fetch_records(ids)
+    model.where(id: ids)
+  end
+end
+```
+
+Thus, simply add your custom implementation of those methods that work with
+whatever ORM you use.
+
+The model must implement a `find_each` class method.
 
 ## Current ActiveSupport Dependencies
 

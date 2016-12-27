@@ -28,6 +28,28 @@ module ElasticSearch
         self.scopes = scopes.merge(name.to_s => block)
       end
 
+      def each_record(scope, index_scope: false)
+        return enum_for(:each_record, scope) unless block_given?
+
+        if scope.respond_to?(:find_each)
+          (index_scope ? index_scope_for(scope) : scope).find_each do |record|
+            yield record
+          end
+        else
+          Array(scope).each do |record|
+            yield record
+          end
+        end
+      end
+
+      def record_id(object)
+        object.id
+      end
+
+      def fetch_records(ids)
+        model.where(id: ids)
+      end
+
       def index_scope(&block)
         if block_given?
           self.index_scopes = index_scopes + [block]
@@ -110,8 +132,8 @@ module ElasticSearch
 
       def index(scope, options = {}, _index_options = {})
         bulk options do |indexer|
-          (scope.respond_to?(:find_each) ? index_scope_for(scope).find_each : Array(scope)).each do |object|
-            indexer.index object.id, JSON.generate(serialize(object)), index_options(object).merge(_index_options)
+          each_record(scope, index_scope: true) do |object|
+            indexer.index record_id(object), JSON.generate(serialize(object)), index_options(object).merge(_index_options)
           end
         end
 
@@ -122,8 +144,8 @@ module ElasticSearch
 
       def create(scope, options = {}, _index_options = {})
         bulk options do |indexer|
-          (scope.respond_to?(:find_each) ? index_scope_for(scope).find_each : Array(scope)).each do |object|
-            indexer.create object.id, JSON.generate(serialize(object)), index_options(object).merge(_index_options)
+          each_record(scope, index_scope: true) do |object|
+            indexer.create record_id(object), JSON.generate(serialize(object)), index_options(object).merge(_index_options)
           end
         end
 
@@ -134,8 +156,8 @@ module ElasticSearch
 
       def update(scope, options = {}, _index_options = {})
         bulk options do |indexer|
-          (scope.respond_to?(:find_each) ? index_scope_for(scope).find_each : Array(scope)).each do |object|
-            indexer.update object.id, JSON.generate(:doc => serialize(object)), index_options(object).merge(_index_options)
+          each_record(scope, index_scope: true) do |object|
+            indexer.update record_id(object), JSON.generate(:doc => serialize(object)), index_options(object).merge(_index_options)
           end
         end
 
@@ -146,8 +168,8 @@ module ElasticSearch
 
       def delete(scope, options = {}, _index_options = {})
         bulk options do |indexer|
-          (scope.respond_to?(:find_each) ? scope.find_each : Array(scope)).each do |object|
-            indexer.delete object.id, index_options(object).merge(_index_options)
+          each_record(scope) do |object|
+            indexer.delete record_id(object), index_options(object).merge(_index_options)
           end
         end
 

@@ -153,6 +153,8 @@ module ElasticSearch
       end
     end
 
+    alias_method :each, :find_each
+
     def response
       @response ||= begin
         if scroll_args && scroll_args[:id]
