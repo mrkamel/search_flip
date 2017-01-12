@@ -36,7 +36,7 @@ module ElasticSearch
             yield record
           end
         else
-          Array(scope).each do |record|
+          (scope.respond_to?(:each) ? scope : Array(scope)).each do |record|
             yield record
           end
         end
