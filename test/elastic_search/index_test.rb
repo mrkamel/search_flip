@@ -92,6 +92,12 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
     assert_equal "http://127.0.0.1:9200/products2/products2", ProductIndex.type_url
   end
 
+  def test_import_object
+    assert_difference "ProductIndex.total_entries" do
+      ProductIndex.import create(:product)
+    end
+  end
+
   def test_import_array
     assert_difference "ProductIndex.total_entries", 2 do
       ProductIndex.import [create(:product), create(:product)]
