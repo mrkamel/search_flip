@@ -41,7 +41,7 @@ module ElasticSearch
     end
 
     def results
-      @results ||= hits["hits"].map { |hit| Result.new hit["_source"] }
+      @results ||= hits["hits"].map { |hit| Result.new hit["_source"].merge(hit["highlight"] ? { highlight: hit["highlight"] } : {}) }
     end
 
     def hits

@@ -38,6 +38,5 @@ The model must implement a `find_each` class method.
 
 ## TODO
 
-* Highlighting
 * Suggestions
 

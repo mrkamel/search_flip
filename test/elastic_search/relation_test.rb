@@ -607,6 +607,37 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
     assert_equal [product2, product3].to_set, ProductIndex.query(query_string: { query: "nothing" }).query(query_string: { query: "price:>15" }).records.to_set
   end
 
+  def test_highlight
+    product1 = create(:product, title: "Title1 highlight", description: "Description1 highlight")
+    product2 = create(:product, title: "Title2 highlight", description: "Description2 highlight")
+
+    ProductIndex.import [product1, product2]
+
+    results = ProductIndex.sort(:id).highlight([:title, :description]).where(title: "highlight", description: "highlight").results
+
+    assert_equal ["Title1 <em>highlight</em>"], results[0].highlight.title
+    assert_equal ["Description1 <em>highlight</em>"], results[0].highlight.description
+
+    assert_equal ["Title2 <em>highlight</em>"], results[1].highlight.title
+    assert_equal ["Description2 <em>highlight</em>"], results[1].highlight.description
+
+    results = ProductIndex.sort(:id).highlight([:title, :description], require_field_match: false).search("highlight").results
+
+    assert_equal ["Title1 <em>highlight</em>"], results[0].highlight.title
+    assert_equal ["Description1 <em>highlight</em>"], results[0].highlight.description
+
+    assert_equal ["Title2 <em>highlight</em>"], results[1].highlight.title
+    assert_equal ["Description2 <em>highlight</em>"], results[1].highlight.description
+
+    results = ProductIndex.sort(:id).highlight(:title).highlight(:description).where(title: "highlight", description: "highlight").results
+
+    assert_equal ["Title1 <em>highlight</em>"], results[0].highlight.title
+    assert_equal ["Description1 <em>highlight</em>"], results[0].highlight.description
+
+    assert_equal ["Title2 <em>highlight</em>"], results[1].highlight.title
+    assert_equal ["Description2 <em>highlight</em>"], results[1].highlight.description
+  end
+
   def test_find_in_batches
     expected1 = create(:product, title: "expected", rank: 1)
     expected2 = create(:product, title: "expected", rank: 2)
