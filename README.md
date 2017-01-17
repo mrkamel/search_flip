@@ -36,7 +36,3 @@ The model must implement a `find_each` class method.
 * `Object#present?`
 * `Object#blank?`
 
-## TODO
-
-* Suggestions
-
