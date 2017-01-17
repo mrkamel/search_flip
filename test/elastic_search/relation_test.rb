@@ -3,7 +3,7 @@ require File.expand_path("../../test_helper", __FILE__)
 
 class ElasticSearch::IndexTest < ElasticSearch::TestCase
   should_delegate_methods :total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids,
-    :count, :size, :length, :took, :aggregations, :scope, :results, :records, :scroll_id, :raw_response,
+    :count, :size, :length, :took, :aggregations, :suggestions, :scope, :results, :records, :scroll_id, :raw_response,
     to: :response, subject: ElasticSearch::Relation.new(target: ProductIndex)
 
   def test_where
@@ -636,6 +636,14 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
 
     assert_equal ["Title2 <em>highlight</em>"], results[1].highlight.title
     assert_equal ["Description2 <em>highlight</em>"], results[1].highlight.description
+  end
+
+  def test_suggest
+    product = create(:product, title: "Title", description: "Description")
+
+    ProductIndex.import product
+
+    assert_equal "description", ProductIndex.suggest(:suggestion, text: "Desciption", term: { field: "description" }).suggestions(:suggestion).first["text"]
   end
 
   def test_find_in_batches

@@ -5,7 +5,8 @@ module ElasticSearch
     include ElasticSearch::PostFilterableRelation
     include ElasticSearch::AggregatableRelation
 
-    attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :offset_value, :limit_value, :query_value, :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args
+    attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values, :offset_value, :limit_value, :query_value,
+      :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args
 
     def initialize(options = {})
       options.each do |key, value|
@@ -31,6 +32,7 @@ module ElasticSearch
       res.update :from => offset_value, :size => limit_value
 
       res[:highlight] = highlight_values if highlight_values
+      res[:suggest] = suggest_values if suggest_values
       res[:sort] = sort_values if sort_values
       res[:aggregations] = aggregation_values if aggregation_values
       res[:post_filter] = post_filter_values.size > 1 ? { :and => post_filter_values } : post_filter_values.first if post_filter_values
@@ -53,6 +55,12 @@ module ElasticSearch
         end
 
         relation.highlight_values[:fields] = (relation.highlight_values[:fields] || {}).merge(hash)
+      end
+    end
+
+    def suggest(name, options = {})
+      fresh.tap do |relation|
+        relation.suggest_values = (relation.suggest_values || {}).merge(name => options)
       end
     end
 
@@ -216,7 +224,8 @@ module ElasticSearch
       end
     end
 
-    delegate :total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :scope, :results, :records, :scroll_id, :raw_response, :to => :response
+    delegate :total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions,
+      :scope, :results, :records, :scroll_id, :raw_response, :to => :response
   end
 end
 

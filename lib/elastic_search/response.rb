@@ -44,6 +44,14 @@ module ElasticSearch
       @results ||= hits["hits"].map { |hit| Result.new hit["_source"].merge(hit["highlight"] ? { highlight: hit["highlight"] } : {}) }
     end
 
+    def suggestions(name = nil)
+      if name
+        response["suggest"][name.to_s].first["options"]
+      else
+        response["suggest"]
+      end
+    end
+
     def hits
       response["hits"]
     end
