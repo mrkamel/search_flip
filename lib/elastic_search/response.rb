@@ -64,7 +64,7 @@ module ElasticSearch
       @records ||= begin
         sort_map = ids.each_with_index.each_with_object({}) { |(id, index), hash| hash[id.to_s] = index }
 
-        scope.sort_by { |record| sort_map[relation.target.record_id(record).to_s] }
+        scope.to_a.sort_by { |record| sort_map[relation.target.record_id(record).to_s] }
       end
     end
 
