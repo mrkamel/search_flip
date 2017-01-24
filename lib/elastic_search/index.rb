@@ -12,13 +12,59 @@ module ElasticSearch
     end
 
     module ClassMethods
-      def index_options(object)
+      # Override this method to automatically pass index options for a record
+      # at index-time, like routing or versioning.
+      #
+      # @example
+      #   def self.index_options(comment)
+      #     { routing: comment.user_id, version: comment.version, version_type: "external_gte" }
+      #   end
+      #
+      # @param record The record that gets indexed
+      # @return [Hash] The index options
+
+      def index_options(record)
         {}
       end
 
-      def serialize(object)
-        {}
+      # @abstract
+      #
+      # Override this method to generate a hash representation of a record,
+      # used to generate the JSON representation of it.
+      #
+      # @example
+      #   def self.serialize(comment)
+      #     {
+      #       id: comment.id,
+      #       user_id: comment.user_id,
+      #       message: comment.message,
+      #       created_at: comment.created_at,
+      #       updated_at: comment.updated_at
+      #     }
+      #   end
+      #
+      # @param record The record that gets serialized
+      # @return [Hash] The hash-representation of the record
+
+      def serialize(record)
+        raise NotImplementedError
       end
+
+      # Adds a named scope to the index.
+      #
+      # @example
+      #   scope(:active) { where(active: true) }
+      #
+      #   UserIndex.active
+      #
+      # @example
+      #   scope(:active) { |value| where(active: value) }
+      #
+      #   UserIndex.active(true)
+      #   UserIndex.active(false)
+      #
+      # @param name [Symbol] The name of the scope
+      # @param block The scope definition. Add filters, etc.
 
       def scope(name, &block)
         define_singleton_method name do |*args, &blk|
@@ -27,6 +73,16 @@ module ElasticSearch
 
         self.scopes = scopes.merge(name.to_s => block)
       end
+
+      # @api private
+      #
+      # Used to iterate a record set, ie a) an ActiveRecord::Relation or
+      # anything responding to #find_each, b) an Array of records or anything
+      # responding to #each or c) a single record.
+      #
+      # @param scope The record set that gets iterated
+      # @param index_scope [Boolean] Set to true if you want the the index
+      #   scopes to be applied to the scope
 
       def each_record(scope, index_scope: false)
         return enum_for(:each_record, scope) unless block_given?
@@ -42,8 +98,25 @@ module ElasticSearch
         end
       end
 
-      def record_id(object)
-        object.id
+      # Returns the record's id, ie the unique identifier or primary key of a
+      # record. Override this method for custom primary keys, but return a
+      # String or Fixnum.
+      #
+      # @example Default implementation
+      #   def self.record_id(record)
+      #     record.id
+      #   end
+      #
+      # @example Custom primary key
+      #   def self.record_id(user)
+      #     user.username
+      #   end
+      #
+      # @param record The record to get the primary key for
+      # @return [String, Fixnum] The record's primary key
+
+      def record_id(record)
+        record.id
       end
 
       def fetch_records(ids)
