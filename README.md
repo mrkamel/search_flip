@@ -3,6 +3,10 @@
 
 [![Build Status](https://secure.travis-ci.org/mrkamel/elastic_search.png?branch=master)](http://travis-ci.org/mrkamel/elastic_search)
 
+## Reference Docs
+
+See [http://www.rubydoc.info/github/mrkamel/elastic_search](http://www.rubydoc.info/github/mrkamel/elastic_search)
+
 ## Non-ActiveRecord models
 
 The ElasticSearch gem ships with built-in support for ActiveRecord models, but
@@ -29,10 +33,16 @@ whatever ORM you use.
 
 The model must implement a `find_each` class method.
 
-## Current ActiveSupport Dependencies
+## TODO
+
+1. Remove ActiveSupport dependencies
 
 * `Hash#except` (can probably be removed)
 * `Module#delegate`
 * `Object#present?`
 * `Object#blank?`
+
+2. Add convenience mixin for re-indexing ActiveRecord models on callbacks
+
+3. Documentation
 

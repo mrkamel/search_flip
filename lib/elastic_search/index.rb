@@ -1,5 +1,43 @@
 
 module ElasticSearch
+  # The ElasticSearch::Index mixin makes your class correspond to an
+  # ElasticSearch index. Your class can then create or delete the index, modify
+  # the mapping, import records, delete records and query the index.
+  #
+  # @example Simple index class
+  #   class CommentIndex
+  #     include ElasticSearch::Index
+  #
+  #     def self.model
+  #       Comment
+  #     end
+  #
+  #     def self.type_name
+  #       "comments"
+  #     end
+  #
+  #     def self.serialize(comment)
+  #       {
+  #         id: comment.id,
+  #         user_id: comment.user_id,
+  #         message: comment.message,
+  #         created_at: comment.created_at
+  #       }
+  #     end
+  #   end
+  #
+  # @example Create/delete the index
+  #   CommentIndex.create_index
+  #   CommentIndex.delete_index if CommentIndex.index_exists?
+  #
+  # @example Import records
+  #   CommentIndex.import(Comment.all)
+  #
+  # @example Query the index
+  #   CommentIndex.search("hello world")
+  #   CommentIndex.where(user_id: 1)
+  #   CommentIndex.range(:created_at, gt: Time.now - 7.days)
+
   module Index
     def self.included(base)
       base.extend ClassMethods
