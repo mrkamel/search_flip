@@ -114,9 +114,9 @@ module ElasticSearch
 
       # @api private
       #
-      # Used to iterate a record set, ie a) an ActiveRecord::Relation or
-      # anything responding to #find_each, b) an Array of records or anything
-      # responding to #each or c) a single record.
+      # Used to iterate a record set. Here, a record set may be a) an
+      # ActiveRecord::Relation or anything responding to #find_each, b) an
+      # Array of records or anything responding to #each or c) a single record.
       #
       # @param scope The record set that gets iterated
       # @param index_scope [Boolean] Set to true if you want the the index
@@ -157,9 +157,34 @@ module ElasticSearch
         record.id
       end
 
+      # Returns a record set, usually an ActiveRecord::Relation, for the
+      # specified ids, ie primary keys. Override this method for custom primary
+      # keys and/or ORMs.
+      #
+      # @param ids [Array] The array of ids to fetch the records for
+      # @return The record set or an array of records
+
       def fetch_records(ids)
         model.where(id: ids)
       end
+
+      # Adds the provided block as index scope to the list of index scopes.
+      # All index scopes will automatically be applied to scopes, eg
+      # ActiveRecord::Relation's, provided to #import or #index. This can be
+      # used to preload associations that are used when serializing records or
+      # to restrict the records you want to index.
+      #
+      # @example Preloading an association
+      #   index_scope { preload(:user) }
+      #
+      #   CommentIndex.import(Comment.all) # => CommentIndex.import(Comment.preload(:user))
+      #
+      # @example Restricting records
+      #   index_scope { where(public: true) }
+      #
+      #   CommentIndex.import(Comment.all) # => CommentIndex.import(Comment.where(public: true))
+      #
+      # @param block The block implementing the index scope
 
       def index_scope(&block)
         if block_given?
@@ -170,7 +195,7 @@ module ElasticSearch
       end
 
       def index_scope_for(scope)
-        index_scopes.inject(scope) { |memo, cur| cur.call(memo) }
+        index_scopes.inject(scope) { |memo, cur| memo.instance_exec(memo, &cur) }
       end
 
       def relation
