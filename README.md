@@ -46,5 +46,3 @@ The model must implement a `find_each` class method.
 
 3. Documentation
 
-4. Support msearch, script_fields and custom sections
-

@@ -2,7 +2,10 @@
 module ElasticSearch
   # The ElasticSearch::Index mixin makes your class correspond to an
   # ElasticSearch index. Your class can then create or delete the index, modify
-  # the mapping, import records, delete records and query the index.
+  # the mapping, import records, delete records and query the index. This gem
+  # uses an individual ElasticSearch index for each index class, because
+  # ElasticSearch requires to have the same mapping for the same field name,
+  # even if the field is living in different types of the same index.
   #
   # @example Simple index class
   #   class CommentIndex
@@ -194,9 +197,25 @@ module ElasticSearch
         end
       end
 
+      # @api private
+      #
+      # Applies all index scopes to the scope provided. The scope eg is an
+      # ActiveRecord::Relation, but can as well be any other kind of scope
+      # depending on which ORM is used, if any.
+      #
+      # @param scope The scope to which the index scopes should be applied to
+      # @return A new scope with all index scopes applied
+
       def index_scope_for(scope)
         index_scopes.inject(scope) { |memo, cur| memo.instance_exec(memo, &cur) }
       end
+
+      # @api private
+      #
+      # Creates an ElasticSearch::Relation for the current index, which is used
+      # as a base for chaining relation methods.
+      #
+      # @eturn [ElasticSearch::Relation] The base for chaining relation methods
 
       def relation
         ElasticSearch::Relation.new(:target => self)
@@ -205,6 +224,13 @@ module ElasticSearch
       delegate :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where, :post_where_not, :post_filter, :post_range,
         :post_exists, :post_exists_not, :aggregate, :scroll, :source, :includes, :eager_load, :preload, :sort, :order, :offset, :limit, :paginate, :query,
         :search, :highlight, :suggest, :find_in_batches, :find_each, :failsafe, :total_entries, :to => :relation
+
+      # Override to specify the type name used within ElasticSearch. Recap,
+      # this gem uses an individual index for each index class, because
+      # ElasticSearch requires to have the same mapping for the same field
+      # name, even if the field is living in different types of the same index.
+      #
+      # @return [String] The name used for the type within the index
 
       def type_name
         raise NotImplementedError
