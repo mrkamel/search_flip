@@ -58,7 +58,11 @@ module ElasticSearch
       #
       # @example
       #   def self.index_options(comment)
-      #     { routing: comment.user_id, version: comment.version, version_type: "external_gte" }
+      #     {
+      #       routing: comment.user_id,
+      #       version: comment.version,
+      #       version_type: "external_gte"
+      #     }
       #   end
       #
       # @param record The record that gets indexed
@@ -236,13 +240,39 @@ module ElasticSearch
         raise NotImplementedError
       end
 
-      def index_name_with_prefix
-        "#{ElasticSearch::Config[:index_prefix]}#{index_name}"
-      end
+      # Returns the base name of the index within ElasticSearch, ie the index
+      # name without prefix. Equals #type_name by default.
+      #
+      # @return [String] The base name of the index, ie without prefix
 
       def index_name
         type_name
       end
+
+      # @api private
+      #
+      # Returns the full name of the index within ElasticSearch, ie with prefix
+      # specified via ElasticSearch::Config[:index_prefix].
+      #
+      # @return [String] The full index name
+
+      def index_name_with_prefix
+        "#{ElasticSearch::Config[:index_prefix]}#{index_name}"
+      end
+
+      # Override to specify index settings like number of shards, analyzers,
+      # refresh interval, etc.
+      #
+      # @example
+      #   def self.index_settings
+      #     {
+      #       settings: {
+      #         number_of_shards: 1
+      #       }
+      #     }
+      #   end
+      #
+      # @return [Hash] The index settings
 
       def index_settings
         {}
@@ -262,6 +292,10 @@ module ElasticSearch
 
       def create_index
         RestClient.put index_url, JSON.generate(index_settings), content_type: "application/json"
+      end
+
+      def update_index_settings
+        RestClient.put "#{index_url}/_settings", JSON.generate(index_settings), content_type: "application/json"
       end
 
       def delete_index

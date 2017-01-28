@@ -22,7 +22,19 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
     assert TestIndex.create_index
     assert TestIndex.index_exists?
 
-    assert 3, TestIndex.get_index_settings["test"]["settings"]["index"]["number_of_shards"]
+    assert_equal "3", TestIndex.get_index_settings["test"]["settings"]["index"]["number_of_shards"]
+  ensure
+    TestIndex.delete_index if TestIndex.index_exists?
+  end
+
+  def test_update_index_settings
+    assert TestIndex.create_index
+
+    TestIndex.stubs(:index_settings).returns(settings: { number_of_replicas: 3 })
+
+    assert TestIndex.update_index_settings
+
+    assert_equal "3", TestIndex.get_index_settings["test"]["settings"]["index"]["number_of_replicas"]
   ensure
     TestIndex.delete_index if TestIndex.index_exists?
   end
