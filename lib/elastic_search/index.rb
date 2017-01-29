@@ -278,6 +278,11 @@ module ElasticSearch
         {}
       end
 
+      # Returns whether or not the associated ElasticSearch index already
+      # exists.
+      #
+      # @return [Boolean] Whether or not the index exists
+
       def index_exists?
         get_mapping
 
@@ -286,9 +291,18 @@ module ElasticSearch
         false
       end
 
+      # Fetches the index settings from ElasticSearch. Sends a GET request to
+      # index_url/_settings. Raises RestClient specific exceptions in case any
+      # errors occur.
+      #
+      # @return [Hash] The index settings
+
       def get_index_settings
         JSON.parse RestClient.get("#{index_url}/_settings", content_type: "application/json")
       end
+
+      # Creates the index and applies index settings, if specified. Raises
+      # RestClient specific exceptions in case any errors occur.
 
       def create_index
         RestClient.put index_url, JSON.generate(index_settings), content_type: "application/json"
