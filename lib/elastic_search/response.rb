@@ -91,20 +91,22 @@ module ElasticSearch
     def aggregations(name = nil)
       return response["aggregations"] || {} unless name
 
-      @aggregations ||= Hash.new do |cache, key|
-        cache[key] =
-          if response["aggregations"].blank? || response["aggregations"][key].blank?
-            Hashie::Mash.new
-          elsif response["aggregations"][key]["buckets"].is_a?(Array)
-            response["aggregations"][key]["buckets"].each_with_object({}) { |bucket, hash| hash[bucket["key"]] = Hashie::Mash.new(bucket) }
-          elsif response["aggregations"][key]["buckets"].is_a?(Hash)
-            Hashie::Mash.new response["aggregations"][key]["buckets"]
-          else
-            Hashie::Mash.new response["aggregations"][key]
-          end
-      end
+      @aggregations ||= {}
 
-      @aggregations[name.to_s]
+      key = name.to_s
+
+      return @aggregations[key] if @aggregations.key?(key)
+
+      @aggregations[key] =
+        if response["aggregations"].blank? || response["aggregations"][key].blank?
+          Hashie::Mash.new
+        elsif response["aggregations"][key]["buckets"].is_a?(Array)
+          response["aggregations"][key]["buckets"].each_with_object({}) { |bucket, hash| hash[bucket["key"]] = Hashie::Mash.new(bucket) }
+        elsif response["aggregations"][key]["buckets"].is_a?(Hash)
+          Hashie::Mash.new response["aggregations"][key]["buckets"]
+        else
+          Hashie::Mash.new response["aggregations"][key]
+        end
     end
   end
 end
