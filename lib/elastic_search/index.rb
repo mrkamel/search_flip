@@ -301,23 +301,47 @@ module ElasticSearch
         JSON.parse RestClient.get("#{index_url}/_settings", content_type: "application/json")
       end
 
-      # Creates the index and applies index settings, if specified. Raises
-      # RestClient specific exceptions in case any errors occur.
+      # Creates the index within ElasticSearch and applies index settings, if
+      # specified. Raises RestClient specific exceptions in case any errors
+      # occur.
 
       def create_index
         RestClient.put index_url, JSON.generate(index_settings), content_type: "application/json"
       end
 
+      # Updates the index settings within ElasticSearch according to the index
+      # settings specified. Raises RestClient specific exceptions in case any
+      # errors occur.
+
       def update_index_settings
         RestClient.put "#{index_url}/_settings", JSON.generate(index_settings), content_type: "application/json"
       end
+
+      # Deletes the index from ElasticSearch. Raises RestClient specific
+      # exceptions in case any errors occur.
 
       def delete_index
         RestClient.delete index_url, content_type: "application/json"
       end
 
+      # Specifies a type mapping. Override to specify a custom mapping.
+      #
+      # @example
+      #   def self.mapping
+      #     {
+      #       comments: {
+      #         _all: {
+      #           enabled: false
+      #         },
+      #         properties: {
+      #           email: { type: "string", analyzer: "custom_analyzer" }
+      #         }
+      #       }
+      #     }
+      #   end
+
       def mapping
-        {}
+        { type_name => {} }
       end
 
       def update_mapping
