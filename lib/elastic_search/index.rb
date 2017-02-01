@@ -344,13 +344,27 @@ module ElasticSearch
         { type_name => {} }
       end
 
+      # Updates the type mapping within ElasticSearch according to the mapping
+      # currently specified. Raises RestClient specific exceptions in case any
+      # errors occur.
+
       def update_mapping
         RestClient.put "#{type_url}/_mapping", JSON.generate(mapping), content_type: "application/json"
       end
 
+      # Retrieve the current type mapping from ElasticSearch. Raises RestClient
+      # specific exceptions in case any errors occur.
+      #
+      # @return [Hash] The current type mapping
+
       def get_mapping
         JSON.parse RestClient.get("#{type_url}/_mapping", content_type: "application/json")
       end
+
+      # Retrieve the document specified by id from ElasticSearch. Raises RestClient
+      # specific exceptions in case any errors occur.
+      #
+      # @return [Hash] The specified document
 
       def get(id)
         JSON.parse RestClient.get("#{type_url}/#{id}", content_type: "application/json")
