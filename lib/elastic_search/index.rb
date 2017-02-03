@@ -352,7 +352,7 @@ module ElasticSearch
         RestClient.put "#{type_url}/_mapping", JSON.generate(mapping), content_type: "application/json"
       end
 
-      # Retrieve the current type mapping from ElasticSearch. Raises RestClient
+      # Retrieves the current type mapping from ElasticSearch. Raises RestClient
       # specific exceptions in case any errors occur.
       #
       # @return [Hash] The current type mapping
@@ -361,7 +361,7 @@ module ElasticSearch
         JSON.parse RestClient.get("#{type_url}/_mapping", content_type: "application/json")
       end
 
-      # Retrieve the document specified by id from ElasticSearch. Raises RestClient
+      # Retrieves the document specified by id from ElasticSearch. Raises RestClient
       # specific exceptions in case any errors occur.
       #
       # @return [Hash] The specified document
@@ -370,13 +370,45 @@ module ElasticSearch
         JSON.parse RestClient.get("#{type_url}/#{id}", content_type: "application/json")
       end
 
+      # Sends a index refresh request to ElasticSearch. Raises RestClient
+      # specific exceptions in case any errors occur.
+
       def refresh
         RestClient.post "#{index_url}/_refresh", "{}", content_type: "application/json"
       end
 
+      # Indexes the given record set, array of records or individual record.
+      # Alias for #index. See #index for more details.
+
       def import(*args)
         index(*args)
       end
+
+      # Indexes the given record set, array of records or individual record. A
+      # record set usually is an ActiveRecord::Relation, but can be any other
+      # ORM as well (see fetch_records and record_id). Uses the ElasticSearch
+      # bulk API no matter what is provided. Refreshes the index if the
+      # environment is set to testing (see ElasticSearch::Config). Raises
+      # RestClient specific exception in case any errors occur.
+      #
+      # @example
+      #   CommentIndex.import Comment.all
+      #   CommentIndex.import [comment1, comment2]
+      #   CommentIndex.import Comment.first
+      #   CommentIndex.import Comment.all, ignore_errors: [409]
+      #   CommentIndex.import Comment.all, raise: false
+      #
+      # @param scope A record set, array of records or individual record to
+      #   index
+      # @param options [Hash] Options regarding the bulk indexing, namely
+      #   :ignore_errors and :raise. Use :ignore_errors to specify an array of
+      #   http status codes that shouldn't raise any exceptions, like eg 409
+      #   for conflicts, ie when optimistic concurrency control is used. Use
+      #   :raise to prevent any exceptions from being raised. Please note that
+      #   raise: false only applies to the bulk response, not to the request in
+      #   general, such that connection errors, etc will still raise.
+      # @param _index_options [Hash] May provide custom index options for eg
+      #   routing, versioning, etc
 
       def index(scope, options = {}, _index_options = {})
         bulk options do |indexer|
