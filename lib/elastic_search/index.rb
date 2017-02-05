@@ -398,16 +398,16 @@ module ElasticSearch
       #   CommentIndex.import Comment.all, ignore_errors: [409]
       #   CommentIndex.import Comment.all, raise: false
       #
-      # @param scope A record set, array of records or individual record to
-      #   index
-      # @param options [Hash] Options regarding the bulk indexing, namely
-      #   :ignore_errors and :raise. Use :ignore_errors to specify an array of
-      #   http status codes that shouldn't raise any exceptions, like eg 409
-      #   for conflicts, ie when optimistic concurrency control is used. Use
-      #   :raise to prevent any exceptions from being raised. Please note that
-      #   raise: false only applies to the bulk response, not to the request in
-      #   general, such that connection errors, etc will still raise.
-      # @param _index_options [Hash] May provide custom index options for eg
+      # @param scope A record set, array of records or individual record to index
+      # @param options [Hash] Specifies options regarding the bulk indexing.
+      # @option options ignore_errors [Array] Specifies an array of http status
+      #   codes that shouldn't raise any exceptions, like eg 409 for conflicts,
+      #   ie when optimistic concurrency control is used.
+      # @option options raise [Boolean] Prevents any exceptions from being
+      #   raised. Please note that this only applies to the bulk response, not to
+      #   the request in general, such that connection errors, etc will still
+      #   raise.
+      # @param _index_options [Hash] Provides custom index options for eg
       #   routing, versioning, etc
 
       def index(scope, options = {}, _index_options = {})
