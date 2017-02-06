@@ -386,10 +386,10 @@ module ElasticSearch
 
       # Indexes the given record set, array of records or individual record. A
       # record set usually is an ActiveRecord::Relation, but can be any other
-      # ORM as well (see fetch_records and record_id). Uses the ElasticSearch
+      # ORM as well (see #fetch_records and #record_id). Uses the ElasticSearch
       # bulk API no matter what is provided. Refreshes the index if the
       # environment is set to testing (see ElasticSearch::Config). Raises
-      # RestClient specific exception in case any errors occur.
+      # RestClient specific exceptions in case any errors occur.
       #
       # @example
       #   CommentIndex.import Comment.all
@@ -422,6 +422,12 @@ module ElasticSearch
         scope
       end
 
+      # Indexes the given record set, array of records or individual record
+      # using ElasticSearch's create operation via the Bulk API, such that the
+      # request will fail if a record with a particular primary key already
+      # exists in ElasticSearch. See #index for more details regarding
+      # available params and return values.
+
       def create(scope, options = {}, _index_options = {})
         bulk options do |indexer|
           each_record(scope, index_scope: true) do |object|
@@ -434,6 +440,12 @@ module ElasticSearch
         scope
       end
 
+      # Indexes the given record set, array of records or individual record
+      # using ElasticSearch's update operation via the Bulk API, such that the
+      # request will fail if a record you want to update does not already exist
+      # in ElasticSearch. See #index for more details regarding available
+      # params and return values.
+
       def update(scope, options = {}, _index_options = {})
         bulk options do |indexer|
           each_record(scope, index_scope: true) do |object|
@@ -445,6 +457,10 @@ module ElasticSearch
 
         scope
       end
+
+      # Deletes the given record set, array of records or individual record
+      # from ElasticSearch using the Bulk API. See #index for more details
+      # regarding available params and return values.
 
       def delete(scope, options = {}, _index_options = {})
         bulk options do |indexer|
