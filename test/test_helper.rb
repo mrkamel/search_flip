@@ -68,6 +68,29 @@ FactoryGirl.define do
   factory :comment
 end
 
+class CommentIndex
+  include ElasticSearch::Index
+
+  def self.type_name
+    "comments"
+  end
+
+  def self.model
+    Comment
+  end
+
+  def self.serialize(comment)
+    {
+      id: comment.id,
+      message: comment.message
+    }
+  end
+end
+
+CommentIndex.delete_index if CommentIndex.index_exists?
+CommentIndex.create_index
+CommentIndex.update_mapping
+
 class ProductIndex
   include ElasticSearch::Index
 

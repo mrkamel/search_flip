@@ -159,7 +159,7 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
     end
   end
 
-  def test_index_array
+  def test_index_scope
     assert_difference "ProductIndex.total_entries", 2 do
       ProductIndex.index Product.where(id: create_list(:product, 2).map(&:id))
     end
@@ -301,7 +301,7 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
     refute_includes results, rejected
   end
 
-  def test_index_scope
+  def test_index_scopes
     temp_product_index = Class.new(ProductIndex)
 
     product1, product2, product3 = create_list(:product, 3)
