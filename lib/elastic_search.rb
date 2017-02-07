@@ -30,7 +30,7 @@ module ElasticSearch
 
   def self.msearch(relations)
     payload = relations.flat_map do |relation|
-      [JSON.generate(index: relation.target.index_name, type: relation.target.type_name), JSON.generate(relation.request)]
+      [JSON.generate(index: relation.target.index_name_with_prefix, type: relation.target.type_name), JSON.generate(relation.request)]
     end
 
     payload = payload.join("\n")
