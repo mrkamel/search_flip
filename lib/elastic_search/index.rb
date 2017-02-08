@@ -219,7 +219,7 @@ module ElasticSearch
       # Creates an ElasticSearch::Relation for the current index, which is used
       # as a base for chaining relation methods.
       #
-      # @eturn [ElasticSearch::Relation] The base for chaining relation methods
+      # @return [ElasticSearch::Relation] The base for chaining relation methods
 
       def relation
         ElasticSearch::Relation.new(:target => self)
@@ -378,7 +378,9 @@ module ElasticSearch
       end
 
       # Indexes the given record set, array of records or individual record.
-      # Alias for #index. See #index for more details.
+      # Alias for #index.
+      #
+      # @see #index See #index for more details
 
       def import(*args)
         index(*args)
@@ -386,10 +388,14 @@ module ElasticSearch
 
       # Indexes the given record set, array of records or individual record. A
       # record set usually is an ActiveRecord::Relation, but can be any other
-      # ORM as well (see #fetch_records and #record_id). Uses the ElasticSearch
-      # bulk API no matter what is provided. Refreshes the index if the
-      # environment is set to testing (see ElasticSearch::Config). Raises
-      # RestClient specific exceptions in case any errors occur.
+      # ORM as well. Uses the ElasticSearch bulk API no matter what is
+      # provided. Refreshes the index if the environment is set to testing.
+      # Raises RestClient specific exceptions in case any errors occur.
+      #
+      # @see #fetch_records See #fetch_records for other/custom ORMs
+      # @see #record_id See #record_id for other/custom ORMs
+      # @see ElasticSearch::Config See ElasticSearch::Config for
+      #   changing the environment
       #
       # @example
       #   CommentIndex.import Comment.all
@@ -425,8 +431,10 @@ module ElasticSearch
       # Indexes the given record set, array of records or individual record
       # using ElasticSearch's create operation via the Bulk API, such that the
       # request will fail if a record with a particular primary key already
-      # exists in ElasticSearch. See #index for more details regarding
-      # available params and return values.
+      # exists in ElasticSearch.
+      #
+      # @see #index See #index for more details regarding available
+      #   params and return values
 
       def create(scope, options = {}, _index_options = {})
         bulk options do |indexer|
@@ -443,8 +451,10 @@ module ElasticSearch
       # Indexes the given record set, array of records or individual record
       # using ElasticSearch's update operation via the Bulk API, such that the
       # request will fail if a record you want to update does not already exist
-      # in ElasticSearch. See #index for more details regarding available
-      # params and return values.
+      # in ElasticSearch.
+      #
+      # @see #index See #index for more details regarding available
+      #   params and return values
 
       def update(scope, options = {}, _index_options = {})
         bulk options do |indexer|
@@ -459,8 +469,10 @@ module ElasticSearch
       end
 
       # Deletes the given record set, array of records or individual record
-      # from ElasticSearch using the Bulk API. See #index for more details
-      # regarding available params and return values.
+      # from ElasticSearch using the Bulk API.
+      #
+      # @see #index See #index for more details regarding available
+      #   params and return values
 
       def delete(scope, options = {}, _index_options = {})
         bulk options do |indexer|
