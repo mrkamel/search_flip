@@ -1,5 +1,9 @@
 
 module ElasticSearch
-  class Result < Hashie::Mash; end
+  class Result < Hashie::Mash
+    def self.disable_warnings?
+      true
+    end
+  end
 end
 

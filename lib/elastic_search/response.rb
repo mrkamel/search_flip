@@ -99,13 +99,13 @@ module ElasticSearch
 
       @aggregations[key] =
         if response["aggregations"].blank? || response["aggregations"][key].blank?
-          Hashie::Mash.new
+          Result.new
         elsif response["aggregations"][key]["buckets"].is_a?(Array)
-          response["aggregations"][key]["buckets"].each_with_object({}) { |bucket, hash| hash[bucket["key"]] = Hashie::Mash.new(bucket) }
+          response["aggregations"][key]["buckets"].each_with_object({}) { |bucket, hash| hash[bucket["key"]] = Result.new(bucket) }
         elsif response["aggregations"][key]["buckets"].is_a?(Hash)
-          Hashie::Mash.new response["aggregations"][key]["buckets"]
+          Result.new response["aggregations"][key]["buckets"]
         else
-          Hashie::Mash.new response["aggregations"][key]
+          Result.new response["aggregations"][key]
         end
     end
   end
