@@ -21,11 +21,10 @@ module ElasticSearch
     end
 
     def total_pages
-      (total_entries / relation.limit_value.to_f).ceil
+      [(total_entries / relation.limit_value.to_f).ceil, 1].max
     end
 
     def previous_page
-      return nil if total_pages.zero?
       return nil if current_page <= 1
       return total_pages if current_page > total_pages
 
@@ -33,7 +32,6 @@ module ElasticSearch
     end
 
     def next_page
-      return nil if total_pages.zero?
       return nil if current_page >= total_pages
       return 1 if current_page < 1
 

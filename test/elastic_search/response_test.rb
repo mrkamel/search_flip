@@ -19,7 +19,7 @@ class ElasticSearch::ResponseTest < ElasticSearch::TestCase
   end
 
   def test_total_pages
-    assert_equal 0, ProductIndex.paginate(page: 1, per_page: 2).total_pages
+    assert_equal 1, ProductIndex.paginate(page: 1, per_page: 2).total_pages
 
     ProductIndex.import create_list(:product, 3)
 
