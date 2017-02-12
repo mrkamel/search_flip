@@ -423,8 +423,6 @@ module ElasticSearch
           end
         end
 
-        refresh if ElasticSearch::Config[:environment] == "test"
-
         scope
       end
 
@@ -442,8 +440,6 @@ module ElasticSearch
             indexer.create record_id(object), JSON.generate(serialize(object)), index_options(object).merge(_index_options)
           end
         end
-
-        refresh if ElasticSearch::Config[:environment] == "test"
 
         scope
       end
@@ -463,8 +459,6 @@ module ElasticSearch
           end
         end
 
-        refresh if ElasticSearch::Config[:environment] == "test"
-
         scope
       end
 
@@ -480,8 +474,6 @@ module ElasticSearch
             indexer.delete record_id(object), index_options(object).merge(_index_options)
           end
         end
-
-        refresh if ElasticSearch::Config[:environment] == "test"
 
         scope
       end
