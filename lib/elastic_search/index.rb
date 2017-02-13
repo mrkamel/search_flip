@@ -389,13 +389,13 @@ module ElasticSearch
       # Indexes the given record set, array of records or individual record. A
       # record set usually is an ActiveRecord::Relation, but can be any other
       # ORM as well. Uses the ElasticSearch bulk API no matter what is
-      # provided. Refreshes the index if the environment is set to testing.
+      # provided. Refreshes the index if the environment is set to test.
       # Raises RestClient specific exceptions in case any errors occur.
       #
       # @see #fetch_records See #fetch_records for other/custom ORMs
       # @see #record_id See #record_id for other/custom ORMs
-      # @see ElasticSearch::Config See ElasticSearch::Config for
-      #   changing the environment
+      # @see ElasticSearch::Config See ElasticSearch::Config for changing the
+      #   environment
       #
       # @example
       #   CommentIndex.import Comment.all
@@ -405,7 +405,7 @@ module ElasticSearch
       #   CommentIndex.import Comment.all, raise: false
       #
       # @param scope A record set, array of records or individual record to index
-      # @param options [Hash] Specifies options regarding the bulk indexing.
+      # @param options [Hash] Specifies options regarding the bulk indexing
       # @option options ignore_errors [Array] Specifies an array of http status
       #   codes that shouldn't raise any exceptions, like eg 409 for conflicts,
       #   ie when optimistic concurrency control is used.
@@ -478,6 +478,30 @@ module ElasticSearch
         scope
       end
 
+      # Initiates and yields the bulk object, such that index, import, create,
+      # update and delete requests can be appended to the bulk request. Sends a
+      # refresh request afterwards if the current environment is set to test.
+      #
+      # @example
+      #   CommentIndex.bulk ignore_errors: [409] do |bulk|
+      #     bulk.create comment.id, JSON.generate(CommentIndex.serialize(comment)),
+      #       version: comment.version, version_type: "external_gte"
+      #
+      #     bulk.delete ...
+      #   end
+      #
+      # @param options [Hash] Specifies options regarding the bulk indexing
+      # @option options ignore_errors [Array] Specifies an array of http status
+      #   codes that shouldn't raise any exceptions, like eg 409 for conflicts,
+      #   ie when optimistic concurrency control is used.
+      # @option options raise [Boolean] Prevents any exceptions from being
+      #   raised. Please note that this only applies to the bulk response, not to
+      #   the request in general, such that connection errors, etc will still
+      #   raise.
+      #
+      # @see ElasticSearch::Config See ElasticSearch::Config for changing the
+      #   environment and bulk limit
+ 
       def bulk(options = {})
         ElasticSearch::Bulk.new("#{type_url}/_bulk", ElasticSearch::Config[:bulk_limit], options) do |indexer|
           yield indexer
