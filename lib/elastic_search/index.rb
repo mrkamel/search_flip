@@ -510,13 +510,27 @@ module ElasticSearch
         refresh if ElasticSearch::Config[:environment] == "test"
       end
 
+      # Returns the full ElasticSearch type URL, ie base URL, index name with
+      # prefix and type name.
+      #
+      # @return [String] The ElasticSearch type URL
+
       def type_url
         "#{index_url}/#{type_name}"
       end
 
+      # Returns the ElasticSearch index URL, ie base URL and index name with
+      # prefix.
+      #
+      # @return [String] The ElasticSearch index URL
+
       def index_url
         "#{base_url}/#{index_name_with_prefix}"
       end
+
+      # Returns the ElasticSearch base URL, ie protcol and host with port.
+      #
+      # @return [String] The ElasticSearch base URL
 
       def base_url
         ElasticSearch::Config[:base_url]
