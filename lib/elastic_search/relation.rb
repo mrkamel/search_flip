@@ -1,5 +1,18 @@
 
 module ElasticSearch
+  # The ElasticSearch::Relation class serves the purpose of chaining various
+  # filtering and aggregation methods. Each chainable method creates a new
+  # relation object until a method is called that finally sends the respective
+  # request to ElasticSearch and then the result is returned.
+  #
+  # @example
+  #   CommentIndex.where(visible: true).sort(id: "desc").limit(1_000).records
+  #   CommentIndex.range(:created_at, lt: Time.parse("2014-01-01").delete
+  #   CommentIndex.search("hello world").total_entries
+  #   CommentIndex.query(more_like_this: { fields: ["description"], ... })]
+  #   CommentIndex.exists(:user_id).paginate(page: 1, per_page: 100)
+  #   CommentIndex.sort("_doc").find_each { |comment| ... }
+
   class Relation
     include ElasticSearch::FilterableRelation
     include ElasticSearch::PostFilterableRelation
@@ -8,8 +21,12 @@ module ElasticSearch
     attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values, :offset_value, :limit_value, :query_value,
       :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args
 
-    def initialize(options = {})
-      options.each do |key, value|
+    # Creates a new ElasticSearch::Relation.
+    #
+    # @param attributes [Hash] Attributes to initialize the Relation with
+
+    def initialize(attributes = {})
+      attributes.each do |key, value|
         self.send "#{key}=", value
       end
 
@@ -17,6 +34,12 @@ module ElasticSearch
       self.limit_value ||= 30
       self.failsafe_value ||= false
     end
+
+    # Generates the request object from the attributes specified via chaining,
+    # like eg offset, limit, query, filters, aggregations, etc and returns a
+    # Hash that later gets serialized as JSON.
+    #
+    # @return [Hash] The generated request object
 
     def request
       res = {}
