@@ -65,6 +65,26 @@ module ElasticSearch
       res
     end
 
+    # Adds highlighting of the given fields to the request.
+    #
+    # @example
+    #   CommentIndex.highlight([:title, :message])
+    #   CommentIndex.highlight(:title).highlight(:description)
+    #   CommentIndex.highlight(:title, require_field_match: false)
+    #   CommentIndex.highlight(title: { type: "fvh" })
+    #
+    # @example
+    #   CommentIndex.highlight(:title).search("hello").results[0].highlight.title
+    #   # => "<em>hello</em> world"
+    #
+    # @param fields [Hash, Array, String, Symbol] The fields to highligt.
+    #   Supports raw ElasticSearch values by passing a Hash.
+    #
+    # @param options [Hash] Extra highlighting options. Check out the ElasticSearch
+    #   docs for further details.
+    #
+    # @return [ElasticSearch::Relation] A new relation including the highlighting
+
     def highlight(fields, options = {})
       fresh.tap do |relation|
         relation.highlight_values = (relation.highlight_values || {}).merge(options)
