@@ -74,8 +74,8 @@ module ElasticSearch
     #   CommentIndex.highlight(title: { type: "fvh" })
     #
     # @example
-    #   CommentIndex.highlight(:title).search("hello").results[0].highlight.title
-    #   # => "<em>hello</em> world"
+    #   query = CommentIndex.highlight(:title).search("hello")
+    #   query.results[0].highlight.title # => "<em>hello</em> world"
     #
     # @param fields [Hash, Array, String, Symbol] The fields to highligt.
     #   Supports raw ElasticSearch values by passing a Hash.
@@ -101,11 +101,34 @@ module ElasticSearch
       end
     end
 
+    # Adds a suggestion section with the given name to the request.
+    #
+    # @example
+    #   query = CommentIndex.suggest(:suggestion, text: "helo", term: { field: "message" })
+    #   query.suggestions(:suggestion).first["text"] # => "hello"
+    #
+    # @param name [String, Symbol] The name of the suggestion section
+    #
+    # @param options [Hash] Additional suggestion options. Check out the ElasticSearch
+    #   docs for further details.
+    #
+    # @return [ElasticSearch::Relation] A new relation including the suggestion section
+
     def suggest(name, options = {})
       fresh.tap do |relation|
         relation.suggest_values = (relation.suggest_values || {}).merge(name => options)
       end
     end
+
+    # Sets whether or not query profiling should be enabled.
+    #
+    # @example
+    #   query = CommentIndex.profile(true)
+    #   query.raw_response["profile"] # => { "shards" => ... }
+    #
+    # @param value [Boolean] Whether query profiling should be enabled or not
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
 
     def profile(value)
       fresh.tap do |relation|
