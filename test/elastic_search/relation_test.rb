@@ -438,8 +438,8 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
     result = []
     iterations = 0
 
-    while records = relation.records.presence
-      result += records
+    until relation.records.empty?
+      result += relation.records
       iterations += 1
 
       relation = relation.scroll(id: relation.scroll_id, timeout: "1m")

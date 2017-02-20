@@ -136,9 +136,29 @@ module ElasticSearch
       end
     end
 
+    # Adds scrolling to the request with or without an already existing scroll
+    # id and using the specified timeout
+    #
+    # @example
+    #   query = CommentIndex.scroll(timeout: "5m")
+    #
+    #   until query.records.empty?
+    #     # ...
+    #
+    #     query = query.scroll(id: query.scroll_id, timeout: "5m")
+    #   end
+    #
+    # @param id [String, nil] The scroll id of the last request returned by
+    #   ElasticSearch or nil
+    #
+    # @param timeout [String] The timeout of the scroll request, ie. how long
+    #   ElasticSearch should keep the scroll handle open
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def scroll(id: nil, timeout: "1m")
       fresh.tap do |relation|
-        relation.scroll_args = { :id => id, :timeout => timeout }
+        relation.scroll_args = { id: id, timeout: timeout }
       end
     end
 
@@ -227,8 +247,8 @@ module ElasticSearch
 
       relation = limit(batch_size).scroll(timeout: timeout)
 
-      while records = relation.records.presence
-        yield records
+      until relation.records.empty?
+        yield relation.records
 
         relation = relation.scroll(id: relation.scroll_id, timeout: timeout)
       end
