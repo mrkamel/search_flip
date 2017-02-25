@@ -6,7 +6,7 @@ module ElasticSearch
   # request to ElasticSearch and then the result is returned.
   #
   # @example
-  #   CommentIndex.where(visible: true).sort(id: "desc").limit(1_000).records
+  #   CommentIndex.where(public: true).sort(id: "desc").limit(1_000).records
   #   CommentIndex.range(:created_at, lt: Time.parse("2014-01-01").delete
   #   CommentIndex.search("hello world").total_entries
   #   CommentIndex.query(more_like_this: { fields: ["description"], ... })]
@@ -137,7 +137,7 @@ module ElasticSearch
     end
 
     # Adds scrolling to the request with or without an already existing scroll
-    # id and using the specified timeout
+    # id and using the specified timeout.
     #
     # @example
     #   query = CommentIndex.scroll(timeout: "5m")
@@ -162,11 +162,31 @@ module ElasticSearch
       end
     end
 
+    # Sends a delete by query request to ElasticSearch, such that all documents
+    # matching the query get deleted. Please note, for certain ElasticSearch
+    # versions you need to install the delete-by-query plugin to get support
+    # for this feature. Refreshes the index if the environment is set to test.
+    # Raises RestClient specific exceptions in case any errors occur.
+    #
+    # @example
+    #   CommentIndex.range(lt: Time.parse("2014-01-01")).delete
+    #   CommentIndex.where(public: false).delete
+
     def delete
       RestClient::Request.execute :method => :delete, :url => "#{target.type_url}/_query", :payload => JSON.generate(request.except(:from, :size)), :headers => { :content_type => "application/json" }
 
       target.refresh if ElasticSearch::Config[:environment] == "test"
     end
+
+    # Use to specify which fields of the source document you want ElasticSearch
+    # to return for each matching result.
+    #
+    # @example
+    #   CommentIndex.source([:id, :message]).search("hello world")
+    #
+    # @param value [Array] Array listing the field names of the source document
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
 
     def source(value)
       fresh.tap do |relation|
