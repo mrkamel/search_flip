@@ -194,6 +194,19 @@ module ElasticSearch
       end
     end
 
+    # Specify associations of the target model you want to include via
+    # ActiveRecord's or other ORM's mechanisms when records get fetched from
+    # the database.
+    #
+    # @example
+    #   CommentIndex.includes(:user, :post).records
+    #   PostIndex.includes(:comments => :user).records
+    #
+    # @param args The args that get passed to the includes method of
+    #   ActiveRecord or other ORMs
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def includes(*args)
       fresh.tap do |relation|
         relation.includes_values = (includes_values || []) + args
