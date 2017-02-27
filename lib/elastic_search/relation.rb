@@ -307,7 +307,7 @@ module ElasticSearch
 
     alias_method :each, :find_each
 
-    def response
+    def execute
       @response ||= begin
         if scroll_args && scroll_args[:id]
           if ElasticSearch.version.to_i >= 2
@@ -326,6 +326,8 @@ module ElasticSearch
         ElasticSearch::Response.new self, "took" => 0, "hits" => { "total" => 0, "hits" => [] }
       end
     end
+
+    alias_method :response, :execute
 
     def failsafe(value)
       fresh.tap do |relation|
