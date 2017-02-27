@@ -719,5 +719,11 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
     assert_includes records, expected
     refute_includes records, rejected
   end
+
+  def test_custom
+    request = ProductIndex.custom(custom_key: "custom_value").request
+
+    assert_equal "custom_value", request[:custom_key]
+  end
 end
 

@@ -19,7 +19,7 @@ module ElasticSearch
     include ElasticSearch::AggregatableRelation
 
     attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values, :offset_value, :limit_value, :query_value,
-      :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args
+      :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args, :custom_value
 
     # Creates a new ElasticSearch::Relation.
     #
@@ -61,6 +61,8 @@ module ElasticSearch
       res[:post_filter] = post_filter_values.size > 1 ? { :and => post_filter_values } : post_filter_values.first if post_filter_values
       res[:_source] = source_value unless source_value.nil?
       res[:profile] = true if profile_value
+
+      res.update(custom_value) if custom_value
 
       res
     end
@@ -240,6 +242,12 @@ module ElasticSearch
     end
 
     alias_method :reorder, :resort
+
+    def custom(hash)
+      fresh.tap do |relation|
+        relation.custom_value = (custom_value || {}).merge(hash)
+      end
+    end
 
     def offset(n)
       fresh.tap do |relation|
