@@ -215,11 +215,37 @@ module ElasticSearch
       end
     end
 
+    # Specify associations of the target model you want to eager load via
+    # ActiveRecord's or other ORM's mechanisms when records get fetched from
+    # the database.
+    #
+    # @example
+    #   CommentIndex.eager_load(:user, :post).records
+    #   PostIndex.eager_load(:comments => :user).records
+    #
+    # @param args The args that get passed to the eager load method of
+    #   ActiveRecord or other ORMs
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def eager_load(*args)
       fresh.tap do |relation|
         relation.eager_load_values = (eager_load_values || []) + args
       end
     end
+
+    # Specify associations of the target model you want to preload via
+    # ActiveRecord's or other ORM's mechanisms when records get fetched from
+    # the database.
+    #
+    # @example
+    #   CommentIndex.preload(:user, :post).records
+    #   PostIndex.includes(:comments => :user).records
+    #
+    # @param args The args that get passed to the preload method of
+    #   ActiveRecord or other ORMs
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
 
     def preload(*args)
       fresh.tap do |relation|

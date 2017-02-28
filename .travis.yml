@@ -14,7 +14,7 @@ install:
   - /tmp/elasticsearch-2.4.1/bin/elasticsearch -d
 
 before_script:
-  - sleep 10
+  - sleep 15
 
 script:
   - bundle exec rake test
