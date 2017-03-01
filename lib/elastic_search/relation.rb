@@ -253,6 +253,26 @@ module ElasticSearch
       end
     end
 
+    # Specify the sort order you want ElasticSearch to use for sorting the
+    # results. When you call this multiple times, the sort orders are appended
+    # to the already existing ones. The sort arguments get passed to
+    # ElasticSearch without modifications, such that you can use sort by
+    # script, etc here as well.
+    #
+    # @example Default usage
+    #   CommentIndex.sort(user_id: "asc", id: "desc")
+    #
+    #   # Same as
+    #
+    #   CommentIndex.sort(user_id: "asc").sort(id: "desc")
+    #
+    # @example Sort by native script
+    #   CommentIndex.sort("_script" => "sort_script", lang: "native", order: "asc", type: "number")
+    #
+    # @param args The sort values that get passed to ElasticSearch
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def sort(*args)
       fresh.tap do |relation|
         relation.sort_values = (sort_values || []) + args
@@ -260,6 +280,20 @@ module ElasticSearch
     end
 
     alias_method :order, :sort
+
+    # Specify the sort order you want ElasticSearch to use for sorting the
+    # results with already existing sort orders being removed.
+    #
+    # @example
+    #   CommentIndex.sort(user_id: "asc").resort(id: "desc")
+    #
+    #   # Same as
+    #
+    #   CommentIndex.sort(id: "desc")
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+    #
+    # @see #sort See #sort for more details
 
     def resort(*args)
       fresh.tap do |relation|
