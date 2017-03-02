@@ -45,20 +45,20 @@ module ElasticSearch
       res = {}
 
       if query_value.present? && filter_values
-        res[:query] = { :filtered => { :query => query_value, :filter => filter_values.size > 1 ? { :and => filter_values } : filter_values.first } }
+        res[:query] = { filtered: { query: query_value, filter: filter_values.size > 1 ? { and: filter_values } : filter_values.first } }
       elsif query_value.present?
         res[:query] = query_value
       elsif filter_values.present?
-        res[:query] = { :filtered => { :filter => filter_values.size > 1 ? { :and => filter_values } : filter_values.first } }
+        res[:query] = { filtered: { filter: filter_values.size > 1 ? { and: filter_values } : filter_values.first } }
       end
 
-      res.update :from => offset_value, :size => limit_value
+      res.update from: offset_value, size: limit_value
 
       res[:highlight] = highlight_values if highlight_values
       res[:suggest] = suggest_values if suggest_values
       res[:sort] = sort_values if sort_values
       res[:aggregations] = aggregation_values if aggregation_values
-      res[:post_filter] = post_filter_values.size > 1 ? { :and => post_filter_values } : post_filter_values.first if post_filter_values
+      res[:post_filter] = post_filter_values.size > 1 ? { and: post_filter_values } : post_filter_values.first if post_filter_values
       res[:_source] = source_value unless source_value.nil?
       res[:profile] = true if profile_value
 
@@ -175,7 +175,7 @@ module ElasticSearch
     #   CommentIndex.where(public: false).delete
 
     def delete
-      RestClient::Request.execute :method => :delete, :url => "#{target.type_url}/_query", :payload => JSON.generate(request.except(:from, :size)), :headers => { :content_type => "application/json" }
+      RestClient::Request.execute :method => :delete, url: "#{target.type_url}/_query", payload: JSON.generate(request.except(:from, :size)), headers: { content_type: "application/json" }
 
       target.refresh if ElasticSearch::Config[:environment] == "test"
     end
@@ -303,11 +303,34 @@ module ElasticSearch
 
     alias_method :reorder, :resort
 
+    # Adds a fully custom field/section to the request, such that upcoming or
+    # minor ElasticSearch features as well as other custom requirements can be
+    # used without having yet specialized relation methods.
+    #
+    # @example
+    #   CommentIndex.custom(section: { argument: "value" }).request
+    #   => {:section=>{:argument=>"value"},...}
+    #
+    # @param hash [Hash] The custom section that is added to the request
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def custom(hash)
       fresh.tap do |relation|
         relation.custom_value = (custom_value || {}).merge(hash)
       end
     end
+
+    # Sets the request offset, ie ElasticSearch's from parameter that is used
+    # to skip results in the result set from being returned.
+    #
+    # @example
+    #   CommentIndex.offset(100)
+    #
+    # @param n [Fixnum] The offset value, ie the number of results that are
+    #   skipped in the result set
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
 
     def offset(n)
       fresh.tap do |relation|
@@ -315,22 +338,60 @@ module ElasticSearch
       end
     end
 
+    # Sets the request limit, ie ElasticSearch's size parameter that is used
+    # to restrict the results that get returned.
+    #
+    # @example
+    #   CommentIndex.limit(100)
+    #
+    # @param n [Fixnum] The limit value, ie the max number of results that
+    #   should be returned
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def limit(n)
       fresh.tap do |relation|
         relation.limit_value = n.to_i
       end
     end
 
-    def paginate(options = {})
-      page = [(options[:page] || 1).to_i, 1].max
-      per_page = (options[:per_page] || 30).to_i
+    # Sets pagination parameters for the relation by using offset and limit,
+    # ie ElasticSearch's from and size parameters.
+    #
+    # @example
+    #   CommentIndex.paginate(page: 3)
+    #   CommentIndex.paginate(page: 5, per_page: 60)
+    #
+    # @param page [#to_i] The current page
+    # @param per_page [#to_i] The number of results per page
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
+    def paginate(page:, per_page: limit_value)
+      page = [page.to_i, 1].max
+      per_page = per_page.to_i
 
       offset((page - 1) * per_page).limit(per_page)
     end
 
+    # Adds a query string query to the relation while using AND as the default
+    # operator by default. As there can only be one query string query, this
+    # overrides an existing query string query, if already present. Check out
+    # the ElasticSearch docs for further details.
+    #
+    # @example
+    #   CommentIndex.search("message:hello OR message:worl*")
+    #
+    # @param q [String] The query string query
+    #
+    # @param options [Hash] Additional options for the query sring query, like
+    #   eg default_operator, default_field, etc.
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def search(q, options = {})
       fresh.tap do |relation|
-        relation.query_value = { :query_string => { :query => q, :default_operator => :AND }.merge(options) } if q.present?
+        relation.query_value = { query_string: { query: q, :default_operator => :AND }.merge(options) } if q.present?
       end
     end
 
@@ -371,14 +432,14 @@ module ElasticSearch
       @response ||= begin
         if scroll_args && scroll_args[:id]
           if ElasticSearch.version.to_i >= 2
-            ElasticSearch::Response.new self, JSON.parse(RestClient.post("#{target.base_url}/_search/scroll", JSON.generate(:scroll => scroll_args[:timeout], :scroll_id => scroll_args[:id]), :content_type => "application/json"))
+            ElasticSearch::Response.new self, JSON.parse(RestClient.post("#{target.base_url}/_search/scroll", JSON.generate(scroll: scroll_args[:timeout], scroll_id: scroll_args[:id]), content_type: "application/json"))
           else
-            ElasticSearch::Response.new self, JSON.parse(RestClient.post("#{target.base_url}/_search/scroll?scroll=#{scroll_args[:timeout]}", scroll_args[:id], :content_type => "application/json"))
+            ElasticSearch::Response.new self, JSON.parse(RestClient.post("#{target.base_url}/_search/scroll?scroll=#{scroll_args[:timeout]}", scroll_args[:id], content_type: "application/json"))
           end
         elsif scroll_args
-          ElasticSearch::Response.new self, JSON.parse(RestClient.post("#{target.type_url}/_search?scroll=#{scroll_args[:timeout]}", JSON.generate(request), :content_type => "application/json"))
+          ElasticSearch::Response.new self, JSON.parse(RestClient.post("#{target.type_url}/_search?scroll=#{scroll_args[:timeout]}", JSON.generate(request), content_type: "application/json"))
         else
-          ElasticSearch::Response.new self, JSON.parse(RestClient.post("#{target.type_url}/_search", JSON.generate(request), :content_type => "application/json"))
+          ElasticSearch::Response.new self, JSON.parse(RestClient.post("#{target.type_url}/_search", JSON.generate(request), content_type: "application/json"))
         end
       rescue RestClient::BadRequest, RestClient::InternalServerError, RestClient::ServiceUnavailable, Errno::ECONNREFUSED => e
         raise e unless failsafe_value
