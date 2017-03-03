@@ -375,9 +375,9 @@ module ElasticSearch
     end
 
     # Adds a query string query to the relation while using AND as the default
-    # operator by default. As there can only be one query string query, this
-    # overrides an existing query string query, if already present. Check out
-    # the ElasticSearch docs for further details.
+    # operator unless otherwise specified. As there can only be one query
+    # section, this overrides an existing query section, if already present.
+    # Check out the ElasticSearch docs for further details.
     #
     # @example
     #   CommentIndex.search("message:hello OR message:worl*")
@@ -394,6 +394,18 @@ module ElasticSearch
         relation.query_value = { query_string: { query: q, :default_operator => :AND }.merge(options) } if q.present?
       end
     end
+
+    # Adds a raw query section to the relation. As there can only be one query
+    # section, this overrides an existing query section, if already present.
+    # Check out the ElasticSearch docs for further details.
+    #
+    # @example
+    #   CommentIndex.query(filtered: { filter: { term: { message: "hello" }}})
+    #   CommentIndex.query(more_like_this: { fields: ["message"], ids: [comment.id] })
+    #
+    # @param q [Hash] The raw query section
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
 
     def query(q)
       fresh.tap do |relation|
