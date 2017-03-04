@@ -424,9 +424,9 @@ module ElasticSearch
     #   end
     #
     # @param options [Hash] The options to control the fetching of batches
-    # @option batch_size options [Fixnum] The number of records to fetch per
+    # @option options batch_size [Fixnum] The number of records to fetch per
     #   batch. Uses #limit to control the batch size.
-    # @option timeout options [String] The timeout per scroll request, ie how
+    # @option options timeout [String] The timeout per scroll request, ie how
     #   long ElasticSearch will keep the request handle open.
     #
     # @return [ElasticSearch::Relation] A newly created extended relation
