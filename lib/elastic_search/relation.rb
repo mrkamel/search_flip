@@ -446,6 +446,24 @@ module ElasticSearch
       end
     end
 
+    # Fetches the records specified by the relatin in batches using the
+    # ElasticSearch scroll API and yields each record. The batch size and
+    # scroll API timeout can be specified. Check out the ElasticSearch docs for
+    # further details.
+    #
+    # @example
+    #   CommentIndex.search("hello world").find_each(batch_size: 100) do |record|
+    #     # ...
+    #   end
+    #
+    # @param options [Hash] The options to control the fetching of batches
+    # @option options batch_size [Fixnum] The number of records to fetch per
+    #   batch. Uses #limit to control the batch size.
+    # @option options timeout [String] The timeout per scroll request, ie how
+    #   long ElasticSearch will keep the request handle open.
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def find_each(options = {})
       return enum_for(:find_each, options) unless block_given?
 
