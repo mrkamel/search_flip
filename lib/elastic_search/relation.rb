@@ -476,6 +476,18 @@ module ElasticSearch
 
     alias_method :each, :find_each
 
+    # Executes the search request for the current relation, ie sends the
+    # request to ElasticSearch and returns the response. Certain exceptions
+    # will be rescued if you specify the relation to be #failsafe, such that an
+    # empty response is returned instead. These exceptions are
+    # RestClient::BadRequest, RestClient::InternalServerError,
+    # RestClient::ServiceUnavailable and Errno::ECONNREFUSED.
+    #
+    # @example
+    #   response = CommentIndex.search("hello world").execute
+    #
+    # @return [ElasticSearch::Response] The response object
+
     def execute
       @response ||= begin
         if scroll_args && scroll_args[:id]
