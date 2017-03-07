@@ -510,6 +510,16 @@ module ElasticSearch
 
     alias_method :response, :execute
 
+    # Marks the relation to be failsafe, ie certain exceptions raised due to
+    # invalid queries, inavailability of ElasticSearch, etc get rescued and an
+    # empty relation is returned instead.
+    #
+    # @see #execute See #execute for further details
+    #
+    # @param value [Boolean] Whether or not the relation should be failsafe
+    #
+    # @return [ElasticSearch::Response] An newly created extended relation
+
     def failsafe(value)
       fresh.tap do |relation|
         relation.failsafe_value = value
