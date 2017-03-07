@@ -516,15 +516,32 @@ module ElasticSearch
     #
     # @see #execute See #execute for further details
     #
+    # @example
+    #   CommentIndex.search("invalid/request").execute
+    #   RestClient::BadRequest: 400 Bad Request
+    #     # ...
+    #
+    #   CommentIndex.search("invalid/request").failsafe(true).execute
+    #   => #<ElasticSearch::Response ...>
+    #
     # @param value [Boolean] Whether or not the relation should be failsafe
     #
-    # @return [ElasticSearch::Response] An newly created extended relation
+    # @return [ElasticSearch::Response] A newly created extended relation
 
     def failsafe(value)
       fresh.tap do |relation|
         relation.failsafe_value = value
       end
     end
+
+    # Returns a fresh, ie dupped, relation with the response cache being
+    # cleared.
+    #
+    # @example
+    #   CommentIndex.search("hello world").fresh
+    #
+    # @return [ElasticSearch::Response] A dupped relation with the response
+    #   cache being cleared
 
     def fresh
       dup.tap do |relation|
