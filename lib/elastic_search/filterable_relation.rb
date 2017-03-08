@@ -1,11 +1,38 @@
 
 module ElasticSearch
+  # The ElasticSearch::FilterableRelation mixin provides elegant and chainable
+  # methods like #where, #exists, #range, etc to add search filters to a
+  # relation.
+  #
+  # @example
+  #   CommentIndex.where(public: true)
+  #   CommentIndex.exists(:user_id)
+  #   CommentIndex.range(:created_at, gt: Date.today - 7)
+
   module FilterableRelation
     def self.included(base)
       base.class_eval do
         attr_accessor :filter_values
       end
     end
+
+    # Adds filters to your relation for the supplied hash composed of
+    # field-to-filter mappings which specify terms, term or range filters,
+    # depending on the type of the respective hash value, namely array, range
+    # or scalar type like Fixnum, String, etc.
+    #
+    # @example
+    #   CommentIndex.where(id: [1, 2, 3])
+    #   CommentIndex.where(state: ["approved", "declined"])
+    #   CommentIndex.where(id: 1 .. 100)
+    #   CommentIndex.where(created_at: Time.parse("2016-01-01") .. Time.parse("2017-01-01"))
+    #   CommentIndex.where(id: 1)
+    #   CommentIndex.where(message: "hello")
+    #
+    # @param hash [Hash] A field-to-filter mapping specifying filter values for
+    #   the respective fields
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
 
     def where(hash)
       fresh.tap do |relation|
