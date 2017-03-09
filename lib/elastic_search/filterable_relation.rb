@@ -22,12 +22,10 @@ module ElasticSearch
     # or scalar type like Fixnum, String, etc.
     #
     # @example
-    #   CommentIndex.where(id: [1, 2, 3])
-    #   CommentIndex.where(state: ["approved", "declined"])
+    #   CommentIndex.where(id: [1, 2, 3], state: ["approved", "declined"])
     #   CommentIndex.where(id: 1 .. 100)
     #   CommentIndex.where(created_at: Time.parse("2016-01-01") .. Time.parse("2017-01-01"))
-    #   CommentIndex.where(id: 1)
-    #   CommentIndex.where(message: "hello")
+    #   CommentIndex.where(id: 1, message: "hello")
     #
     # @param hash [Hash] A field-to-filter mapping specifying filter values for
     #   the respective fields
