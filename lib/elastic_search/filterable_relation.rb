@@ -46,6 +46,22 @@ module ElasticSearch
       end
     end
 
+    # Adds filters to exclude documents in accordance to the supplied hash
+    # composed of field-to-filter mappings. Check out #where for further
+    # details.
+    #
+    # @see #where See #where for further details
+    #
+    # @example
+    #   CommentIndex.where_not(state: "approved")
+    #   CommentIndex.where_not(created_at: Time.parse("2016-01-01") .. Time.parse("2017-01-01"))
+    #   CommentIndex.where_not(id: [1, 2, 3], state: "new")
+    #
+    # @param hash [Hash] A field-to-filter mapping specifying filter values for the
+    #   respective fields
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def where_not(hash)
       fresh.tap do |relation|
         relation.filter_values = (filter_values || []) + hash.collect do |key, value|
