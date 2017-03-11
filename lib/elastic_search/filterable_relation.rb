@@ -76,6 +76,17 @@ module ElasticSearch
       end
     end
 
+    # Adds raw filters to the relation, such that you can filter the returned
+    # documents easily but still have full and fine grained control over the
+    # filter settings. However, usually you can achieve the same with the more
+    # easy to use methods like #where, #range, etc.
+    #
+    # @example
+    #   CommentIndex.filter(range: { created_at: { gte: Time.parse("2016-01-01"), lte: Time.parse("2017-01-01") }})
+    #   CommentIndex.filter(term: { state: "new" })
+    #
+    # @param [Array, Hash] A newly created extended relation
+
     def filter(*args)
       fresh.tap do |relation|
         relation.filter_values = (filter_values || []) + args
