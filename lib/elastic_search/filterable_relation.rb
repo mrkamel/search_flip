@@ -86,12 +86,29 @@ module ElasticSearch
     #   CommentIndex.filter(term: { state: "new" })
     #
     # @param [Array, Hash] A newly created extended relation
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
 
     def filter(*args)
       fresh.tap do |relation|
         relation.filter_values = (filter_values || []) + args
       end
     end
+
+    # Adds a range filter to the relation without being forced to specify the
+    # left and right end of the range, such that you can eg simply specify lt,
+    # lte, gt and gte. For fully specified ranges, you can as well use #where,
+    # etc. Check out the ElasticSearch docs for further details regarding the
+    # range filter.
+    #
+    # @example
+    #   CommentIndex.range(:created_at, gte: Time.parse("2016-01-01"))
+    #   CommentIndex.range(:likes_count, gt: 10, lt: 100)
+    #
+    # @param field [Symbol, String] The field name to specify the range for
+    # @param options [Hash] The range filter specification, like lt, lte, etc
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
 
     def range(field, options = {})
       filter :range => { field => options }
