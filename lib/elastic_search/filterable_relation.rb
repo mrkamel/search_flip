@@ -36,11 +36,11 @@ module ElasticSearch
       fresh.tap do |relation|
         relation.filter_values = (filter_values || []) + hash.collect do |key, value|
           if value.is_a?(Array)
-            { :terms => { key => value } }
+            { terms: { key => value } }
           elsif value.is_a?(Range)
-            { :range => { key => { :gte => value.min, :lte => value.max } } }
+            { range: { key => { gte: value.min, lte: value.max } } }
           else
-            { :term => { key => value } }
+            { term: { key => value } }
           end
         end
       end
@@ -66,11 +66,11 @@ module ElasticSearch
       fresh.tap do |relation|
         relation.filter_values = (filter_values || []) + hash.collect do |key, value|
           if value.is_a?(Array)
-            { :not => { :terms => { key => value } } }
+            { not: { terms: { key => value } } }
           elsif value.is_a?(Range)
-            { :not => { :range => { key => { :gte => value.min, :lte => value.max } } } }
+            { not: { range: { key => { gte: value.min, lte: value.max } } } }
           else
-            { :not => { :term => { key => value } } }
+            { not: { term: { key => value } } }
           end
         end
       end
@@ -111,19 +111,43 @@ module ElasticSearch
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def range(field, options = {})
-      filter :range => { field => options }
+      filter range: { field => options }
     end
 
-    def match_all
-      filter :match_all => {}
+    # Adds a match all filter/query to the relation, which simply matches all
+    # documents. This can be eg be used within filter aggregations or for
+    # filter chaining. Check out the ElasticSearch docs for further details.
+    #
+    # @example Basic usage
+    #   CommentIndex.match_all
+    #
+    # @example Filter chaining
+    #   query = CommentIndex.match_all
+    #   query = query.where(public: true) unless current_user.admin?
+    #
+    # @example Filter aggregation
+    #   query = CommentIndex.aggregate(filtered_tags: {}) do |aggregation|
+    #     aggregation = aggregation.match_all
+    #     aggregation = aggregation.where(user_id: current_user.id) if current_user
+    #     aggregation = aggregation.aggregate(:tags)
+    #   end
+    #
+    #   query.aggregations(:filtered_tags).tags.buckets.each { ... }
+    #
+    # @param options [Hash] Options for the match_all filter, like eg boost
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
+    def match_all(options = {})
+      filter match_all: options
     end
 
     def exists(field)
-      filter :exists => { :field => field }
+      filter exists: { field: field }
     end
 
     def exists_not(field)
-      filter :bool => { :must_not => { :exists => { :field => field }}}
+      filter bool: { must_not: { exists: { field: field }}}
     end
   end
 end
