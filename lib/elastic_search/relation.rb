@@ -307,6 +307,10 @@ module ElasticSearch
     # minor ElasticSearch features as well as other custom requirements can be
     # used without having yet specialized relation methods.
     #
+    # @note Use with caution, because using #custom will potentiall override
+    #   other sections like +aggregations+, +query+, +sort+, etc if you use the
+    #   the same section names.
+    #
     # @example
     #   CommentIndex.custom(section: { argument: "value" }).request
     #   => {:section=>{:argument=>"value"},...}

@@ -85,7 +85,7 @@ module ElasticSearch
     #   CommentIndex.filter(range: { created_at: { gte: Time.parse("2016-01-01"), lte: Time.parse("2017-01-01") }})
     #   CommentIndex.filter(term: { state: "new" })
     #
-    # @param [Array, Hash] A newly created extended relation
+    # @param args [Array, Hash] A newly created extended relation
     #
     # @return [ElasticSearch::Relation] A newly created extended relation
 
