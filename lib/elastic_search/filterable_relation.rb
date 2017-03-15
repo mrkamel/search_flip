@@ -142,9 +142,29 @@ module ElasticSearch
       filter match_all: options
     end
 
+    # Adds an exists filter to the relation, which selects all documents for
+    # which the specified field has a non-null value.
+    #
+    # @example
+    #   CommentIndex.exists(:notified_at)
+    #
+    # @param field [Symbol, String] The field that should have a non-null value
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def exists(field)
       filter exists: { field: field }
     end
+
+    # Adds an exists not filter to the relation, which selects all documents
+    # for which the specified field's value is null.
+    #
+    # @example
+    #   CommentIndex.exists_not(:notified_at)
+    #
+    # @param field [Symbol, String] The field that should have a null value
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
 
     def exists_not(field)
       filter bool: { must_not: { exists: { field: field }}}
