@@ -1,5 +1,13 @@
 
 module ElasticSearch
+  # The ElasticSearch::AggregatableRelation mixin provides handy methods for
+  # using the ElasticSearch aggregation framework, which can as well be chained
+  # with itself and other filter methods.
+  #
+  # @example
+  #   ProductIndex.where(available: true).aggregate(:tags, size: 50)
+  #   OrderIndex.aggregate(revenue: { sum: { field: "price" }})
+
   module AggregatableRelation
     def self.included(base)
       base.class_eval do
