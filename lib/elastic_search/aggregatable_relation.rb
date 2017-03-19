@@ -1,8 +1,8 @@
 
 module ElasticSearch
   # The ElasticSearch::AggregatableRelation mixin provides handy methods for
-  # using the ElasticSearch aggregation framework, which can as well be chained
-  # with itself and other filter methods.
+  # using the ElasticSearch aggregation framework, which can be chained with
+  # each other, all other relation methods and even nested.
   #
   # @example
   #   ProductIndex.where(available: true).aggregate(:tags, size: 50)
@@ -14,6 +14,39 @@ module ElasticSearch
         attr_accessor :aggregation_values
       end
     end
+
+    # Adds an arbitrary aggregation to the request which can be chained as well
+    # as nested. Check out the examples and ElasticSearch docs for further
+    # details.
+    #
+    # @example Basic usage with optons
+    #   query = CommentIndex.where(public: true).aggregate(:user_id, size: 100)
+    #
+    #   query.aggregations(:user_id)
+    #   # => { 4 => #<ElasticSearch::Result ...>, 7 => #<ElasticSearch::Result ...>, ... }
+    #
+    # @example Simple range aggregation
+    #   ranges = [{ to: 50 }, { from: 50, to: 100 }, { from: 100 }]
+    #
+    #   ProductIndex.aggregate(price_range: { range: { field: "price", ranges: ranges }})
+    #
+    # @example Basic nested aggregation
+    #   OrderIndex.aggregate(:user_id, order: { revenue: "desc" }) do |aggregation|
+    #     aggregation.aggregate(revenue: { sum: { field: "price" }})
+    #   end
+    #
+    # @example Nested histogram aggregation
+    #   OrderIndex.aggregate(histogram: { date_histogram: { field: "price", interval: "month" }}) do |aggregation|
+    #     aggregation.aggregate(:user_id)
+    #   end
+    #
+    # @example Nested aggregation with filters
+    #   OrderIndex.aggregate(average_price: {}) do |aggregation|
+    #     aggregation = aggregation.match_all
+    #     aggregation = aggregation.where(user_id: current_user.id) if current_user
+    #
+    #     aggregation.aggregate(average_price: { avg: { field: "price" }})
+    #   end
 
     def aggregate(field_or_hash, options = {}, &block)
       fresh.tap do |relation|
