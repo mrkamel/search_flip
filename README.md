@@ -48,3 +48,5 @@ The model must implement a `find_each` class method.
 
 4. Switch to httpary or http-rb and use custom exceptions
 
+5. First class support for `nested`, `has_parent` and `has_child` queries
+
