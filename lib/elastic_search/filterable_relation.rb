@@ -1,8 +1,7 @@
 
 module ElasticSearch
-  # The ElasticSearch::FilterableRelation mixin provides elegant and chainable
-  # methods like #where, #exists, #range, etc to add search filters to a
-  # relation.
+  # The ElasticSearch::FilterableRelation mixin provides chainable methods like
+  # #where, #exists, #range, etc to add search filters to a relation.
   #
   # @example
   #   CommentIndex.where(public: true)

@@ -1,5 +1,25 @@
 
 module ElasticSearch
+  # The ElasticSearch::PostFilterableRelation mixin provides chainable methods
+  # like #post_where, #post_exists, #post_range, etc to add and apply search
+  # filters after aggregations have already been calculated.
+  #
+  # @example
+  #   query = ProductIndex.search("harry potter")
+  #
+  #   query = query.aggregate(price_ranges: {
+  #     range: {
+  #       field: "price",
+  #       ranges: [
+  #         { key: "range1", from: 0,  to: 20 },
+  #         { key: "range2", from: 20, to: 50 },
+  #         { key: "range3", from: 50, to: 100 }
+  #       ]
+  #     }
+  #   })
+  #
+  #   query = query.post_where(price: 20 ... 50)
+
   module PostFilterableRelation
     def self.included(base)
       base.class_eval do
