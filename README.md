@@ -10,9 +10,10 @@ See [http://www.rubydoc.info/github/mrkamel/elastic_search](http://www.rubydoc.i
 ## Non-ActiveRecord models
 
 The ElasticSearch gem ships with built-in support for ActiveRecord models, but
-using non-ActiveRecord models is very easy. The Index class needs to implement
-`Index.record_id` and `Index.fetch_records`. The default implementations are as
-follows:
+using non-ActiveRecord models is very easy. The model must implement a
+`find_each` class method and the Index class needs to implement
+`Index.record_id` and `Index.fetch_records`. The default implementations for
+the index class are as follows:
 
 ```ruby
 class MyIndex
@@ -30,8 +31,6 @@ end
 
 Thus, simply add your custom implementation of those methods that work with
 whatever ORM you use.
-
-The model must implement a `find_each` class method.
 
 ## TODO
 
