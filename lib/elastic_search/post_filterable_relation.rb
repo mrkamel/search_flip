@@ -60,6 +60,24 @@ module ElasticSearch
       end
     end
 
+    # Adds post filters to exclude documents in accordance to the supplied hash
+    # composed of field-to-filter mappings. Check out #post_where for further
+    # details.
+    #
+    # @example Array values
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_where_not(id: [1, 2, 3])
+    #
+    # @example Range values
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_where_not(created_at: Time.parse("2016-01-01") .. Time.parse("2017-01-01"))
+    #
+    # @example
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_where_not(state: "approved")
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def post_where_not(hash)
       fresh.tap do |relation|
         relation.post_filter_values = (post_filter_values || []) + hash.collect do |key, value|
