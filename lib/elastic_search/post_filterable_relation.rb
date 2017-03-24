@@ -44,6 +44,9 @@ module ElasticSearch
     #   query = CommentIndex.aggregate("...")
     #   query = query.post_where(id: 1, message: "hello world")
     #
+    # @param hash [Hash] A field-to-filter mapping specifying filter values for
+    #   the respective fields
+    #
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def post_where(hash)
@@ -76,6 +79,9 @@ module ElasticSearch
     #   query = CommentIndex.aggregate("...")
     #   query = query.post_where_not(state: "approved")
     #
+    # @param hash [Hash] A field-to-filter mapping specifying filter values for the
+    #   respective fields
+    #
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def post_where_not(hash)
@@ -91,6 +97,23 @@ module ElasticSearch
         end
       end
     end
+
+    # Adds raw post filters to the relation, such that you can filter the
+    # returned documents easily but still have full and fine grained control
+    # over the filter settings. However, usually you can achieve the same with
+    # the more easy to use methods like #post_where, #post_range, etc.
+    #
+    # @example Raw post term filter
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_filter(term: { state: "new" })
+    #
+    # @example Raw post range filter
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.filter(range: { created_at: { gte: Time.parse("2016-01-01"), lte: Time.parse("2017-01-01") }})
+    #
+    # @param args [Array, Hash] The raw filter settings
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
 
     def post_filter(*args)
       fresh.tap do |relation|

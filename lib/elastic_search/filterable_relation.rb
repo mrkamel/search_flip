@@ -81,10 +81,10 @@ module ElasticSearch
     # easy to use methods like #where, #range, etc.
     #
     # @example
-    #   CommentIndex.filter(range: { created_at: { gte: Time.parse("2016-01-01"), lte: Time.parse("2017-01-01") }})
     #   CommentIndex.filter(term: { state: "new" })
+    #   CommentIndex.filter(range: { created_at: { gte: Time.parse("2016-01-01"), lte: Time.parse("2017-01-01") }})
     #
-    # @param args [Array, Hash] A newly created extended relation
+    # @param args [Array, Hash] The raw filter settings
     #
     # @return [ElasticSearch::Relation] A newly created extended relation
 
