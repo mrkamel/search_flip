@@ -121,6 +121,25 @@ module ElasticSearch
       end
     end
 
+    # Adds a post range filter to the relation without being forced to specify
+    # the left and right end of the range, such that you can eg simply specify
+    # lt, lte, gt and gte. For fully specified ranges, you can easily use
+    # #post_where, etc. Check out the ElasticSearch docs for further details
+    # regarding the range filter.
+    #
+    # @example
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_range(:created_at, gte: Time.parse("2016-01-01"))
+    #
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_range(:likes_count, gt: 10, lt: 100)
+    #
+    # @param field [Symbol, String] The field name to specify the range for
+    # @param options [Hash] The range filter specification, like lt, lte, etc
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
+
     def post_range(field, options = {})
       post_filter range: { field => options }
     end
