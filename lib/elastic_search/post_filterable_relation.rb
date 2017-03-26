@@ -139,10 +139,20 @@ module ElasticSearch
     #
     # @return [ElasticSearch::Relation] A newly created extended relation
 
-
     def post_range(field, options = {})
       post_filter range: { field => options }
     end
+
+    # Adds a post exists filter to the relation, which selects all documents
+    # for which the specified field has a non-null value.
+    #
+    # @example
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_exists(:notified_at)
+    #
+    # @param field [Symbol, String] The field that should have a non-null value
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
 
     def post_exists(field)
       post_filter exists: { field: field }
