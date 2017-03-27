@@ -158,6 +158,17 @@ module ElasticSearch
       post_filter exists: { field: field }
     end
 
+    # Adds a post exists not filter to the relation, which selects all documents
+    # for which the specified field's value is null.
+    #
+    # @example
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_exists_not(:notified_at)
+    #
+    # @param field [Symbol, String] The field that should have a null value
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def post_exists_not(field)
       post_filter bool: { must_not: { exists: { field: field }}}
     end
