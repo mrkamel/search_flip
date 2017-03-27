@@ -31,11 +31,15 @@ module ElasticSearch
     #   ProductIndex.aggregate(price_range: { range: { field: "price", ranges: ranges }})
     #
     # @example Basic nested aggregation
+    #   # When nesting aggregations, the return value of the aggregate block is
+    #   # used.
+    #
     #   OrderIndex.aggregate(:user_id, order: { revenue: "desc" }) do |aggregation|
     #     aggregation.aggregate(revenue: { sum: { field: "price" }})
     #   end
     #
     # @example Nested histogram aggregation
+    #
     #   OrderIndex.aggregate(histogram: { date_histogram: { field: "price", interval: "month" }}) do |aggregation|
     #     aggregation.aggregate(:user_id)
     #   end
