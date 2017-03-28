@@ -1,12 +1,29 @@
 
 module ElasticSearch
+  # The ElasticSearch::Response class wraps a raw ElasticSearch response and
+  # decorates it with methods for aggregations, hits, records, pagination, etc.
+
   class Response
     attr_accessor :relation, :response
+
+    # @api private
+    #
+    # Initializes a new response object for the provided relation and raw
+    # ElasticSearch response.
 
     def initialize(relation, response)
       self.relation = relation
       self.response = response
     end
+
+    # Returns the raw response, ie a hash derived from the ElasticSearch JSON
+    # response.
+    #
+    # @example
+    #   CommentIndex.search("hello world").raw_response
+    #   => {"took"=>3, "timed_out"=>false, "_shards"=>"..."}
+    #
+    # @return [Hash] The raw response hash
 
     def raw_response
       response
