@@ -49,3 +49,5 @@ whatever ORM you use.
 
 5. First class support for `nested`, `has_parent` and `has_child` queries
 
+6. Support collapse
+

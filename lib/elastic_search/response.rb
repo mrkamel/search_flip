@@ -29,9 +29,25 @@ module ElasticSearch
       response
     end
 
+    # Returns the total number of results.
+    #
+    # @example
+    #   CommentIndex.search("hello world").total_entries
+    #   => 13
+    #
+    # @return [Fixnum] The total number of results
+    
     def total_entries
       hits["total"]
     end
+
+    # Returns the current page number, useful for pagination.
+    #
+    # @example
+    #   CommentIndex.search("hello world").paginate(page: 10).current_page
+    #   => 10
+    #
+    # @return [Fixnum] The current page number
 
     def current_page
       1 + (relation.offset_value / relation.limit_value.to_f).ceil
