@@ -21,7 +21,7 @@ module ElasticSearch
     #
     # @example
     #   CommentIndex.search("hello world").raw_response
-    #   => {"took"=>3, "timed_out"=>false, "_shards"=>"..."}
+    #   # => {"took"=>3, "timed_out"=>false, "_shards"=>"..."}
     #
     # @return [Hash] The raw response hash
 
@@ -33,7 +33,7 @@ module ElasticSearch
     #
     # @example
     #   CommentIndex.search("hello world").total_entries
-    #   => 13
+    #   # => 13
     #
     # @return [Fixnum] The total number of results
     
@@ -45,7 +45,7 @@ module ElasticSearch
     #
     # @example
     #   CommentIndex.search("hello world").paginate(page: 10).current_page
-    #   => 10
+    #   # => 10
     #
     # @return [Fixnum] The current page number
 
@@ -53,9 +53,30 @@ module ElasticSearch
       1 + (relation.offset_value / relation.limit_value.to_f).ceil
     end
 
+    # Returns the number of total pages for the current pagination settings, ie
+    # per page/limit settings.
+    #
+    # @example
+    #   CommentIndex.search("hello world").paginate(per_page: 60).total_pages
+    #   # => 5
+    #
+    # @return [Fixnum] The total number of pages
+
     def total_pages
       [(total_entries / relation.limit_value.to_f).ceil, 1].max
     end
+
+    # Returns the previous page number or nil if no previous page exists, ie if
+    # the current page is the first page.
+    #
+    # @example
+    #   CommentIndex.search("hello world").paginate(page: 2).previous_page
+    #   # => 1
+    #
+    #   CommentIndex.search("hello world").paginate(page: 1).previous_page
+    #   # => nil
+    #
+    # @return [Fixnum, nil] The previous page number
 
     def previous_page
       return nil if current_page <= 1
