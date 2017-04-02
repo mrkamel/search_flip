@@ -85,12 +85,31 @@ module ElasticSearch
       current_page - 1
     end
 
+    # Returns the next page number or nil if there is no next page, ie the
+    # current page is the last page.
+    #
+    # @example
+    #   CommentIndex.search("hello world").paginate(page: 2).next_page
+    #   # => 3
+    #
+    # @return [Fixnum, nil] The next page number
+
     def next_page
       return nil if current_page >= total_pages
       return 1 if current_page < 1
 
       return current_page + 1
     end
+
+    # Returns the results, ie hits, wrapped in a ElasticSearch::Result object
+    # which basically is a Hashie::Mash. Check out the Hashie docs for further
+    # details.
+    #
+    # @example
+    #   CommentIndex.search("hello world").results
+    #   # => [#<ElasticSearch::Result ...>, ...]
+    #
+    # @return [Array] An array of results
 
     def results
       @results ||= hits["hits"].map { |hit| Result.new hit["_source"].merge(hit["highlight"] ? { highlight: hit["highlight"] } : {}) }
