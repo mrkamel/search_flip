@@ -115,6 +115,18 @@ module ElasticSearch
       @results ||= hits["hits"].map { |hit| Result.new hit["_source"].merge(hit["highlight"] ? { highlight: hit["highlight"] } : {}) }
     end
 
+    # Returns the named sugggetion, if a name is specified or alle suggestions.
+    #
+    # @example
+    #   query = CommentIndex.suggest(:suggestion, text: "helo", term: { field: "message" })
+    #   query.suggestions # => { "suggestion" => [{ "text" => ... }, ...]}
+    #
+    # @example Named suggestions
+    #   query = CommentIndex.suggest(:suggestion, text: "helo", term: { field: "message" })
+    #   query.suggestions(:sugestion).first["text"] # => "hello"
+    #
+    # @return [Hash, Array] The named suggestion or all suggestions
+
     def suggestions(name = nil)
       if name
         response["suggest"][name.to_s].first["options"]
