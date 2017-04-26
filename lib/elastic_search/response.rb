@@ -135,6 +135,14 @@ module ElasticSearch
       end
     end
 
+    # Returns the hits returned by ElasticSearch.
+    #
+    # @example
+    #   CommentIndex.search("hello world").hits
+    #   # => { "total" => 3 "max_score" => 2.34, "hits" => [{ ... }, ...] }
+    #
+    # @return [Hash] The hits returned by ElasticSearch
+
     def hits
       response["hits"]
     end
