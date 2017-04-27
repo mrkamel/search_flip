@@ -119,7 +119,7 @@ module ElasticSearch
     #
     # @example
     #   query = CommentIndex.suggest(:suggestion, text: "helo", term: { field: "message" })
-    #   query.suggestions # => { "suggestion" => [{ "text" => ... }, ...]}
+    #   query.suggestions # => {"suggestion"=>[{"text"=>...}, ...]}
     #
     # @example Named suggestions
     #   query = CommentIndex.suggest(:suggestion, text: "helo", term: { field: "message" })
@@ -139,7 +139,7 @@ module ElasticSearch
     #
     # @example
     #   CommentIndex.search("hello world").hits
-    #   # => { "total" => 3 "max_score" => 2.34, "hits" => [{ ... }, ...] }
+    #   # => {"total"=>3, "max_score"=>2.34, "hits"=>[{...}, ...]}
     #
     # @return [Hash] The hits returned by ElasticSearch
 
