@@ -147,6 +147,14 @@ module ElasticSearch
       response["hits"]
     end
 
+    # Returns the scroll id returned by ElasticSearch, that can be used in the
+    # following request to fetch the next batch of records.
+    #
+    # @example
+    #   CommentIndex.scroll(timeout: "1m").scroll_id #=> "cXVlcnlUaGVuRmV0Y2..."
+    #
+    # @return [String] The scroll id returned by ElasticSearch
+
     def scroll_id
       response["_scroll_id"]
     end
