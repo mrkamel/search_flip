@@ -36,7 +36,7 @@ module ElasticSearch
     #   # => 13
     #
     # @return [Fixnum] The total number of results
-    
+
     def total_entries
       hits["total"]
     end
@@ -158,6 +158,15 @@ module ElasticSearch
     def scroll_id
       response["_scroll_id"]
     end
+
+    # Returns the database records, usually ActiveRecord objects, depending on
+    # the ORM you're using. The records are sorted using the order returned by
+    # ElasticSearch.
+    #
+    # @example
+    #   CommentIndex.search("hello world").records # => [#<Comment ...>, ...]
+    #
+    # @return [Array] An array of database records
 
     def records(options = {})
       @records ||= begin
