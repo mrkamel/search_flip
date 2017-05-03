@@ -176,6 +176,16 @@ module ElasticSearch
       end
     end
 
+    # Builds and returns a scope for the set of ids in the current result set
+    # returned by ElasticSearch, including the eager load, preload and includes
+    # associations, if specified. A scope is eg an ActiveRecord::Relation,
+    # depending on the ORM you're using.
+    #
+    # @example
+    #   CommentIndex.preload(:user).scope # => #<Comment::ActiveRecord_Relation:0x0...>
+    #
+    # @return The scope for the set of ids in the current result set
+
     def scope
       res = relation.target.fetch_records(ids)
 
