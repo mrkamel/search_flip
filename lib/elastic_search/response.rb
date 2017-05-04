@@ -176,7 +176,7 @@ module ElasticSearch
       end
     end
 
-    # Builds and returns a scope for the set of ids in the current result set
+    # Builds and returns a scope for the array of ids in the current result set
     # returned by ElasticSearch, including the eager load, preload and includes
     # associations, if specified. A scope is eg an ActiveRecord::Relation,
     # depending on the ORM you're using.
@@ -184,7 +184,7 @@ module ElasticSearch
     # @example
     #   CommentIndex.preload(:user).scope # => #<Comment::ActiveRecord_Relation:0x0...>
     #
-    # @return The scope for the set of ids in the current result set
+    # @return The scope for the array of ids in the current result set
 
     def scope
       res = relation.target.fetch_records(ids)
@@ -196,11 +196,27 @@ module ElasticSearch
       res
     end
 
+    # Returns the array of ids returned by ElasticSearch for the current result
+    # set, ie the ids listed in the hits section of the response.
+    #
+    # @example
+    #   CommentIndex.match_all.ids # => [20341, 12942, ...]
+    #
+    # @return The array of ids in the current result set
+
     def ids
       @ids ||= hits["hits"].map { |hit| hit["_id"] }
     end
 
     delegate :size, :count, :length, :to => :ids
+
+    # Returns the response time in milliseconds of ElasticSearch specified in
+    # the took info of the response.
+    #
+    # @example
+    #   CommentIndex.match_all.took # => 6
+    #
+    # @return [Fixnum] The ElasticSearch response time in milliseconds
 
     def took
       response["took"]
