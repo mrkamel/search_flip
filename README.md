@@ -51,3 +51,7 @@ whatever ORM you use.
 
 6. Support collapse
 
+7. Support ElasticSearch > 5
+  * delete by query changes
+  * filtered query deprecation
+
