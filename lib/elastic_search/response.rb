@@ -222,6 +222,23 @@ module ElasticSearch
       response["took"]
     end
 
+    # Returns a single or all aggregations returned by ElasticSearch, depending
+    # on whether or not a name is specified. If no name is specified, the raw
+    # aggregation hash is simply returned. Contrary, if a name is specified,
+    # only this aggregation is returned. Moreover, if a name is specified and
+    # the aggregation includes a buckets section, a post-processed aggregation
+    # hash is returned.
+    #
+    # @example All aggregations
+    #   CommentIndex.aggregate(:user_id).aggregations
+    #   # => {"user_id"=>{..., "buckets"=>[{"key"=>4922, "doc_count"=>1129}, ...]}
+    #
+    # @example Specific and post-processed aggregations
+    #   CommentIndex.aggregate(:user_id).aggregations(:user_id)
+    #   # => {4922=>1129, ...}
+    #
+    # @return [Hash] Specific or all aggregations returned by ElasticSearch
+
     def aggregations(name = nil)
       return response["aggregations"] || {} unless name
 
