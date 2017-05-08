@@ -1,5 +1,10 @@
 
 module ElasticSearch
+  # @api private
+  #
+  # The ElasticSearch::Bulk class implements the bulk support, ie it collects
+  # single requests and emits batches of requests. Internal use only.
+
   class Bulk
     class Error < StandardError; end
 
