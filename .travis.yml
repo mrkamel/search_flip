@@ -17,12 +17,12 @@ env:
 install:
   - travis_retry bundle install
   - sh -c "if [ '$ES_VERSION' = '5' ]; then (curl -s https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.4.0.tar.gz | tar xz -C /tmp); fi"
-  - sh -c "if [ '$ES_VERSION' = '5' ]; then/tmp/elasticsearch-5.4.0/bin/elasticsearch -d; fi"
+  - sh -c "if [ '$ES_VERSION' = '5' ]; then /tmp/elasticsearch-5.4.0/bin/elasticsearch -d; fi"
   - sh -c "if [ '$ES_VERSION' = '2' ]; then (curl -s https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.4.1/elasticsearch-2.4.1.tar.gz | tar xz -C /tmp); fi"
   - sh -c "if [ '$ES_VERSION' = '2' ]; then /tmp/elasticsearch-2.4.1/bin/plugin install delete-by-query; fi"
-  - sh -c "if [ '$ES_VERSION' = '2' ]; then/tmp/elasticsearch-2.4.1/bin/elasticsearch -d; fi"
+  - sh -c "if [ '$ES_VERSION' = '2' ]; then /tmp/elasticsearch-2.4.1/bin/elasticsearch -d; fi"
   - sh -c "if [ '$ES_VERSION' = '1' ]; then (curl -s https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.4.tar.gz | tar xz -C /tmp); fi"
-  - sh -c "if [ '$ES_VERSION' = '1' ]; then/tmp/elasticsearch-1.7.4/bin/elasticsearch -d; fi"
+  - sh -c "if [ '$ES_VERSION' = '1' ]; then /tmp/elasticsearch-1.7.4/bin/elasticsearch -d; fi"
 
 before_script:
   - sleep 15
