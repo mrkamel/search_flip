@@ -595,6 +595,7 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
     assert_equal [product1, product3].to_set, ProductIndex.search("Title1 OR Title3").records.to_set
     assert_equal [product1, product3].to_set, ProductIndex.search("Title1 Title3", default_operator: :OR).records.to_set
     assert_equal [product2, product3].to_set, ProductIndex.search("nothing").search("price:>15").records.to_set
+    assert_equal [product1], ProductIndex.search("Title1 OR Title3").where(price: 5 .. 15).records
   end
 
   def test_query
