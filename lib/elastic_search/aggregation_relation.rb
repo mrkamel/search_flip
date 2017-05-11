@@ -17,7 +17,17 @@ module ElasticSearch
     def to_hash
       res = {}
       res[:aggregations] = aggregation_values if aggregation_values.present?
-      res[:filter] = filter_values.size > 1 ? { and: filter_values } : filter_values.first if filter_values.present?
+
+      if filter_values || filter_not_values
+        if ElasticSearch.version.to_i >= 2
+          res[:filter] = { bool: {}.merge(filter_not_values ? { must_not: filter_not_values } : {}).merge(filter_values ? { filter: filter_values } : {}) }
+        else
+          filters = (filter_values || []) + (filter_not_values || []).map { |filter_not_value| { not: filter_not_value } }
+
+          res[:filter] = filters.size > 1 ? { and: filters } : filters.first
+        end
+      end
+
       res
     end
 

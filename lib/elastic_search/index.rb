@@ -366,8 +366,8 @@ module ElasticSearch
       #
       # @return [Hash] The specified document
 
-      def get(id)
-        JSON.parse RestClient.get("#{type_url}/#{id}", content_type: "application/json")
+      def get(id, params = {})
+        JSON.parse RestClient.get("#{type_url}/#{id}", params: params, content_type: "application/json")
       end
 
       # Sends a index refresh request to ElasticSearch. Raises RestClient

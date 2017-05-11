@@ -1,7 +1,7 @@
 
 require File.expand_path("../../test_helper", __FILE__)
 
-class ElasticSearch::IndexTest < ElasticSearch::TestCase
+class ElasticSearch::RelationTest < ElasticSearch::TestCase
   should_delegate_methods :total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids,
     :count, :size, :length, :took, :aggregations, :suggestions, :scope, :results, :records, :scroll_id, :raw_response,
     to: :response, subject: ElasticSearch::Relation.new(target: ProductIndex)
@@ -425,6 +425,8 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
   end
 
   def test_profile
+    return if ElasticSearch.version.to_i < 2
+
     assert_not_nil ProductIndex.profile(true).raw_response["profile"]
   end
 
@@ -613,7 +615,7 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
 
     ProductIndex.import [product1, product2]
 
-    results = ProductIndex.sort(:id).highlight([:title, :description]).where(title: "highlight", description: "highlight").results
+    results = ProductIndex.sort(:id).highlight([:title, :description]).search("title:highlight description:highlight").results
 
     assert_equal ["Title1 <em>highlight</em>"], results[0].highlight.title
     assert_equal ["Description1 <em>highlight</em>"], results[0].highlight.description
@@ -629,13 +631,13 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
     assert_equal ["Title2 <em>highlight</em>"], results[1].highlight.title
     assert_equal ["Description2 <em>highlight</em>"], results[1].highlight.description
 
-    results = ProductIndex.sort(:id).highlight(:title).highlight(:description).where(title: "highlight", description: "highlight").results
+    results = ProductIndex.sort(:id).highlight(:title, require_field_match: true).highlight(:description, require_field_match: true).search("title:highlight").results
 
     assert_equal ["Title1 <em>highlight</em>"], results[0].highlight.title
-    assert_equal ["Description1 <em>highlight</em>"], results[0].highlight.description
+    assert_nil results[0].highlight.description
 
     assert_equal ["Title2 <em>highlight</em>"], results[1].highlight.title
-    assert_equal ["Description2 <em>highlight</em>"], results[1].highlight.description
+    assert_nil results[1].highlight.description
   end
 
   def test_suggest

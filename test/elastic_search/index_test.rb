@@ -258,27 +258,41 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
 
     products = create_list(:product, 2)
 
-    assert_difference "ProductIndex.total_entries", 2 do
-      ProductIndex.create products, {}, version: 1, version_type: "external"
-    end
-
-    assert_no_difference "ProductIndex.total_entries" do
-      assert_raises ElasticSearch::Bulk::Error do
-        ProductIndex.import products, {}, version: 1, version_type: "external"
+    if ElasticSearch.version.to_i >= 5
+      assert_difference "ProductIndex.total_entries", 2 do
+        ProductIndex.create products, {}, routing: "r1"
       end
+
+      assert_equal "r1", ProductIndex.get(products.first.id, routing: "r1")["_routing"]
+    else
+      assert_difference "ProductIndex.total_entries", 2 do
+        ProductIndex.create products, {}, version: 2, version_type: "external"
+      end
+
+      assert_equal [2, 2], products.map { |product| ProductIndex.get(product.id)["_version"] }
     end
   end
 
   def test_create_with_class_options
     products = create_list(:product, 2)
 
-    ProductIndex.stubs(:index_options).returns(version: 2, version_type: "external")
+    if ElasticSearch.version.to_i >= 5
+      ProductIndex.stubs(:index_options).returns(routing: "r1")
 
-    assert_difference "ProductIndex.total_entries", 2 do
-      ProductIndex.create products
+      assert_difference "ProductIndex.total_entries", 2 do
+        ProductIndex.create products
+      end
+
+      assert_equal ["r1", "r1"], products.map { |product| ProductIndex.get(product.id, routing: "r1")["_routing"] }
+    else
+      ProductIndex.stubs(:index_options).returns(version: 2, version_type: "external")
+
+      assert_difference "ProductIndex.total_entries", 2 do
+        ProductIndex.create products
+      end
+
+      assert_equal [2, 2], products.map { |product| ProductIndex.get(product.id)["_version"] }
     end
-
-    assert_equal [2, 2], products.map { |product| ProductIndex.get(product.id)["_version"] }
   end
 
   def test_get

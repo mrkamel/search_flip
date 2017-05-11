@@ -23,7 +23,7 @@ module ElasticSearch
   module PostFilterableRelation
     def self.included(base)
       base.class_eval do
-        attr_accessor :post_filter_values
+        attr_accessor :post_filter_not_values, :post_filter_values
       end
     end
 
@@ -50,15 +50,13 @@ module ElasticSearch
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def post_where(hash)
-      fresh.tap do |relation|
-        relation.post_filter_values = (post_filter_values || []) + hash.collect do |key, value|
-          if value.is_a?(Array)
-            { terms: { key => value } }
-          elsif value.is_a?(Range)
-            { range: { key => { gte: value.min, lte: value.max } } }
-          else
-            { term: { key => value } }
-          end
+      hash.inject(fresh) do |memo, (key, value)|
+        if value.is_a?(Array)
+          memo.post_filter terms: { key => value }
+        elsif value.is_a?(Range)
+          memo.post_filter range: { key => { gte: value.min, lte: value.max } }
+        else
+          memo.post_filter term: { key => value }
         end
       end
     end
@@ -85,15 +83,13 @@ module ElasticSearch
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def post_where_not(hash)
-      fresh.tap do |relation|
-        relation.post_filter_values = (post_filter_values || []) + hash.collect do |key, value|
-          if value.is_a?(Array)
-            { not: { terms: { key => value } } }
-          elsif value.is_a?(Range)
-            { not: { range: { key => { gte: value.min, lte: value.max } } } }
-          else
-            { not: { term: { key => value } } }
-          end
+      hash.inject(fresh) do |memo, (key,value)|
+        if value.is_a?(Array)
+          memo.post_filter_not terms: { key => value }
+        elsif value.is_a?(Range)
+          memo.post_filter_not range: { key => { gte: value.min, lte: value.max } }
+        else
+          memo.post_filter_not term: { key => value }
         end
       end
     end
@@ -109,7 +105,7 @@ module ElasticSearch
     #
     # @example Raw post range filter
     #   query = CommentIndex.aggregate("...")
-    #   query = query.filter(range: { created_at: { gte: Time.parse("2016-01-01"), lte: Time.parse("2017-01-01") }})
+    #   query = query.post_filter(range: { created_at: { gte: Time.parse("2016-01-01") }})
     #
     # @param args [Array, Hash] The raw filter settings
     #
@@ -118,6 +114,31 @@ module ElasticSearch
     def post_filter(*args)
       fresh.tap do |relation|
         relation.post_filter_values = (post_filter_values || []) + args
+      end
+    end
+
+    # Adds raw post not filters to the relation, such that you can filter out
+    # returned documents easily but still have full and fine grained control
+    # over the filter settings. However, usually you can achieve the same with
+    # the more easy to use methods like #post_where, #post_range, etc.
+    # Depending on the ElasticSearch server version these not filters are added
+    # to the request as must_not queries or prefixed filters.
+    #
+    # @example Raw post term filter
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_not_filter(term: { state: "new" })
+    #
+    # @example Raw post range filter
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_not_filter(range: { created_at: { gte: Time.parse("2016-01-01") }})
+    #
+    # @param args [Array, Hash] The raw filter settings
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
+    def post_filter_not(*args)
+      fresh.tap do |relation|
+        relation.post_filter_not_values = (post_filter_not_values || []) + args
       end
     end
 
@@ -170,7 +191,7 @@ module ElasticSearch
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def post_exists_not(field)
-      post_filter bool: { must_not: { exists: { field: field }}}
+      post_filter_not exists: { field: field }
     end
   end
 end

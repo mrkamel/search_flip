@@ -95,7 +95,28 @@ class ProductIndex
   include ElasticSearch::Index
 
   def self.mapping
-    { products: {} }
+    if ElasticSearch.version.to_i >= 5
+      {
+        products: {
+          properties: {
+            category: {
+              type: "text",
+              fielddata: true
+            },
+            title: {
+              type: "text",
+              fielddata: true
+            },
+            description: {
+              type: "text",
+              fielddata: true
+            }
+          }
+        }
+      }
+    else
+      { products: {} }
+    end
   end
 
   def self.type_name

@@ -44,12 +44,24 @@ module ElasticSearch
     def request
       res = {}
 
-      if query_value.present? && filter_values
-        res[:query] = { filtered: { query: query_value, filter: filter_values.size > 1 ? { and: filter_values } : filter_values.first } }
+      if query_value.present? && (filter_values || filter_not_values)
+        if ElasticSearch.version.to_i >= 2
+          res[:query] = { bool: {}.merge(must: query_value).merge(filter_not_values ? { must_not: filter_not_values } : {}).merge(filter_values ? { filter: filter_values } : {}) }
+        else
+          filters = (filter_values || []) + (filter_not_values || []).map { |filter_not_value| { not: filter_not_value } }
+
+          res[:query] = { filtered: { query: query_value, filter: filters.size > 1 ? { and: filters } : filters.first } }
+        end
       elsif query_value.present?
         res[:query] = query_value
-      elsif filter_values.present?
-        res[:query] = { filtered: { filter: filter_values.size > 1 ? { and: filter_values } : filter_values.first } }
+      elsif filter_values || filter_not_values
+        if ElasticSearch.version.to_i >= 2
+          res[:query] = { bool: {}.merge(filter_not_values ? { must_not: filter_not_values } : {}).merge(filter_values ? { filter: filter_values } : {}) }
+        else
+          filters = (filter_values || []) + (filter_not_values || []).map { |filter_not_value| { not: filter_not_value } }
+
+          res[:query] = { filtered: { filter: filters.size > 1 ? { and: filters } : filters.first } }
+        end
       end
 
       res.update from: offset_value, size: limit_value
@@ -58,7 +70,17 @@ module ElasticSearch
       res[:suggest] = suggest_values if suggest_values
       res[:sort] = sort_values if sort_values
       res[:aggregations] = aggregation_values if aggregation_values
-      res[:post_filter] = post_filter_values.size > 1 ? { and: post_filter_values } : post_filter_values.first if post_filter_values
+
+      if post_filter_values || post_filter_not_values
+        if ElasticSearch.version.to_i >= 2
+          res[:post_filter] = { bool: {}.merge(post_filter_not_values ? { must_not: post_filter_not_values } : {}).merge(post_filter_values ? { filter: post_filter_values } : {}) }
+        else
+          post_filters = (post_filter_values || []) + (post_filter_not_values || []).map { |post_filter_not_value| { not: post_filter_not_value } }
+
+          res[:post_filter] = post_filters.size > 1 ? { and: post_filters } : post_filters.first
+        end
+      end
+
       res[:_source] = source_value unless source_value.nil?
       res[:profile] = true if profile_value
 
@@ -175,12 +197,16 @@ module ElasticSearch
     #   CommentIndex.where(public: false).delete
 
     def delete
-      RestClient::Request.execute(
-        :method => :delete,
-        url: "#{target.type_url}/_query",
-        payload: JSON.generate(request.except(:from, :size)),
-        headers: { content_type: "application/json" }
-      )
+      if ElasticSearch.version.to_i >= 5
+        RestClient.post("#{target.type_url}/_delete_by_query", JSON.generate(request.except(:from, :size)), content_type: "application/json")
+      else
+        RestClient::Request.execute(
+          :method => :delete,
+          url: "#{target.type_url}/_query",
+          payload: JSON.generate(request.except(:from, :size)),
+          headers: { content_type: "application/json" }
+        )
+      end
 
       target.refresh if ElasticSearch::Config[:environment] == "test"
     end

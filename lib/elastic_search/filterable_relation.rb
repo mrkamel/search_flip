@@ -11,7 +11,7 @@ module ElasticSearch
   module FilterableRelation
     def self.included(base)
       base.class_eval do
-        attr_accessor :filter_values
+        attr_accessor :filter_values, :filter_not_values
       end
     end
 
@@ -32,15 +32,13 @@ module ElasticSearch
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def where(hash)
-      fresh.tap do |relation|
-        relation.filter_values = (filter_values || []) + hash.collect do |key, value|
-          if value.is_a?(Array)
-            { terms: { key => value } }
-          elsif value.is_a?(Range)
-            { range: { key => { gte: value.min, lte: value.max } } }
-          else
-            { term: { key => value } }
-          end
+      hash.inject(fresh) do |memo, (key, value)|
+        if value.is_a?(Array)
+          memo.filter terms: { key => value }
+        elsif value.is_a?(Range)
+          memo.filter range: { key => { gte: value.min, lte: value.max } }
+        else
+          memo.filter term: { key => value }
         end
       end
     end
@@ -62,15 +60,13 @@ module ElasticSearch
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def where_not(hash)
-      fresh.tap do |relation|
-        relation.filter_values = (filter_values || []) + hash.collect do |key, value|
-          if value.is_a?(Array)
-            { not: { terms: { key => value } } }
-          elsif value.is_a?(Range)
-            { not: { range: { key => { gte: value.min, lte: value.max } } } }
-          else
-            { not: { term: { key => value } } }
-          end
+      hash.inject(fresh) do |memo, (key, value)|
+        if value.is_a?(Array)
+          memo.filter_not terms: { key => value }
+        elsif value.is_a?(Range)
+          memo.filter_not range: { key => { gte: value.min, lte: value.max } }
+        else
+          memo.filter_not term: { key => value }
         end
       end
     end
@@ -82,7 +78,7 @@ module ElasticSearch
     #
     # @example
     #   CommentIndex.filter(term: { state: "new" })
-    #   CommentIndex.filter(range: { created_at: { gte: Time.parse("2016-01-01"), lte: Time.parse("2017-01-01") }})
+    #   CommentIndex.filter(range: { created_at: { gte: Time.parse("2016-01-01") }})
     #
     # @param args [Array, Hash] The raw filter settings
     #
@@ -91,6 +87,27 @@ module ElasticSearch
     def filter(*args)
       fresh.tap do |relation|
         relation.filter_values = (filter_values || []) + args
+      end
+    end
+
+    # Adds raw not filters to the relation, such that you can filter out
+    # returned documents easily but still have full and fine graned control
+    # over the filter settings.  However, usually you can achieve the same with
+    # the more easy to use methods like #where_not, #rage, etc. Depending on
+    # the ElasticSearch server version, these not filters are added to the
+    # request as must_not queries or prefixed filters.
+    #
+    # @example
+    #   CommentIndex.filter_not(term: { state: "new" })
+    #   CommentIndex.filter_not(range: { created_at: { gte: Time.parse("2016-01-01") }})
+    #
+    # @param args [Array, Hash] The raw not filter settings
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
+    def filter_not(*args)
+      fresh.tap do |relation|
+        relation.filter_not_values = (filter_not_values || []) + args
       end
     end
 
@@ -166,7 +183,7 @@ module ElasticSearch
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def exists_not(field)
-      filter bool: { must_not: { exists: { field: field }}}
+      filter_not exists: { field: field }
     end
   end
 end
