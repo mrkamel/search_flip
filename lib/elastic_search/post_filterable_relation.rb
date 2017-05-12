@@ -23,7 +23,31 @@ module ElasticSearch
   module PostFilterableRelation
     def self.included(base)
       base.class_eval do
-        attr_accessor :post_filter_not_values, :post_filter_values
+        attr_accessor :post_must_values, :post_must_not_values, :post_should_values, :post_filter_values
+      end
+    end
+
+    # Adds a post query string query to the relation while using AND as the
+    # default operator unless otherwise specified. Check out the
+    # ElasticSearch docs for further details.
+    #
+    # @example
+    #   CommentIndex.search("message:hello OR message:worl*")
+    #
+    # @param q [String] The query string query
+    #
+    # @param options [Hash] Additional options for the query sring query, like
+    #   eg default_operator, default_field, etc.
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
+    def post_search(q, options = {})
+      raise(ElasticSearch::NotSupportedError) if ElasticSearch.version.to_i < 2
+
+      if q.present?
+        post_must query_string: { query: q, :default_operator => :AND }.merge(options)
+      else
+        fresh
       end
     end
 
@@ -85,11 +109,11 @@ module ElasticSearch
     def post_where_not(hash)
       hash.inject(fresh) do |memo, (key,value)|
         if value.is_a?(Array)
-          memo.post_filter_not terms: { key => value }
+          memo.post_must_not terms: { key => value }
         elsif value.is_a?(Range)
-          memo.post_filter_not range: { key => { gte: value.min, lte: value.max } }
+          memo.post_must_not range: { key => { gte: value.min, lte: value.max } }
         else
-          memo.post_filter_not term: { key => value }
+          memo.post_must_not term: { key => value }
         end
       end
     end
@@ -117,28 +141,21 @@ module ElasticSearch
       end
     end
 
-    # Adds raw post not filters to the relation, such that you can filter out
-    # returned documents easily but still have full and fine grained control
-    # over the filter settings. However, usually you can achieve the same with
-    # the more easy to use methods like #post_where, #post_range, etc.
-    # Depending on the ElasticSearch server version these not filters are added
-    # to the request as must_not queries or prefixed filters.
-    #
-    # @example Raw post term filter
-    #   query = CommentIndex.aggregate("...")
-    #   query = query.post_not_filter(term: { state: "new" })
-    #
-    # @example Raw post range filter
-    #   query = CommentIndex.aggregate("...")
-    #   query = query.post_not_filter(range: { created_at: { gte: Time.parse("2016-01-01") }})
-    #
-    # @param args [Array, Hash] The raw filter settings
-    #
-    # @return [ElasticSearch::Relation] A newly created extended relation
-
-    def post_filter_not(*args)
+    def post_must(*args)
       fresh.tap do |relation|
-        relation.post_filter_not_values = (post_filter_not_values || []) + args
+        relation.post_must_values = (post_must_values || []) + args
+      end
+    end
+
+    def post_must_not(*args)
+      fresh.tap do |relation|
+        relation.post_must_not_values = (post_must_not_values || []) + args
+      end
+    end
+
+    def post_should(*args)
+      fresh.tap do |relation|
+        relation.post_must_not_values = (post_must_not_values || []) + args
       end
     end
 
@@ -191,7 +208,7 @@ module ElasticSearch
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def post_exists_not(field)
-      post_filter_not exists: { field: field }
+      post_must_not exists: { field: field }
     end
   end
 end

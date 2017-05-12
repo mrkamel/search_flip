@@ -188,6 +188,30 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
     refute_includes query2.records, product3
   end
 
+  def test_post_search
+    return if ElasticSearch.version.to_i < 2
+
+    product1 = create(:product, title: "title1", category: "category1")
+    product2 = create(:product, title: "title2", category: "category2")
+    product3 = create(:product, title: "title3", category: "category1")
+
+    ProductIndex.import [product1, product2, product3]
+
+    query1 = ProductIndex.aggregate(:category).post_search("title1 OR title2")
+    query2 = query1.post_search("category1")
+
+    assert_includes query1.records, product1
+    assert_includes query1.records, product2
+    refute_includes query1.records, product3
+
+    assert_includes query2.records, product1
+    refute_includes query2.records, product2
+    refute_includes query2.records, product3
+
+    assert_equal Hash["category1" => 2, "category2" => 1], query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    assert_equal Hash["category1" => 2, "category2" => 1], query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+  end
+
   def test_post_where
     product1 = create(:product, price: 100, category: "category1")
     product2 = create(:product, price: 200, category: "category2")
@@ -594,20 +618,8 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
 
     assert_equal [product1, product3].to_set, ProductIndex.search("Title1 OR Title3").records.to_set
     assert_equal [product1, product3].to_set, ProductIndex.search("Title1 Title3", default_operator: :OR).records.to_set
-    assert_equal [product2, product3].to_set, ProductIndex.search("nothing").search("price:>15").records.to_set
+    assert_equal [product1], ProductIndex.search("Title1 OR Title2").search("Title1 OR Title3").records
     assert_equal [product1], ProductIndex.search("Title1 OR Title3").where(price: 5 .. 15).records
-  end
-
-  def test_query
-    product1 = create(:product, title: "Title1", description: "Description1", price: 10)
-    product2 = create(:product, title: "Title2", description: "Description2", price: 20)
-    product3 = create(:product, title: "Title3", description: "Description2", price: 30)
-
-    ProductIndex.import [product1, product2, product3]
-
-    assert_equal [product1, product3].to_set, ProductIndex.query(query_string: { query: "Title1 OR Title3", default_operator: :AND }).records.to_set
-    assert_equal [product1, product3].to_set, ProductIndex.query(query_string: { query: "Title1 Title3", default_operator: :OR }).records.to_set
-    assert_equal [product2, product3].to_set, ProductIndex.query(query_string: { query: "nothing" }).query(query_string: { query: "price:>15" }).records.to_set
   end
 
   def test_highlight

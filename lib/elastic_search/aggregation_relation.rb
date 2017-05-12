@@ -18,13 +18,25 @@ module ElasticSearch
       res = {}
       res[:aggregations] = aggregation_values if aggregation_values.present?
 
-      if filter_values || filter_not_values
+      if must_values || must_not_values || should_values || filter_values
         if ElasticSearch.version.to_i >= 2
-          res[:filter] = { bool: {}.merge(filter_not_values ? { must_not: filter_not_values } : {}).merge(filter_values ? { filter: filter_values } : {}) }
+          res[:filter] = {
+            bool: {}.
+              merge(must_values ? { must: must_values } : {}).
+              merge(must_not_values ? { must_not: must_not_values } : {}).
+              merge(should_values ? { should: should_values } : {}).
+              merge(filter_values ? { filter: filter_values } : {})
+          }
         else
-          filters = (filter_values || []) + (filter_not_values || []).map { |filter_not_value| { not: filter_not_value } }
+          filters = (filter_values || []) + (must_not_values || []).map { |must_not_value| { not: must_not_value } }
 
-          res[:filter] = filters.size > 1 ? { and: filters } : filters.first
+          queries = {}.
+            merge(must_values ? { must: must_values } : {}).
+            merge(should_values ? { should: should_values } : {})
+
+          filters_and_queries = filters + (queries.size > 0 ? [bool: queries] : [])
+
+          res[:filter] = filters_and_queries.size > 1 ? { and: filters_and_queries } : filters_and_queries.first
         end
       end
 

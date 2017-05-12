@@ -16,6 +16,8 @@ require "elastic_search/result"
 require "elastic_search/index"
 
 module ElasticSearch
+  class NotSupportedError < StandardError; end
+
   # Uses the ElasticSearch Multi Search API to execute multiple search requests
   # within a single request. Raises RestClient specific exceptions in case any
   # errors occur.

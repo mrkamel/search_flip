@@ -44,23 +44,27 @@ module ElasticSearch
     def request
       res = {}
 
-      if query_value.present? && (filter_values || filter_not_values)
+      if must_values || must_not_values || should_values || filter_values
         if ElasticSearch.version.to_i >= 2
-          res[:query] = { bool: {}.merge(must: query_value).merge(filter_not_values ? { must_not: filter_not_values } : {}).merge(filter_values ? { filter: filter_values } : {}) }
+          res[:query] = {
+            bool: {}.
+              merge(must_values ? { must: must_values } : {}).
+              merge(must_not_values ? { must_not: must_not_values } : {}).
+              merge(should_values ? { should: should_values } : {}).
+              merge(filter_values ? { filter: filter_values } : {})
+          }
         else
-          filters = (filter_values || []) + (filter_not_values || []).map { |filter_not_value| { not: filter_not_value } }
+          filters = (filter_values || []) + (must_not_values || []).map { |must_not_value| { not: must_not_value } }
 
-          res[:query] = { filtered: { query: query_value, filter: filters.size > 1 ? { and: filters } : filters.first } }
-        end
-      elsif query_value.present?
-        res[:query] = query_value
-      elsif filter_values || filter_not_values
-        if ElasticSearch.version.to_i >= 2
-          res[:query] = { bool: {}.merge(filter_not_values ? { must_not: filter_not_values } : {}).merge(filter_values ? { filter: filter_values } : {}) }
-        else
-          filters = (filter_values || []) + (filter_not_values || []).map { |filter_not_value| { not: filter_not_value } }
+          queries = {}.
+            merge(must_values ? { must: must_values } : {}).
+            merge(should_values ? { should: should_values } : {})
 
-          res[:query] = { filtered: { filter: filters.size > 1 ? { and: filters } : filters.first } }
+          res[:query] = {
+            filtered: {}.
+              merge(queries.size > 0 ? { query: { bool: queries } } : {}).
+              merge(filter: filters.size > 1 ? { and: filters } : filters.first)
+          }
         end
       end
 
@@ -71,13 +75,25 @@ module ElasticSearch
       res[:sort] = sort_values if sort_values
       res[:aggregations] = aggregation_values if aggregation_values
 
-      if post_filter_values || post_filter_not_values
+      if post_must_values || post_must_not_values || post_should_values || post_filter_values
         if ElasticSearch.version.to_i >= 2
-          res[:post_filter] = { bool: {}.merge(post_filter_not_values ? { must_not: post_filter_not_values } : {}).merge(post_filter_values ? { filter: post_filter_values } : {}) }
+          res[:post_filter] = {
+            bool: {}.
+              merge(post_must_values ? { must: post_must_values } : {}).
+              merge(post_must_not_values ? { must_not: post_must_not_values } : {}).
+              merge(post_should_values ? { should: post_should_values } : {}).
+              merge(post_filter_values ? { filter: post_filter_values } : {})
+          }
         else
-          post_filters = (post_filter_values || []) + (post_filter_not_values || []).map { |post_filter_not_value| { not: post_filter_not_value } }
+          post_filters = (post_filter_values || []) + (post_must_not_values || []).map { |post_must_not_value| { not: post_must_not_value } }
 
-          res[:post_filter] = post_filters.size > 1 ? { and: post_filters } : post_filters.first
+          post_queries = {}.
+            merge(post_must_values ? { must: post_must_values } : {}).
+            merge(post_should_values ? { should: post_should_values } : {})
+
+          post_filters_and_queries = post_filters + (post_queries.size > 0 ? [bool: post_queries] : [])
+
+          res[:post_filter] = post_filters_and_queries.size > 1 ? { and: post_filters_and_queries } : post_filters_and_queries.first
         end
       end
 
@@ -407,45 +423,6 @@ module ElasticSearch
       per_page = per_page.to_i
 
       offset((page - 1) * per_page).limit(per_page)
-    end
-
-    # Adds a query string query to the relation while using AND as the default
-    # operator unless otherwise specified. As there can only be one query
-    # section, this overrides an existing query section, if already present.
-    # Check out the ElasticSearch docs for further details.
-    #
-    # @example
-    #   CommentIndex.search("message:hello OR message:worl*")
-    #
-    # @param q [String] The query string query
-    #
-    # @param options [Hash] Additional options for the query sring query, like
-    #   eg default_operator, default_field, etc.
-    #
-    # @return [ElasticSearch::Relation] A newly created extended relation
-
-    def search(q, options = {})
-      fresh.tap do |relation|
-        relation.query_value = { query_string: { query: q, :default_operator => :AND }.merge(options) } if q.present?
-      end
-    end
-
-    # Adds a raw query section to the relation. As there can only be one query
-    # section, this overrides an existing query section, if already present.
-    # Check out the ElasticSearch docs for further details.
-    #
-    # @example
-    #   CommentIndex.query(filtered: { filter: { term: { message: "hello" }}})
-    #   CommentIndex.query(more_like_this: { fields: ["message"], ids: [comment.id] })
-    #
-    # @param q [Hash] The raw query section
-    #
-    # @return [ElasticSearch::Relation] A newly created extended relation
-
-    def query(q)
-      fresh.tap do |relation|
-        relation.query_value = q
-      end
     end
 
     # Fetches the records specified by the relation in batches using the

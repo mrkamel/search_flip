@@ -11,7 +11,29 @@ module ElasticSearch
   module FilterableRelation
     def self.included(base)
       base.class_eval do
-        attr_accessor :filter_values, :filter_not_values
+        attr_accessor :must_values, :must_not_values, :should_values, :filter_values
+      end
+    end
+
+    # Adds a query string query to the relation while using AND as the default
+    # operator unless otherwise specified. Check out the ElasticSearch docs
+    # for further details.
+    #
+    # @example
+    #   CommentIndex.search("message:hello OR message:worl*")
+    #
+    # @param q [String] The query string query
+    #
+    # @param options [Hash] Additional options for the query sring query, like
+    #   eg default_operator, default_field, etc.
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
+    def search(q, options = {})
+      if q.present?
+        must query_string: { query: q, :default_operator => :AND }.merge(options)
+      else
+        fresh
       end
     end
 
@@ -62,11 +84,11 @@ module ElasticSearch
     def where_not(hash)
       hash.inject(fresh) do |memo, (key, value)|
         if value.is_a?(Array)
-          memo.filter_not terms: { key => value }
+          memo.must_not terms: { key => value }
         elsif value.is_a?(Range)
-          memo.filter_not range: { key => { gte: value.min, lte: value.max } }
+          memo.must_not range: { key => { gte: value.min, lte: value.max } }
         else
-          memo.filter_not term: { key => value }
+          memo.must_not term: { key => value }
         end
       end
     end
@@ -90,24 +112,21 @@ module ElasticSearch
       end
     end
 
-    # Adds raw not filters to the relation, such that you can filter out
-    # returned documents easily but still have full and fine graned control
-    # over the filter settings.  However, usually you can achieve the same with
-    # the more easy to use methods like #where_not, #rage, etc. Depending on
-    # the ElasticSearch server version, these not filters are added to the
-    # request as must_not queries or prefixed filters.
-    #
-    # @example
-    #   CommentIndex.filter_not(term: { state: "new" })
-    #   CommentIndex.filter_not(range: { created_at: { gte: Time.parse("2016-01-01") }})
-    #
-    # @param args [Array, Hash] The raw not filter settings
-    #
-    # @return [ElasticSearch::Relation] A newly created extended relation
-
-    def filter_not(*args)
+    def must(*args)
       fresh.tap do |relation|
-        relation.filter_not_values = (filter_not_values || []) + args
+        relation.must_values = (must_values || []) + args
+      end
+    end
+
+    def must_not(*args)
+      fresh.tap do |relation|
+        relation.must_not_values = (must_not_values || []) + args
+      end
+    end
+
+    def should(*args)
+      fresh.tap do |relation|
+        relation.should_values = (should_values || []) + args
       end
     end
 
@@ -183,7 +202,7 @@ module ElasticSearch
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def exists_not(field)
-      filter_not exists: { field: field }
+      must_not exists: { field: field }
     end
   end
 end
