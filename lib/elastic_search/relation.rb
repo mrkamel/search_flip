@@ -67,8 +67,7 @@ module ElasticSearch
                 merge(filters.size > 1 ? { and: filters } : filters.first)
             }
           else
-            res[:query] = {}.
-              merge(queries.size > 1 ? { bool: queries } : queries.first)
+            res[:query] = { bool: queries }
           end
         end
       end
