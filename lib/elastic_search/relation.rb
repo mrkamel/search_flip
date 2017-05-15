@@ -60,11 +60,16 @@ module ElasticSearch
             merge(must_values ? { must: must_values } : {}).
             merge(should_values ? { should: should_values } : {})
 
-          res[:query] = {
-            filtered: {}.
-              merge(queries.size > 0 ? { query: { bool: queries } } : {}).
-              merge(filters.size > 0 ? (filters.size > 1 ? { and: filters } : filters.first) : {})
-          }
+          if filters.size > 0
+            res[:query] = {
+              filtered: {}.
+                merge(queries.size > 0 ? { query: { bool: queries } } : {}).
+                merge(filters.size > 1 ? { and: filters } : filters.first)
+            }
+          else
+            res[:query] = {}.
+              merge(queries.size > 1 ? { bool: queries } : queries.first)
+          end
         end
       end
 
