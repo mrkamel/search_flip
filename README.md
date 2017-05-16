@@ -3,6 +3,20 @@
 
 [![Build Status](https://secure.travis-ci.org/mrkamel/elastic_search.png?branch=master)](http://travis-ci.org/mrkamel/elastic_search)
 
+Using ElasticSearch it is dead-simple to create index classes that correspond
+to ElasticSearch indices and to query these indices using a chainable, concise
+yet powerful DSL.
+
+```ruby
+CommentIndex.search("hello world", default_field: "title").where(visible: true).aggregate(:user_id).sort(id: "desc")
+
+CommentIndex.aggregate(:user_id) do |aggregation|
+  aggregation.aggregate(histogram: { date_histogram: { field: "created_at", interval: "month" }})
+end
+
+CommentIndex.range(:created_at, gt: Date.today - 1.week, lt: Date.today).where(state: ["approved", "pending"])
+```
+
 ## Reference Docs
 
 See [http://www.rubydoc.info/github/mrkamel/elastic_search](http://www.rubydoc.info/github/mrkamel/elastic_search)
