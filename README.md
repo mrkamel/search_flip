@@ -141,7 +141,7 @@ CommentIndex.import(Comment.where("created_at > ?", Time.now - 7.days))
 
 and query records:
 
-```
+```ruby
 CommentIndex.total_entries
 # => 2838
 
