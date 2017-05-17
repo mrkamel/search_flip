@@ -159,7 +159,7 @@ CommentIndex.aggregate(:username).aggregations(:username)
 and delete records (for ElasticSearch 2.x, the delete-by-query plugin is
 required):
 
-```
+```ruby
 CommentIndex.match_all.delete
 ```
 
