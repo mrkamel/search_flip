@@ -45,7 +45,7 @@ $ gem install elastic_search
 
 You can change global config options like:
 
-```
+```ruby
 ElasticSearch::Config[:environment] = "development"
 ElasticSearch::Config[:base_url] = "http://127.0.0.1:9200"
 ```
@@ -127,6 +127,7 @@ Then you can interact with the index:
 CommentIndex.create_index
 CommentIndex.index_exists?
 CommentIndex.delete_index
+CommentIndex.update_mapping
 ```
 
 and index records (automatically uses the bulk API):
