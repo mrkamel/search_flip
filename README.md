@@ -99,7 +99,19 @@ end
 Please note, ElasticSearch (the server) allows to have multiple types per
 index. However, this forces to have the same mapping for fields having the same
 name even though the fields live in different types of the same index. Thus,
-this gem is using a different index for each type.
+this gem is using a different index for each type by default, but you can
+change that. Simply supply a custom `index_name`.
+
+```ruby
+class CommentIndex
+  # ...
+
+  def self.index_name
+    "custom_index_name"
+  end
+
+  # ...
+end
 
 To specify a custom mapping:
 
