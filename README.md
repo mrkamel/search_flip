@@ -112,6 +112,7 @@ class CommentIndex
 
   # ...
 end
+```
 
 To specify a custom mapping:
 
