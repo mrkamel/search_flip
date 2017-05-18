@@ -4,8 +4,8 @@
 [![Build Status](https://secure.travis-ci.org/mrkamel/elastic_search.png?branch=master)](http://travis-ci.org/mrkamel/elastic_search)
 
 Using ElasticSearch it is dead-simple to create index classes that correspond
-to ElasticSearch indices and to query these indices using a chainable, concise,
-yet powerful DSL.
+to ElasticSearch indices and to manipulate, query and aggregate these indices
+using a chainable, concise, yet powerful DSL.
 
 ```ruby
 CommentIndex.search("hello world", default_field: "title").where(visible: true).aggregate(:user_id).sort(id: "desc")
@@ -156,11 +156,21 @@ CommentIndex.aggregate(:username).aggregations(:username)
 ...
 ```
 
-and delete records (for ElasticSearch 2.x, the delete-by-query plugin is
-required):
+and delete records:
 
 ```ruby
+# for ElasticSearch 2.x, the delete-by-query plugin is required for the
+# following query:
+
 CommentIndex.match_all.delete
+
+# or delete manually via the bulk API:
+
+CommentIndex.match_all.find_each do |record|
+  CommentIndex.bulk do |indexer|
+    indexer.delete record.id
+  end
+end
 ```
 
 ## Non-ActiveRecord models

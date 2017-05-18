@@ -487,7 +487,9 @@ module ElasticSearch
       #     bulk.create comment.id, JSON.generate(CommentIndex.serialize(comment)),
       #       version: comment.version, version_type: "external_gte"
       #
-      #     bulk.delete ...
+      #     bulk.delete comment.id, routing: comment.user_id
+      #
+      #     # ...
       #   end
       #
       # @param options [Hash] Specifies options regarding the bulk indexing

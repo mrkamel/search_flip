@@ -1,14 +1,45 @@
 
 module ElasticSearch
-  # @api private
-  #
   # The ElasticSearch::Bulk class implements the bulk support, ie it collects
-  # single requests and emits batches of requests. Internal use only.
+  # single requests and emits batches of requests.
+  #
+  # @example
+  #   ElasticSearch::Bulk.new "http://127.0.0.1:9200/index/type/_bulk" do |bulk|
+  #     bulk.create record.id, JSON.generate(MyIndex.serialize(record))
+  #     bulk.index record.id, JSON.generate(MyIndex.serialize(record)), version: record.version, version_type: "external"
+  #     bulk.delete record.id, routing: record.user_id
+  #     bulk.update record.id, JSON.generate(MyIndex.serialize(record))
+  #   end
 
   class Bulk
     class Error < StandardError; end
 
     attr_accessor :url, :count, :options, :ignore_errors
+
+    # Builds and yields a new Bulk object, ie initiates the buffer, yields,
+    # sends batches of records each time the buffer is full, and sends a final
+    # batch after the yielded code returns and there are still documents
+    # present within the buffer.
+    #
+    # @example Basic use
+    #   ElasticSearch::Bulk.new "http://127.0.0.1:9200/index/type/_bulk" do |bulk|
+    #     # ...
+    #   end
+    #
+    # @example Ignore certain errors
+    #   ElasticSearch::Bulk.new "http://127.0.0.1:9200/index/type/_bulk", 1_000, ignore_errors: [409] do |bulk|
+    #     # ...
+    #   end
+    #
+    # @param url [String] The endpoint to send bulk requests to
+    # @param count [Fixnum] The maximum number of documents per bulk request
+    # @param options [Hash] Options for the bulk requests
+    # @option options ignore_errors [Array, Fixnum] Errors that should be
+    #   ignored. If you eg want to ignore errors resulting from conflicts,
+    #   you can specify to ignore 409 here.
+    # @option options raise [Boolean] If you want the bulk requests to never
+    #   raise any exceptions (fire and forget), you can pass false here.
+    #   Default is true.
 
     def initialize(url, count = 1_000, options = {})
       self.url = url
@@ -22,6 +53,59 @@ module ElasticSearch
 
       upload if @num > 0
     end
+
+    # Adds an index request to the bulk batch.
+    #
+    # @param id [Fixnum, String] The document/record id
+    # @param json [String] The json document
+    # @param options [options] Options for the index request, like eg routing
+    #   and versioning
+
+    def index(id, json, options = {})
+      perform :index, id, json, options
+    end
+
+    # Adds an index request to the bulk batch
+    #
+    # @see #index
+
+    def import(*args)
+      index(*args)
+    end
+
+    # Adds a create request to the bulk batch.
+    #
+    # @param id [Fixnum, String] The document/record id
+    # @param json [String] The json document
+    # @param options [options] Options for the index request, like eg routing
+    #   and versioning
+
+    def create(id, json, options = {})
+      perform :create, id, json, options
+    end
+
+    # Adds a update request to the bulk batch.
+    #
+    # @param id [Fixnum, String] The document/record id
+    # @param json [String] The json document
+    # @param options [options] Options for the index request, like eg routing
+    #   and versioning
+
+    def update(id, json, options = {})
+      perform :update, id, json, options
+    end
+
+    # Adds a delete request to the bulk batch.
+    #
+    # @param id [Fixnum, String] The document/record id
+    # @param options [options] Options for the index request, like eg routing
+    #   and versioning
+
+    def delete(id, options = {})
+      perform :delete, id, nil, options
+    end
+
+    private
 
     def init
       @payload = ""
@@ -48,26 +132,6 @@ module ElasticSearch
       end
     ensure
       init
-    end
-
-    def index(id, json, options = {})
-      perform :index, id, json, options
-    end
-
-    def import(*args)
-      index(*args)
-    end
-
-    def create(id, json, options = {})
-      perform :create, id, json, options
-    end
-
-    def update(id, json, options = {})
-      perform :update, id, json, options
-    end
-
-    def delete(id, options = {})
-      perform :delete, id, nil, options
     end
 
     def perform(action, id, json = nil, options = {})
