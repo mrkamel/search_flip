@@ -9,9 +9,9 @@ module ElasticSearch
   #   CommentIndex.where(public: true).sort(id: "desc").limit(1_000).records
   #   CommentIndex.range(:created_at, lt: Time.parse("2014-01-01").delete
   #   CommentIndex.search("hello world").total_entries
-  #   CommentIndex.query(more_like_this: { fields: ["description"], ... })]
+  #   CommentIndex.query(more_like_this: { "...", fields: ["description"] })]
   #   CommentIndex.exists(:user_id).paginate(page: 1, per_page: 100)
-  #   CommentIndex.sort("_doc").find_each { |comment| ... }
+  #   CommentIndex.sort("_doc").find_each { |comment| "..." }
 
   class Relation
     include ElasticSearch::FilterableRelation

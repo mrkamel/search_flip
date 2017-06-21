@@ -3,9 +3,12 @@
 
 [![Build Status](https://secure.travis-ci.org/mrkamel/elastic_search.png?branch=master)](http://travis-ci.org/mrkamel/elastic_search)
 
-Using ElasticSearch it is dead-simple to create index classes that correspond
-to ElasticSearch indices and to manipulate, query and aggregate these indices
-using a chainable, concise, yet powerful DSL.
+Using the ElasticSearch gem it is dead-simple to create index classes that
+correspond to ElasticSearch indices and to manipulate, query and aggregate
+these indices using a chainable, concise, yet powerful DSL. Finally, the
+ElasticSearch gem supports ElasticSearch Server 1.x, 2.x, 5.x. Check section
+[#feature-support](Feature Support) for version dependent features.
+
 
 ```ruby
 CommentIndex.search("hello world", default_field: "title").where(visible: true).aggregate(:user_id).sort(id: "desc")
@@ -143,7 +146,7 @@ CommentIndex.delete_index
 CommentIndex.update_mapping
 ```
 
-and index records (automatically uses the bulk API):
+index records (automatically uses the bulk API):
 
 ```ruby
 CommentIndex.import(Comment.all)
@@ -152,7 +155,7 @@ CommentIndex.import([Comment.find(1), Comment.find(2)])
 CommentIndex.import(Comment.where("created_at > ?", Time.now - 7.days))
 ```
 
-and query records:
+query records:
 
 ```ruby
 CommentIndex.total_entries
@@ -169,7 +172,7 @@ CommentIndex.aggregate(:username).aggregations(:username)
 ...
 ```
 
-and delete records:
+delete records:
 
 ```ruby
 # for ElasticSearch 2.x, the delete-by-query plugin is required for the
@@ -185,6 +188,60 @@ CommentIndex.match_all.find_each do |record|
   end
 end
 ```
+
+## Advanced Usage
+
+The ElasticSearch gem supports even more advanced usages, like e.g. post
+filters, filtered aggregations or nested aggregations via simple to use
+API methods.
+
+### Post filters
+
+All relation methods (`#where`, `#where_not`, `#range`, etc.) are available
+in post filter mode as well, ie. filters/queries applied after aggregations
+are calculated. Checkout the ElasticSearch docs for further info.
+
+```ruby
+query = CommentIndex.aggregate(:user_id)
+query = query.post_where(reviewed: true)
+query = query.post_search("username:a*")
+```
+
+Checkout [http://www.rubydoc.info/github/mrkamel/elastic_search/ElasticSearch/PostFilterableRelation](PostFilterableRelation)
+for a complete API reference.
+
+### Aggregations
+
+The ElasticSearch gem allows to elegantly specify nested aggregations,
+no matter how deep:
+
+```ruby
+OrderIndex.aggregate(:user_id, order: { revenue: "desc" }) do |aggregation|
+  aggregation.aggregate(revenue: { sum: { field: "price" }})
+end
+```
+
+and once more, the relation methods (`#where`, `#range`, etc.) are available in
+aggregations as well:
+
+```
+OrderIndex.aggregate(average_price: {}) do |aggregation|
+  aggregation = aggregation.match_all
+  aggregation = aggregation.where(user_id: current_user.id) if current_user
+
+  aggregation.aggregate(average_price: { avg: { field: "price" }})
+end
+```
+
+Checkout [http://www.rubydoc.info/github/mrkamel/elastic_search/ElasticSearch/AggregatableRelation](AggregatableRelation)
+as well as [http://www.rubydoc.info/github/mrkamel/elastic_search/ElasticSearch/AggregationRelation](AggregationRelation)
+for a complete API reference.
+
+### Suggestions
+### Highlighting
+### Advanced Relation Methods
+
+source, scroll, profile, preload, includes, find_in_batches, find_each, failsafe
 
 ## Non-ActiveRecord models
 
@@ -210,6 +267,11 @@ end
 
 Thus, simply add your custom implementation of those methods that work with
 whatever ORM you use.
+
+## Feature Support
+
+`#post_search` and `#profile` are only supported from up to ElasticSearch
+Server version >= 2.
 
 ## TODO
 
