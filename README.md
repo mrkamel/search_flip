@@ -7,7 +7,7 @@ Using the ElasticSearch gem it is dead-simple to create index classes that
 correspond to ElasticSearch indices and to manipulate, query and aggregate
 these indices using a chainable, concise, yet powerful DSL. Finally, the
 ElasticSearch gem supports ElasticSearch Server 1.x, 2.x, 5.x. Check section
-[#feature-support](Feature Support) for version dependent features.
+[Feature Support](#feature-support) for version dependent features.
 
 
 ```ruby
@@ -207,7 +207,7 @@ query = query.post_where(reviewed: true)
 query = query.post_search("username:a*")
 ```
 
-Checkout [http://www.rubydoc.info/github/mrkamel/elastic_search/ElasticSearch/PostFilterableRelation](PostFilterableRelation)
+Checkout [PostFilterableRelation](http://www.rubydoc.info/github/mrkamel/elastic_search/ElasticSearch/PostFilterableRelation)
 for a complete API reference.
 
 ### Aggregations
@@ -233,8 +233,8 @@ OrderIndex.aggregate(average_price: {}) do |aggregation|
 end
 ```
 
-Checkout [http://www.rubydoc.info/github/mrkamel/elastic_search/ElasticSearch/AggregatableRelation](AggregatableRelation)
-as well as [http://www.rubydoc.info/github/mrkamel/elastic_search/ElasticSearch/AggregationRelation](AggregationRelation)
+Checkout [AggregatableRelation](http://www.rubydoc.info/github/mrkamel/elastic_search/ElasticSearch/AggregatableRelation)
+as well as [AggregationRelation](http://www.rubydoc.info/github/mrkamel/elastic_search/ElasticSearch/AggregationRelation)
 for a complete API reference.
 
 ### Suggestions
