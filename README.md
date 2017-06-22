@@ -213,24 +213,42 @@ for a complete API reference.
 ### Aggregations
 
 The ElasticSearch gem allows to elegantly specify nested aggregations,
-no matter how deep:
+no matter how deeply nested:
 
 ```ruby
-OrderIndex.aggregate(:user_id, order: { revenue: "desc" }) do |aggregation|
+query = OrderIndex.aggregate(:username, order: { revenue: "desc" }) do |aggregation|
   aggregation.aggregate(revenue: { sum: { field: "price" }})
 end
 ```
 
-and once more, the relation methods (`#where`, `#range`, etc.) are available in
+Generally, aggregation results returned by ElasticSearch Server are wrapped in
+a `Hashie::Mash`, such thath you can access them via:
+
+```ruby
+query.aggregations(:username)["mrkamel"].revenue.value
+```
+
+Still, if you want to get the raw aggregations return by ElasticSearch Server,
+access them without supplying any aggregation name to `#aggregations`:
+
+```ruby
+query.aggregations # => returns the raw aggregation section
+
+query.aggregations["username"]["buckets"].detect { |bucket| bucket["key"] == "mrkamel" }["revenue"]["value"] # => 238.50
+```
+
+Once again, the relation methods (`#where`, `#range`, etc.) are available in
 aggregations as well:
 
-```
-OrderIndex.aggregate(average_price: {}) do |aggregation|
+```ruby
+query = OrderIndex.aggregate(average_price: {}) do |aggregation|
   aggregation = aggregation.match_all
   aggregation = aggregation.where(user_id: current_user.id) if current_user
 
   aggregation.aggregate(average_price: { avg: { field: "price" }})
 end
+
+query.aggregations(:average_price).average_price.value
 ```
 
 Checkout [AggregatableRelation](http://www.rubydoc.info/github/mrkamel/elastic_search/ElasticSearch/AggregatableRelation)
@@ -238,7 +256,26 @@ as well as [AggregationRelation](http://www.rubydoc.info/github/mrkamel/elastic_
 for a complete API reference.
 
 ### Suggestions
+
+```ruby
+query = CommentIndex.suggest(:suggestion, text: "helo", term: { field: "message" })
+query.suggestions(:suggestion).first["text"] # => "hello"
+```
+
 ### Highlighting
+
+```ruby
+CommentIndex.highlight([:title, :message])
+CommentIndex.highlight(:title).highlight(:description)
+CommentIndex.highlight(:title, require_field_match: false)
+CommentIndex.highlight(title: { type: "fvh" })
+```
+
+```ruby
+query = CommentIndex.highlight(:title).search("hello")
+query.results[0].highlight.title # => "<em>hello</em> world"
+```
+
 ### Advanced Relation Methods
 
 source, scroll, profile, preload, includes, find_in_batches, find_each, failsafe
