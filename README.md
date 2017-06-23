@@ -278,7 +278,22 @@ query.results[0].highlight.title # => "<em>hello</em> world"
 
 ### Advanced Relation Methods
 
-source, scroll, profile, preload, includes, find_in_batches, find_each, failsafe
+There are even more methods to make your life easier, namely `source`,
+`scroll`, `profile`, `includes`, `preload`, `find_in_batches`, `find_each` and
+`failsafe` to name just a few:
+
+* `source`
+
+In case you want to restrict the returned fields, simply specify
+the fields via `#source`:
+
+```ruby
+CommentIndex.source([:id, :message]).search("hello world")
+```
+
+scroll, profile, preload, includes, find_in_batches, find_each, failsafe
+
+For a full list of methods, check out the reference docs.
 
 ## Non-ActiveRecord models
 
