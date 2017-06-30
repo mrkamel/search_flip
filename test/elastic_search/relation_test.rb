@@ -2,8 +2,8 @@
 require File.expand_path("../../test_helper", __FILE__)
 
 class ElasticSearch::RelationTest < ElasticSearch::TestCase
-  should_delegate_methods :total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids,
-    :count, :size, :length, :took, :aggregations, :suggestions, :scope, :results, :records, :scroll_id, :raw_response,
+  should_delegate_methods :total_entries, :current_page, :previous_page, :prev_page, :next_page, :first_page?, :last_page?, :out_of_range?,
+    :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions, :scope, :results, :records, :scroll_id, :raw_response,
     to: :response, subject: ElasticSearch::Relation.new(target: ProductIndex)
 
   def test_where
@@ -607,6 +607,16 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
 
     assert_equal [product1, product2], query.records
     assert_equal [product3], query.paginate(page: 2, per_page: 2).records
+  end
+
+  def test_page
+    assert_equal 0, ProductIndex.page(1).offset_value
+    assert_equal 30, ProductIndex.page(2).offset_value
+    assert_equal 100, ProductIndex.page(3).per(50).offset_value
+  end
+
+  def test_per
+    assert_equal 50, ProductIndex.per(50).limit_value
   end
 
   def test_search

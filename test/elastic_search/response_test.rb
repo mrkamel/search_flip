@@ -41,6 +41,27 @@ class ElasticSearch::ResponseTest < ElasticSearch::TestCase
     assert_nil ProductIndex.paginate(page: 2, per_page: 2).next_page
   end
 
+  def test_first_page?
+    ProductIndex.import create(:product)
+
+    assert ProductIndex.paginate(page: 1).first_page?
+    refute ProductIndex.paginate(page: 2).first_page?
+  end
+
+  def test_last_page?
+    ProductIndex.import create_list(:product, 31)
+
+    assert ProductIndex.paginate(page: 2).last_page?
+    refute ProductIndex.paginate(page: 1).last_page?
+  end
+
+  def test_out_of_range?
+    ProductIndex.import create(:product)
+
+    assert ProductIndex.paginate(page: 2).out_of_range?
+    refute ProductIndex.paginate(page: 1).out_of_range?
+  end
+
   def test_results
     products = create_list(:product, 3)
 

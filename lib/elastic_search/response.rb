@@ -41,6 +41,57 @@ module ElasticSearch
       hits["total"]
     end
 
+    alias_method :total_count, :total_entries
+
+    # Returns whether or not the current page is the first page.
+    #
+    # @example
+    #   CommentIndex.paginate(page: 1).first_page?
+    #   # => true
+    #
+    #   CommentIndex.paginate(page: 2).first_page?
+    #   # => false
+    #
+    # @return [Boolean] Returns true if the current page is the
+    #   first page or false otherwise
+
+    def first_page?
+      current_page == 1
+    end
+
+    # Returns whether or not the current page is the last page.
+    #
+    # @example
+    #   CommentIndex.paginate(page: 100).last_page?
+    #   # => true
+    #
+    #   CommentIndex.paginate(page: 1).last_page?
+    #   # => false
+    #
+    # @return [Boolean] Returns true if the current page is the
+    #   last page or false otherwise
+
+    def last_page?
+      current_page == total_pages
+    end
+
+    # Returns whether or not the current page is out of range,
+    # ie. smaller than 1 or larger than #total_pages
+    #
+    # @example
+    #   CommentIndex.paginate(page: 1_000_000).out_of_range?
+    #   # => true
+    #
+    #   CommentIndex.paginate(page: 1).out_of_range?
+    #   # => false
+    #
+    # @return [Boolean] Returns true if the current page is out
+    #   of range
+
+    def out_of_range?
+      current_page < 1 || current_page > total_pages
+    end
+
     # Returns the current page number, useful for pagination.
     #
     # @example
@@ -84,6 +135,8 @@ module ElasticSearch
 
       current_page - 1
     end
+
+    alias_method :prev_page, :previous_page
 
     # Returns the next page number or nil if there is no next page, ie the
     # current page is the last page.

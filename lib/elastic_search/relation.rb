@@ -429,6 +429,14 @@ module ElasticSearch
       offset((page - 1) * per_page).limit(per_page)
     end
 
+    def page(n)
+      paginate(page: n)
+    end
+
+    def per(n)
+      paginate(page: offset_value.to_i / limit_value + 1, per_page: n)
+    end
+
     # Fetches the records specified by the relation in batches using the
     # ElasicSearch scroll API and yields each batch. The batch size and scroll
     # API timeout can be specified. Check out the ElasticSearch docs for
@@ -577,8 +585,8 @@ module ElasticSearch
       end
     end
 
-    delegate :total_entries, :current_page, :previous_page, :next_page, :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions,
-      :scope, :results, :records, :scroll_id, :raw_response, :to => :response
+    delegate :total_entries, :total_count, :current_page, :previous_page, :prev_page, :next_page, :first_page?, :last_page?, :out_of_range?, :total_pages,
+      :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions, :scope, :results, :records, :scroll_id, :raw_response, :to => :response
   end
 end
 

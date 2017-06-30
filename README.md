@@ -228,7 +228,7 @@ a `Hashie::Mash`, such thath you can access them via:
 query.aggregations(:username)["mrkamel"].revenue.value
 ```
 
-Still, if you want to get the raw aggregations return by ElasticSearch Server,
+Still, if you want to get the raw aggregations returned by ElasticSearch Server,
 access them without supplying any aggregation name to `#aggregations`:
 
 ```ruby
@@ -291,7 +291,32 @@ the fields via `#source`:
 CommentIndex.source([:id, :message]).search("hello world")
 ```
 
-scroll, profile, preload, includes, find_in_batches, find_each, failsafe
+* `paginate`, `page`, `per`
+
+The ElasticSearch gem supports will_paginate and kaminari compatible pagination.
+Thus you can either use `#paginate` or `#page` in combination with `#per`:
+
+```ruby
+CommentIndex.paginate(page: 3, per_page: 50)
+CommentIndex.page(3).per(50)
+```
+
+* `scroll`
+
+You can as well use the underlying scroll API directly, ie. without using higher
+level pagination:
+
+```ruby
+query = CommentIndex.scroll(timeout: "5m")
+
+until query.records.empty?
+  # ...
+
+  query = query.scroll(id: query.scroll_id, timeout: "5m")
+end
+```
+
+profile, preload, includes, find_in_batches, find_each, failsafe
 
 For a full list of methods, check out the reference docs.
 
