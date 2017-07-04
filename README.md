@@ -316,7 +316,46 @@ until query.records.empty?
 end
 ```
 
-profile, preload, includes, find_in_batches, find_each, failsafe
+* `profile`
+
+To enable query profiling simply use:
+
+Use `#profile` To enable query profiling:
+
+```ruby
+query = CommentIndex.profile(true)
+query.raw_response["profile"] # => { "shards" => ... }
+```
+
+* `preload`, `eager_load` and `includes`
+
+Uses the well known methods from ActiveRecord to load
+associated database records when fetching the respective
+records themselves. Works with other ORMs as well, if
+supported.
+
+Using `#preload`:
+
+```ruby
+CommentIndex.preload(:user, :post).records
+PostIndex.includes(:comments => :user).records
+```
+
+or `#eager_load`
+
+```ruby
+CommentIndex.eager_load(:user, :post).records
+PostIndex.eager_load(:comments => :user).records
+```
+
+or `#includes`
+
+```ruby
+CommentIndex.includes(:user, :post).records
+PostIndex.includes(:comments => :user).records
+```
+
+find_in_batches, find_each, failsafe
 
 For a full list of methods, check out the reference docs.
 
