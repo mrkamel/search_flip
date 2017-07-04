@@ -4,7 +4,7 @@
 [![Build Status](https://secure.travis-ci.org/mrkamel/elastic_search.png?branch=master)](http://travis-ci.org/mrkamel/elastic_search)
 
 Using the ElasticSearch gem it is dead-simple to create index classes that
-correspond to ElasticSearch indices and to manipulate, query and aggregate
+correspond to [ElasticSearch](https://www.elastic.co/) indices and to manipulate, query and aggregate
 these indices using a chainable, concise, yet powerful DSL. Finally, the
 ElasticSearch gem supports ElasticSearch Server 1.x, 2.x, 5.x. Check section
 [Feature Support](#feature-support) for version dependent features.
@@ -407,4 +407,10 @@ Server version >= 2.
 5. First class support for `nested`, `has_parent` and `has_child` queries
 
 6. Support collapse
+
+## Links
+
+* ElasticSearch Server: [https://www.elastic.co/](https://www.elastic.co/)
+* Reference Docs: [http://www.rubydoc.info/github/mrkamel/elastic_search](http://www.rubydoc.info/github/mrkamel/elastic_search)
+* Travis: [http://travis-ci.org/mrkamel/elastic_search](http://travis-ci.org/mrkamel/elastic_search)
 
