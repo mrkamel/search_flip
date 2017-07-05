@@ -294,7 +294,7 @@ CommentIndex.source([:id, :message]).search("hello world")
 * `paginate`, `page`, `per`
 
 The ElasticSearch gem supports will_paginate and kaminari compatible pagination.
-Thus you can either use `#paginate` or `#page` in combination with `#per`:
+Thus, you can either use `#paginate` or `#page` in combination with `#per`:
 
 ```ruby
 CommentIndex.paginate(page: 3, per_page: 50)
@@ -355,7 +355,42 @@ CommentIndex.includes(:user, :post).records
 PostIndex.includes(:comments => :user).records
 ```
 
-find_in_batches, find_each, failsafe
+* `find_in_batches`
+
+Used to fetch and yield records in batches using the ElasicSearch scroll API.
+The batch size and scroll API timeout can be specified.
+
+```ruby
+CommentIndex.search("hello world").find_in_batches(batch_size: 100) do |batch|
+  # ...
+end
+```
+
+* `find_each`
+
+Like `#find_in_batches`, used `#find_each` to fetch records in batches, but yields
+one one record at a time.
+
+```ruby
+CommentIndex.search("hello world").find_each(batch_size: 100) do |record|
+  # ...
+end
+```
+
+* `failsafe`
+
+Use `#failsafe` to prevent any exceptions from being raised for query string syntax
+errors or ElasticSearch being unavailable, etc.
+
+```ruby
+CommentIndex.search("invalid/request").execute
+# raises RestClient::BadRequest: 400 Bad Request
+
+# ...
+
+CommentIndex.search("invalid/request").failsafe(true).execute
+# => #<ElasticSearch::Response ...>
+```
 
 For a full list of methods, check out the reference docs.
 

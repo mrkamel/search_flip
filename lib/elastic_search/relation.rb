@@ -542,11 +542,12 @@ module ElasticSearch
     #
     # @example
     #   CommentIndex.search("invalid/request").execute
-    #   RestClient::BadRequest: 400 Bad Request
-    #     # ...
+    #   # raises RestClient::BadRequest: 400 Bad Request
+    #
+    #   # ...
     #
     #   CommentIndex.search("invalid/request").failsafe(true).execute
-    #   => #<ElasticSearch::Response ...>
+    #   # => #<ElasticSearch::Response ...>
     #
     # @param value [Boolean] Whether or not the relation should be failsafe
     #
