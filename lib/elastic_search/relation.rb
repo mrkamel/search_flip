@@ -217,7 +217,9 @@ module ElasticSearch
     #   CommentIndex.where(public: false).delete
 
     def delete
-      _request = ElasticSearch::HashUtil.new(request).except(:from, :size)
+      _request = request.dup
+      _request.delete(:from)
+      _request.delete(:size)
 
       if ElasticSearch.version.to_i >= 5
         RestClient.post("#{target.type_url}/_delete_by_query", JSON.generate(_request), content_type: "application/json")
