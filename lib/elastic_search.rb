@@ -3,6 +3,7 @@ require "active_record"
 require "rest-client"
 require "hashie"
 
+require "elastic_search/hash_util"
 require "elastic_search/version"
 require "elastic_search/config"
 require "elastic_search/bulk"

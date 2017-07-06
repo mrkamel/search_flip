@@ -428,10 +428,11 @@ Server version >= 2.
 
 1. Remove ActiveSupport dependencies
 
-* `Hash#except` (can probably be removed)
 * `Module#delegate`
 * `Object#present?`
 * `Object#blank?`
+
+2. Remove `require "active_record"` and active_record from gemspec
 
 2. Add convenience mixin for re-indexing ActiveRecord models on callbacks
 

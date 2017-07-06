@@ -217,13 +217,15 @@ module ElasticSearch
     #   CommentIndex.where(public: false).delete
 
     def delete
+      _request = ElasticSearch::HashUtil.new(request).except(:from, :size)
+
       if ElasticSearch.version.to_i >= 5
-        RestClient.post("#{target.type_url}/_delete_by_query", JSON.generate(request.except(:from, :size)), content_type: "application/json")
+        RestClient.post("#{target.type_url}/_delete_by_query", JSON.generate(_request), content_type: "application/json")
       else
         RestClient::Request.execute(
           :method => :delete,
           url: "#{target.type_url}/_query",
-          payload: JSON.generate(request.except(:from, :size)),
+          payload: JSON.generate(_request),
           headers: { content_type: "application/json" }
         )
       end
