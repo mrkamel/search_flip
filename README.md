@@ -429,8 +429,6 @@ Server version >= 2.
 1. Remove ActiveSupport dependencies
 
 * `Module#delegate`
-* `Object#present?`
-* `Object#blank?`
 
 2. Remove `require "active_record"` and active_record from gemspec
 
