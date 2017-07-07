@@ -44,7 +44,7 @@ module ElasticSearch
     def post_search(q, options = {})
       raise(ElasticSearch::NotSupportedError) if ElasticSearch.version.to_i < 2
 
-      if q.present?
+      if q.to_s.strip.length > 0
         post_must query_string: { query: q, :default_operator => :AND }.merge(options)
       else
         fresh

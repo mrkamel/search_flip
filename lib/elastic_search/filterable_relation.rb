@@ -30,7 +30,7 @@ module ElasticSearch
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def search(q, options = {})
-      if q.present?
+      if q.to_s.strip.length > 0
         must query_string: { query: q, :default_operator => :AND }.merge(options)
       else
         fresh

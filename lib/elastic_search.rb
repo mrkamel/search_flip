@@ -2,6 +2,7 @@
 require "active_record"
 require "rest-client"
 require "hashie"
+require "set"
 
 require "elastic_search/version"
 require "elastic_search/config"

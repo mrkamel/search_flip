@@ -16,7 +16,7 @@ module ElasticSearch
 
     def to_hash
       res = {}
-      res[:aggregations] = aggregation_values if aggregation_values.present?
+      res[:aggregations] = aggregation_values if aggregation_values
 
       if must_values || must_not_values || should_values || filter_values
         if ElasticSearch.version.to_i >= 2

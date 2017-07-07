@@ -45,7 +45,7 @@ module ElasticSearch
       self.url = url
       self.count = count
       self.options = options
-      self.ignore_errors = Array(options[:ignore_errors]).to_set
+      self.ignore_errors = Array(options[:ignore_errors]).to_set if options[:ignore_errors]
 
       init
 
@@ -113,7 +113,7 @@ module ElasticSearch
     end
 
     def upload
-      response = RestClient.put(url, @payload, params: ignore_errors.blank? ? { filter_path: "errors" } : {}, content_type: "application/json")
+      response = RestClient.put(url, @payload, params: ignore_errors ? {} : { filter_path: "errors" }, content_type: "application/json")
 
       return if options[:raise] == false
 
@@ -121,7 +121,7 @@ module ElasticSearch
 
       return unless parsed_response["errors"]
 
-      raise(ElasticSearch::Bulk::Error, response[0 .. 30]) if ignore_errors.blank?
+      raise(ElasticSearch::Bulk::Error, response[0 .. 30]) unless ignore_errors
 
       parsed_response["items"].each do |item|
         item.each do |_, _item|

@@ -302,7 +302,7 @@ module ElasticSearch
       return @aggregations[key] if @aggregations.key?(key)
 
       @aggregations[key] =
-        if response["aggregations"].blank? || response["aggregations"][key].blank?
+        if response["aggregations"].nil? || response["aggregations"][key].nil?
           Result.new
         elsif response["aggregations"][key]["buckets"].is_a?(Array)
           response["aggregations"][key]["buckets"].each_with_object({}) { |bucket, hash| hash[bucket["key"]] = Result.new(bucket) }
