@@ -4,6 +4,8 @@ module ElasticSearch
   # decorates it with methods for aggregations, hits, records, pagination, etc.
 
   class Response
+    extend Forwardable
+
     attr_accessor :relation, :response
 
     # @api private
@@ -261,7 +263,7 @@ module ElasticSearch
       @ids ||= hits["hits"].map { |hit| hit["_id"] }
     end
 
-    delegate :size, :count, :length, :to => :ids
+    def_delegators :ids, :size, :count, :length
 
     # Returns the response time in milliseconds of ElasticSearch specified in
     # the took info of the response.

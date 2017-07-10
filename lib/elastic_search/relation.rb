@@ -17,6 +17,7 @@ module ElasticSearch
     include ElasticSearch::FilterableRelation
     include ElasticSearch::PostFilterableRelation
     include ElasticSearch::AggregatableRelation
+    extend Forwardable
 
     attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values, :offset_value, :limit_value, :query_value,
       :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args, :custom_value
@@ -590,8 +591,8 @@ module ElasticSearch
       end
     end
 
-    delegate :total_entries, :total_count, :current_page, :previous_page, :prev_page, :next_page, :first_page?, :last_page?, :out_of_range?, :total_pages,
-      :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions, :scope, :results, :records, :scroll_id, :raw_response, :to => :response
+    def_delegators :response, :total_entries, :total_count, :current_page, :previous_page, :prev_page, :next_page, :first_page?, :last_page?, :out_of_range?, :total_pages,
+      :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions, :scope, :results, :records, :scroll_id, :raw_response
   end
 end
 

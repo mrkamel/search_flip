@@ -1,5 +1,6 @@
 
 require "active_record"
+require "forwardable"
 require "rest-client"
 require "hashie"
 require "set"
