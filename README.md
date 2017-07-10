@@ -426,11 +426,7 @@ Server version >= 2.
 
 ## TODO
 
-1. Remove ActiveSupport dependencies
-
-* `Module#delegate`
-
-2. Remove `require "active_record"` and active_record from gemspec
+1. Remove `require "active_record"` and active_record from gemspec
 
 2. Add convenience mixin for re-indexing ActiveRecord models on callbacks
 
