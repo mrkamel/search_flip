@@ -426,17 +426,13 @@ Server version >= 2.
 
 ## TODO
 
-1. Remove `require "active_record"` and active_record from gemspec
+1. Add convenience mixin for re-indexing ActiveRecord models on callbacks
 
-2. Add convenience mixin for re-indexing ActiveRecord models on callbacks
+2. Switch to httpary or http-rb and use custom exceptions
 
-3. Documentation
+3. First class support for `nested`, `has_parent` and `has_child` queries
 
-4. Switch to httpary or http-rb and use custom exceptions
-
-5. First class support for `nested`, `has_parent` and `has_child` queries
-
-6. Support collapse
+4. Support collapse
 
 ## Links
 
