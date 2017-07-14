@@ -426,13 +426,13 @@ Server version >= 2.
 
 ## TODO
 
-1. Add convenience mixin for re-indexing ActiveRecord models on callbacks
+Things on the To do list before releasing it:
 
-2. Switch to httpary or http-rb and use custom exceptions
-
-3. First class support for `nested`, `has_parent` and `has_child` queries
-
-4. Support collapse
+1. Check if gem name is allowed
+2. Add convenience mixin for re-indexing ActiveRecord models on callbacks
+3. Switch to httpary or http-rb and use custom exceptions
+4. First class support for `nested`, `has_parent` and `has_child` queries
+5. Support collapse
 
 ## Links
 
