@@ -433,6 +433,7 @@ Things on the To do list before releasing it:
 3. Switch to httpary or http-rb and use custom exceptions
 4. First class support for `nested`, `has_parent` and `has_child` queries
 5. Support collapse
+6. Create Logo
 
 ## Links
 
