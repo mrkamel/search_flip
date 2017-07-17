@@ -210,8 +210,10 @@ module ElasticSearch
     # Sends a delete by query request to ElasticSearch, such that all documents
     # matching the query get deleted. Please note, for certain ElasticSearch
     # versions you need to install the delete-by-query plugin to get support
-    # for this feature. Refreshes the index if the environment is set to test.
+    # for this feature. Refreshes the index if the auto_refresh is enabled.
     # Raises RestClient specific exceptions in case any errors occur.
+    #
+    # @see ElasticSearch::Config See ElasticSearch::Config for auto_refresh
     #
     # @example
     #   CommentIndex.range(lt: Time.parse("2014-01-01")).delete
@@ -233,7 +235,7 @@ module ElasticSearch
         )
       end
 
-      target.refresh if ElasticSearch::Config[:environment] == "test"
+      target.refresh if ElasticSearch::Config[:auto_refresh]
     end
 
     # Use to specify which fields of the source document you want ElasticSearch

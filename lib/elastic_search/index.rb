@@ -391,13 +391,12 @@ module ElasticSearch
       # Indexes the given record set, array of records or individual record. A
       # record set usually is an ActiveRecord::Relation, but can be any other
       # ORM as well. Uses the ElasticSearch bulk API no matter what is
-      # provided. Refreshes the index if the environment is set to test.
-      # Raises RestClient specific exceptions in case any errors occur.
+      # provided. Refreshes the index if auto_refresh is enabled. Raises
+      # RestClient specific exceptions in case any errors occur.
       #
       # @see #fetch_records See #fetch_records for other/custom ORMs
       # @see #record_id See #record_id for other/custom ORMs
-      # @see ElasticSearch::Config See ElasticSearch::Config for changing the
-      #   environment
+      # @see ElasticSearch::Config See ElasticSearch::Config for auto_refresh
       #
       # @example
       #   CommentIndex.import Comment.all
@@ -482,7 +481,9 @@ module ElasticSearch
 
       # Initiates and yields the bulk object, such that index, import, create,
       # update and delete requests can be appended to the bulk request. Sends a
-      # refresh request afterwards if the current environment is set to test.
+      # refresh request afterwards if auto_refresh is enabled.
+      #
+      # @see ElasticSearch::Config See ElasticSearch::Config for auto_refresh
       #
       # @example
       #   CommentIndex.bulk ignore_errors: [409] do |bulk|
@@ -502,16 +503,13 @@ module ElasticSearch
       #   raised. Please note that this only applies to the bulk response, not to
       #   the request in general, such that connection errors, etc will still
       #   raise.
-      #
-      # @see ElasticSearch::Config See ElasticSearch::Config for changing the
-      #   environment and bulk limit
  
       def bulk(options = {})
         ElasticSearch::Bulk.new("#{type_url}/_bulk", ElasticSearch::Config[:bulk_limit], options) do |indexer|
           yield indexer
         end
 
-        refresh if ElasticSearch::Config[:environment] == "test"
+        refresh if ElasticSearch::Config[:auto_refresh]
       end
 
       # Returns the full ElasticSearch type URL, ie base URL, index name with

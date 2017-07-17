@@ -9,7 +9,7 @@ require "yaml"
 
 ActiveRecord::Base.establish_connection YAML.load_file(File.expand_path("../database.yml", __FILE__))
 
-ElasticSearch::Config[:environment] = "test"
+ElasticSearch::Config[:auto_refresh] = true
 
 ActiveRecord::Base.connection.execute "DROP TABLE IF EXISTS products"
 
