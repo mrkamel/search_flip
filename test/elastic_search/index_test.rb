@@ -299,22 +299,6 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
     # Already tested
   end
 
-  def test_method_scope
-    temp_product_index = Class.new(ProductIndex)
-
-    temp_product_index.define_singleton_method(:with_title) { |title| where(title: title) }
-
-    expected = create(:product, title: "expected")
-    rejected = create(:product, title: "rejected")
-
-    temp_product_index.import [expected, rejected]
-
-    results = temp_product_index.with_title("expected").records
-
-    assert_includes results, expected
-    refute_includes results, rejected
-  end
-
   def test_scope
     temp_product_index = Class.new(ProductIndex)
 
