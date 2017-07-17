@@ -118,20 +118,17 @@ module ElasticSearch
       end
     end
 
-    # Adds raw post filters to the relation, such that you can filter the
-    # returned documents easily but still have full and fine grained control
-    # over the filter settings. However, usually you can achieve the same with
-    # the more easy to use methods like #post_where, #post_range, etc.
+    # Adds raw post filter queries to the relation.
     #
-    # @example Raw post term filter
+    # @example Raw post term filter query
     #   query = CommentIndex.aggregate("...")
     #   query = query.post_filter(term: { state: "new" })
     #
-    # @example Raw post range filter
+    # @example Raw post range filter query
     #   query = CommentIndex.aggregate("...")
     #   query = query.post_filter(range: { created_at: { gte: Time.parse("2016-01-01") }})
     #
-    # @param args [Array, Hash] The raw filter settings
+    # @param args [Array, Hash] The raw filter query arguments
     #
     # @return [ElasticSearch::Relation] A newly created extended relation
 
@@ -141,11 +138,39 @@ module ElasticSearch
       end
     end
 
+    # Adds raw post must queries to the relation.
+    #
+    # @example Raw post term must query
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_must(term: { state: "new" })
+    #
+    # @example Raw post range must query
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_must(range: { created_at: { gte: Time.parse("2016-01-01") }})
+    #
+    # @param args [Array, Hash] The raw must query arguments
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def post_must(*args)
       fresh.tap do |relation|
         relation.post_must_values = (post_must_values || []) + args
       end
     end
+
+    # Adds raw post must_not queries to the relation.
+    #
+    # @example Raw post term must_not query
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_must_not(term: { state: "new" })
+    #
+    # @example Raw post range must_not query
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_must_not(range: { created_at: { gte: Time.parse("2016-01-01") }})
+    #
+    # @param args [Array, Hash] The raw must_not query arguments
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
 
     def post_must_not(*args)
       fresh.tap do |relation|
@@ -153,9 +178,23 @@ module ElasticSearch
       end
     end
 
+    # Adds raw post should queries to the relation.
+    #
+    # @example Raw post term should query
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_should(term: { state: "new" })
+    #
+    # @example Raw post range should query
+    #   query = CommentIndex.aggregate("...")
+    #   query = query.post_should(range: { created_at: { gte: Time.parse("2016-01-01") }})
+    #
+    # @param args [Array, Hash] The raw should query arguments
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def post_should(*args)
       fresh.tap do |relation|
-        relation.post_must_not_values = (post_must_not_values || []) + args
+        relation.post_should_values = (post_should_values || []) + args
       end
     end
 

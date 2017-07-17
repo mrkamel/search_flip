@@ -6,6 +6,20 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
     :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions, :scope, :results, :records, :scroll_id, :raw_response,
     to: :response, subject: ElasticSearch::Relation.new(target: ProductIndex)
 
+  def test_merge
+    product1 = create(:product, price: 100, category: "category1")
+    product2 = create(:product, price: 200, category: "category2")
+    product3 = create(:product, price: 300, category: "category1")
+
+    ProductIndex.import [product1, product2, product3]
+
+    query = ProductIndex.where(price: 50 .. 250).aggregate(:category) & ProductIndex.where(category: "category1")
+
+    assert_includes query.records, product1
+    refute_includes query.records, product2
+    refute_includes query.records, product3
+  end
+
   def test_where
     product1 = create(:product, price: 100, category: "category1")
     product2 = create(:product, price: 200, category: "category2")

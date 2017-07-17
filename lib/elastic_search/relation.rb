@@ -22,6 +22,47 @@ module ElasticSearch
     attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values, :offset_value, :limit_value,
       :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args, :custom_value
 
+    # Creates a new relation while merging the contstraints of the current
+    # relation with the constraints of another one passed as argument. For
+    # multi-value contstraints the resulting relation will include constraints
+    # of both relations. For single-value constraints, the values of the
+    # relation passed as an argument are used.
+    #
+    # @example
+    #   CommentIndex.where(approved: true).merge(CommentIndex.range(:created_at, gt: Time.parse("2015-01-01")))
+    #   CommentIndex.aggregate(:user_id).merge(CommentIndex.where(admin: true))
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
+    def merge(other)
+      fresh.tap do |relation|
+        relation.profile_value = other.profile_value if other.profile_value != nil
+        relation.source_value = (relation.source_value || []) + other.source_value if other.source_value
+        relation.sort_values = (relation.sort_values || []) + other.sort_values if other.sort_values
+        relation.highlight_values = (relation.highlight_values || {}).merge(other.highlight_values) if other.highlight_values
+        relation.suggest_values = (relation.suggest_values || {}).merge(other.suggest_values) if other.suggest_values
+        relation.offset_value = other.offset_value if other.offset_value
+        relation.limit_value = other.limit_value if other.limit_value
+        relation.includes_values = (relation.includes_values || []) + other.includes_values if other.includes_values
+        relation.preload_values = (relation.preload_values || []) + other.preload_values if other.preload_values
+        relation.eager_load_values = (relation.eager_load_values || []) + other.eager_load_values if other.eager_load_values
+        relation.failsafe_value = other.failsafe_value if other.failsafe_value != nil
+        relation.scroll_args = other.scroll_args if other.scroll_args
+        relation.custom_value = (relation.custom_value || {}).merge(other.custom_value) if other.custom_value
+        relation.must_values = (relation.must_values || []) + other.must_values if other.must_values
+        relation.must_not_values = (relation.must_not_values || []) + other.must_not_values if other.must_not_values
+        relation.should_values = (relation.should_values || []) + other.should_values if other.should_values
+        relation.filter_values = (relation.filter_values || []) + other.filter_values if other.filter_values
+        relation.post_must_values = (relation.post_must_values || []) + other.post_must_values if other.post_must_values
+        relation.post_must_not_values = (relation.post_must_not_values || []) + other.post_must_not_values if other.post_must_not_values
+        relation.post_should_values = (relation.post_should_values || []) + other.post_should_values if other.post_should_values
+        relation.post_filter_values = (relation.post_filter_vales || []) + other.post_filter_values if other.post_filter_values
+        relation.aggregation_values = (relation.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values
+      end
+    end
+
+    alias_method :&, :merge
+
     # Creates a new ElasticSearch::Relation.
     #
     # @param attributes [Hash] Attributes to initialize the Relation with
@@ -30,10 +71,6 @@ module ElasticSearch
       attributes.each do |key, value|
         self.send "#{key}=", value
       end
-
-      self.offset_value ||= 0
-      self.limit_value ||= 30
-      self.failsafe_value ||= false
     end
 
     # Generates the request object from the attributes specified via chaining,
@@ -73,7 +110,7 @@ module ElasticSearch
         end
       end
 
-      res.update from: offset_value, size: limit_value
+      res.update from: offset_value_with_default, size: limit_value_with_default
 
       res[:highlight] = highlight_values if highlight_values
       res[:suggest] = suggest_values if suggest_values
@@ -400,6 +437,10 @@ module ElasticSearch
       end
     end
 
+    def offset_value_with_default
+      (offset_value || 0).to_i
+    end
+
     # Sets the request limit, ie ElasticSearch's size parameter that is used
     # to restrict the results that get returned.
     #
@@ -417,6 +458,10 @@ module ElasticSearch
       end
     end
 
+    def limit_value_with_default
+      (limit_value || 30).to_i
+    end
+
     # Sets pagination parameters for the relation by using offset and limit,
     # ie ElasticSearch's from and size parameters.
     #
@@ -429,7 +474,7 @@ module ElasticSearch
     #
     # @return [ElasticSearch::Relation] A newly created extended relation
 
-    def paginate(page:, per_page: limit_value)
+    def paginate(page:, per_page: limit_value_with_default)
       page = [page.to_i, 1].max
       per_page = per_page.to_i
 
@@ -441,7 +486,7 @@ module ElasticSearch
     end
 
     def per(n)
-      paginate(page: offset_value.to_i / limit_value + 1, per_page: n)
+      paginate(page: offset_value_with_default / limit_value_with_default + 1, per_page: n)
     end
 
     # Fetches the records specified by the relation in batches using the

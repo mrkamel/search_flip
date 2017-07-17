@@ -103,7 +103,7 @@ module ElasticSearch
     # @return [Fixnum] The current page number
 
     def current_page
-      1 + (relation.offset_value / relation.limit_value.to_f).ceil
+      1 + (relation.offset_value_with_default / relation.limit_value_with_default.to_f).ceil
     end
 
     # Returns the number of total pages for the current pagination settings, ie
@@ -116,7 +116,7 @@ module ElasticSearch
     # @return [Fixnum] The total number of pages
 
     def total_pages
-      [(total_entries / relation.limit_value.to_f).ceil, 1].max
+      [(total_entries / relation.limit_value_with_default.to_f).ceil, 1].max
     end
 
     # Returns the previous page number or nil if no previous page exists, ie if

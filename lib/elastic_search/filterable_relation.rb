@@ -93,16 +93,13 @@ module ElasticSearch
       end
     end
 
-    # Adds raw filters to the relation, such that you can filter the returned
-    # documents easily but still have full and fine grained control over the
-    # filter settings. However, usually you can achieve the same with the more
-    # easy to use methods like #where, #range, etc.
+    # Adds raw filter queries to the relation.
     #
     # @example
     #   CommentIndex.filter(term: { state: "new" })
     #   CommentIndex.filter(range: { created_at: { gte: Time.parse("2016-01-01") }})
     #
-    # @param args [Array, Hash] The raw filter settings
+    # @param args [Array, Hash] The raw filter query arguments
     #
     # @return [ElasticSearch::Relation] A newly created extended relation
 
@@ -112,17 +109,47 @@ module ElasticSearch
       end
     end
 
+    # Adds raw must queries to the relation.
+    #
+    # @example
+    #   CommentIndex.must(term: { state: "new" })
+    #   CommentIndex.must(range: { created_at: { gt: Time.parse("2016-01-01") }})
+    #
+    # @param args [Array, Hash] The raw must query arguments
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def must(*args)
       fresh.tap do |relation|
         relation.must_values = (must_values || []) + args
       end
     end
 
+    # Adds raw must_not queries to the relation.
+    #
+    # @example
+    #   CommentIndex.must_not(term: { state: "new" })
+    #   CommentIndex.must_not(range: { created_at: { gt: Time.parse"2016-01-01") }})
+    #
+    # @param args [Array, Hash] The raw must_not query arguments
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
     def must_not(*args)
       fresh.tap do |relation|
         relation.must_not_values = (must_not_values || []) + args
       end
     end
+
+    # Adds raw should queries to the relation.
+    #
+    # @example
+    #   CommentIndex.should(term: { state: "new" })
+    #   CommentIndex.should(range: { created_at: { gt: Time.parse"2016-01-01") }})
+    #
+    # @param args [Array, Hash] The raw should query arguments
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
 
     def should(*args)
       fresh.tap do |relation|
