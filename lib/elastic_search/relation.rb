@@ -19,7 +19,7 @@ module ElasticSearch
     include ElasticSearch::AggregatableRelation
     extend Forwardable
 
-    attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values, :offset_value, :limit_value, :query_value,
+    attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values, :offset_value, :limit_value,
       :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args, :custom_value
 
     # Creates a new ElasticSearch::Relation.
