@@ -580,12 +580,14 @@ module ElasticSearch
     end
 
     def respond_to?(name, *args)
-      super || target.scopes.key?(name.to_s)
+      super || target.respond_to?(name, *args) || target.scopes.key?(name.to_s)
     end
 
     def method_missing(name, *args, &block)
       if target.scopes.key?(name.to_s)
         instance_exec(*args, &target.scopes[name.to_s])
+      elsif target.respond_to?(name)
+        target.send(name, *args, &block)
       else
         super
       end
