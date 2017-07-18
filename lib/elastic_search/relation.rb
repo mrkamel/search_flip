@@ -437,6 +437,10 @@ module ElasticSearch
       end
     end
 
+    # Returns the offset value or, if not yet set,  the default limit value (0).
+    #
+    # @return [Fixnum] The offset value
+
     def offset_value_with_default
       (offset_value || 0).to_i
     end
@@ -457,6 +461,10 @@ module ElasticSearch
         relation.limit_value = n.to_i
       end
     end
+
+    # Returns the limit value or, if not yet set, the default limit value (30).
+    #
+    # @return [Fixnum] The limit value
 
     def limit_value_with_default
       (limit_value || 30).to_i
