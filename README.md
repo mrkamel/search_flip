@@ -429,11 +429,12 @@ Server version >= 2.
 Things on the To do list before releasing it:
 
 1. Check if gem name is allowed
-2. Add convenience mixin for re-indexing ActiveRecord models on callbacks
-3. Switch to httpary or http-rb and use custom exceptions
-4. First class support for `nested`, `has_parent` and `has_child` queries
-5. Support collapse
-6. Create Logo
+2. Remove `#class_attribute` dependency
+3. Add convenience mixin for re-indexing ActiveRecord models on callbacks
+4. Switch to httpary or http-rb and use custom exceptions
+5. First class support for `nested`, `has_parent` and `has_child` queries
+6. Support collapse
+7. Create Logo
 
 ## Links
 
