@@ -47,9 +47,6 @@ module ElasticSearch
 
       base.class_attribute :index_scopes
       base.index_scopes = []
-
-      base.class_attribute :scopes
-      base.scopes = {}
     end
 
     module ClassMethods
@@ -114,11 +111,7 @@ module ElasticSearch
       # @param block The scope definition. Add filters, etc.
 
       def scope(name, &block)
-        define_singleton_method name do |*args, &blk|
-          relation.send(name, *args, &blk)
-        end
-
-        self.scopes = scopes.merge(name.to_s => block)
+        define_singleton_method(name, &block)
       end
 
       # @api private
