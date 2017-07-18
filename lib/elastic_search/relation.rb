@@ -35,6 +35,8 @@ module ElasticSearch
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def merge(other)
+      other = other.relation if other.respond_to?(:relation)
+
       fresh.tap do |relation|
         relation.profile_value = other.profile_value if other.profile_value != nil
         relation.source_value = (relation.source_value || []) + other.source_value if other.source_value
