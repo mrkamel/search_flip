@@ -35,7 +35,7 @@ module ElasticSearch
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def merge(other)
-      other = other.relation if other.respond_to?(:relation)
+      other = other.relation
 
       fresh.tap do |relation|
         relation.profile_value = other.profile_value if other.profile_value != nil
@@ -64,6 +64,16 @@ module ElasticSearch
     end
 
     alias_method :&, :merge
+
+    # @api private
+    #
+    # Convenience method to have a unified conversion api.
+    #
+    # @return [ElasticSearch::Relation] Simply returns self
+
+    def relation
+      self
+    end
 
     # Creates a new ElasticSearch::Relation.
     #

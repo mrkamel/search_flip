@@ -20,6 +20,12 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
     refute_includes query.records, product3
   end
 
+  def test_relation
+    relation = ProductIndex.relation
+
+    assert relation.relation === relation
+  end
+
   def test_where
     product1 = create(:product, price: 100, category: "category1")
     product2 = create(:product, price: 200, category: "category2")
