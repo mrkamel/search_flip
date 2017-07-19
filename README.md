@@ -379,8 +379,8 @@ end
 
 * `failsafe`
 
-Use `#failsafe` to prevent any exceptions from being raised for query string syntax
-errors or ElasticSearch being unavailable, etc.
+Use `#failsafe` to prevent any exceptions from being raised for query string
+syntax errors or ElasticSearch being unavailable, etc.
 
 ```ruby
 CommentIndex.search("invalid/request").execute
@@ -390,6 +390,16 @@ CommentIndex.search("invalid/request").execute
 
 CommentIndex.search("invalid/request").failsafe(true).execute
 # => #<ElasticSearch::Response ...>
+```
+
+* `merge`
+
+You can merge relations, ie. combine the attributes (constraints, settings,
+etc) of two individual relations:
+
+```ruby
+CommentIndex.where(approved: true).merge(CommentIndex.search("hello"))
+# equivalent to: CommentIndex.where(approved: true).search("hello")
 ```
 
 For a full list of methods, check out the reference docs.
@@ -431,13 +441,11 @@ whatever ORM you use.
 Things on the To do list before releasing it:
 
 1. Check if gem name is allowed
-2. Remove `#class_attribute` dependency
-3. Add convenience mixin for re-indexing ActiveRecord models on callbacks
-4. Switch to httpary or http-rb and use custom exceptions
-5. First class support for `nested`, `has_parent` and `has_child` queries
-6. Support collapse
-7. Create Logo
-8. Mention relation merging in README
+2. Add convenience mixin for re-indexing ActiveRecord models on callbacks
+3. Switch to httpary or http-rb and use custom exceptions
+4. First class support for `nested`, `has_parent` and `has_child` queries
+5. Support collapse
+6. Create Logo
 
 ## Links
 

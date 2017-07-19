@@ -22,11 +22,11 @@ module ElasticSearch
     attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values, :offset_value, :limit_value,
       :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args, :custom_value
 
-    # Creates a new relation while merging the contstraints of the current
-    # relation with the constraints of another one passed as argument. For
-    # multi-value contstraints the resulting relation will include constraints
-    # of both relations. For single-value constraints, the values of the
-    # relation passed as an argument are used.
+    # Creates a new relation while merging the attributes (constraints,
+    # settings, etc) of the current relation with the attributes of another one
+    # passed as argument. For multi-value contstraints the resulting relation
+    # will include constraints of both relations. For single-value constraints,
+    # the values of the relation passed as an argument are used.
     #
     # @example
     #   CommentIndex.where(approved: true).merge(CommentIndex.range(:created_at, gt: Time.parse("2015-01-01")))
@@ -62,8 +62,6 @@ module ElasticSearch
         relation.aggregation_values = (relation.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values
       end
     end
-
-    alias_method :&, :merge
 
     # @api private
     #

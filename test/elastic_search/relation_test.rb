@@ -13,7 +13,7 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
 
     ProductIndex.import [product1, product2, product3]
 
-    query = ProductIndex.where(price: 50 .. 250).aggregate(:category) & ProductIndex.where(category: "category1")
+    query = ProductIndex.where(price: 50 .. 250).aggregate(:category).merge(ProductIndex.where(category: "category1"))
 
     assert_includes query.records, product1
     refute_includes query.records, product2
