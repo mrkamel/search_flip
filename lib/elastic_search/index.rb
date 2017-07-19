@@ -44,9 +44,6 @@ module ElasticSearch
   module Index
     def self.included(base)
       base.extend ClassMethods
-
-      base.class_attribute :index_scopes
-      base.index_scopes = []
     end
 
     module ClassMethods
@@ -122,13 +119,13 @@ module ElasticSearch
       #
       # @param scope The record set that gets iterated
       # @param index_scope [Boolean] Set to true if you want the the index
-      #   scopes to be applied to the scope
+      #   scope to be applied to the scope
 
       def each_record(scope, index_scope: false)
         return enum_for(:each_record, scope) unless block_given?
 
         if scope.respond_to?(:find_each)
-          (index_scope ? index_scope_for(scope) : scope).find_each do |record|
+          (index_scope ? self.index_scope(scope) : scope).find_each do |record|
             yield record
           end
         else
@@ -170,43 +167,40 @@ module ElasticSearch
         model.where(id: ids)
       end
 
-      # Adds the provided block as index scope to the list of index scopes.
-      # All index scopes will automatically be applied to scopes, eg
-      # ActiveRecord::Relation's, provided to #import or #index. This can be
-      # used to preload associations that are used when serializing records or
-      # to restrict the records you want to index.
+      # Override this method to specify an index scope, which will
+      # automatically be applied to scopes, eg. ActiveRecord::Relation objects,
+      # provided to #import or #index. This can be used to preload associations
+      # that are used when serializing records or to restrict the records you
+      # want to index.
       #
       # @example Preloading an association
-      #   index_scope { preload(:user) }
+      #   class CommentIndex
+      #     # ...
+      #
+      #     def self.index_scope(scope)
+      #       scope.preload(:user)
+      #     end
+      #   end
       #
       #   CommentIndex.import(Comment.all) # => CommentIndex.import(Comment.preload(:user))
       #
       # @example Restricting records
-      #   index_scope { where(public: true) }
+      #   class CommentIndex
+      #     # ...
+      #
+      #     def self.index_scope(scope)
+      #       scope.where(public: true)
+      #     end
+      #   end
       #
       #   CommentIndex.import(Comment.all) # => CommentIndex.import(Comment.where(public: true))
       #
-      # @param block The block implementing the index scope
-
-      def index_scope(&block)
-        if block_given?
-          self.index_scopes = index_scopes + [block]
-        else
-          index_scope_for(model)
-        end
-      end
-
-      # @api private
+      # @param scope The supplied scope to extend
       #
-      # Applies all index scopes to the scope provided. The scope eg is an
-      # ActiveRecord::Relation, but can as well be any other kind of scope
-      # depending on which ORM is used, if any.
-      #
-      # @param scope The scope to which the index scopes should be applied to
-      # @return A new scope with all index scopes applied
+      # @return The extended scope
 
-      def index_scope_for(scope)
-        index_scopes.inject(scope) { |memo, cur| memo.instance_exec(memo, &cur) }
+      def index_scope(scope)
+        scope
       end
 
       # @api private
@@ -217,7 +211,7 @@ module ElasticSearch
       # @return [ElasticSearch::Relation] The base for chaining relation methods
 
       def relation
-        ElasticSearch::Relation.new(:target => self)
+        ElasticSearch::Relation.new(target: self)
       end
 
       def_delegators :relation, :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where, :post_where_not, :post_filter, :post_range,
@@ -524,6 +518,7 @@ module ElasticSearch
       end
 
       # Returns the ElasticSearch base URL, ie protcol and host with port.
+      # Override to specify an index specific ElasticSearch cluster.
       #
       # @return [String] The ElasticSearch base URL
 

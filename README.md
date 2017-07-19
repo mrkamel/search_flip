@@ -222,7 +222,7 @@ end
 ```
 
 Generally, aggregation results returned by ElasticSearch Server are wrapped in
-a `Hashie::Mash`, such thath you can access them via:
+a `Hashie::Mash`, such that you can access them via:
 
 ```ruby
 query.aggregations(:username)["mrkamel"].revenue.value
@@ -293,8 +293,10 @@ CommentIndex.source([:id, :message]).search("hello world")
 
 * `paginate`, `page`, `per`
 
-The ElasticSearch gem supports will_paginate and kaminari compatible pagination.
-Thus, you can either use `#paginate` or `#page` in combination with `#per`:
+The ElasticSearch gem supports
+[will_paginate](https://github.com/mislav/will_paginate) and
+[kaminari](https://github.com/kaminari/kaminari) compatible pagination. Thus,
+you can either use `#paginate` or `#page` in combination with `#per`:
 
 ```ruby
 CommentIndex.paginate(page: 3, per_page: 50)
@@ -317,8 +319,6 @@ end
 ```
 
 * `profile`
-
-To enable query profiling simply use:
 
 Use `#profile` To enable query profiling:
 
@@ -421,8 +421,10 @@ whatever ORM you use.
 
 ## Feature Support
 
-`#post_search` and `#profile` are only supported from up to ElasticSearch
-Server version >= 2.
+* `#post_search` and `#profile` are only supported from up to ElasticSearch
+  Server version >= 2.
+* for ElasticSearch 2.x, the delete-by-query plugin is required to delete
+  records via queries
 
 ## TODO
 
@@ -435,10 +437,13 @@ Things on the To do list before releasing it:
 5. First class support for `nested`, `has_parent` and `has_child` queries
 6. Support collapse
 7. Create Logo
+8. Mention relation merging in README
 
 ## Links
 
 * ElasticSearch Server: [https://www.elastic.co/](https://www.elastic.co/)
 * Reference Docs: [http://www.rubydoc.info/github/mrkamel/elastic_search](http://www.rubydoc.info/github/mrkamel/elastic_search)
 * Travis: [http://travis-ci.org/mrkamel/elastic_search](http://travis-ci.org/mrkamel/elastic_search)
+* will_paginate: [https://github.com/mislav/will_paginate](https://github.com/mislav/will_paginate)
+* kaminari: [https://github.com/kaminari/kaminari](https://github.com/kaminari/kaminari)
 

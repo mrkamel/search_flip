@@ -160,8 +160,16 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
   end
 
   def test_index_scope
+    temp_product_index = Class.new(ProductIndex)
+
+    temp_product_index.define_singleton_method(:index_scope) do |scope|
+      scope.where("price < 80")
+    end
+
+    products = [create(:product, price: 20), create(:product, price: 50), create(:product, price: 100)]
+
     assert_difference "ProductIndex.total_entries", 2 do
-      ProductIndex.index Product.where(id: create_list(:product, 2).map(&:id))
+      temp_product_index.index Product.where(id: products.map(&:id))
     end
   end
 
@@ -313,23 +321,6 @@ class ElasticSearch::IndexTest < ElasticSearch::TestCase
 
     assert_includes results, expected
     refute_includes results, rejected
-  end
-
-  def test_index_scopes
-    temp_product_index = Class.new(ProductIndex)
-
-    product1, product2, product3 = create_list(:product, 3)
-
-    temp_product_index.index_scope { |products| products.where.not(id: product1.id) }
-    temp_product_index.index_scope { |products| products.where.not(id: product2.id) }
-
-    temp_product_index.import Product.all
-
-    results = temp_product_index.match_all.records
-
-    refute_includes results, product1
-    refute_includes results, product2
-    assert_includes results, product3
   end
 
   def test_bulk
