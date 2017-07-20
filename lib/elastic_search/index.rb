@@ -169,7 +169,7 @@ module ElasticSearch
 
       # Override this method to specify an index scope, which will
       # automatically be applied to scopes, eg. ActiveRecord::Relation objects,
-      # provided to #import or #index. This can be used to preload associations
+      # passed to #import or #index. This can be used to preload associations
       # that are used when serializing records or to restrict the records you
       # want to index.
       #

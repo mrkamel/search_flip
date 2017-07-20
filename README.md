@@ -99,6 +99,23 @@ class CommentIndex
 end
 ```
 
+You can additionally specify an `index_scope` which will automatically be
+applied to scopes, eg. ActiveRecord::Relation objects, passed to `#import`,
+`#index`, etc. This can be used to preload associations that are used when
+serializing records or to restrict the records you want to index.
+
+```ruby
+class CommentIndex
+  # ...
+
+  def self.index_scope(scope)
+    scope.preload(:user)
+  end
+end
+
+CommentIndex.import(Comment.all) # => CommentIndex.import(Comment.preload(:user))
+```
+
 Please note, ElasticSearch (the server) allows to have multiple types per
 index. However, this forces to have the same mapping for fields having the same
 name even though the fields live in different types of the same index. Thus,
