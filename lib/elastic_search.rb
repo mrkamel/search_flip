@@ -15,6 +15,7 @@ require "elastic_search/relation"
 require "elastic_search/response"
 require "elastic_search/result"
 require "elastic_search/index"
+require "elastic_search/model"
 
 module ElasticSearch
   class NotSupportedError < StandardError; end
