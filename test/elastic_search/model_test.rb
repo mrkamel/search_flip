@@ -2,11 +2,11 @@
 require File.expand_path("../../test_helper", __FILE__)
 
 class ElasticSearch::ModelTest < ElasticSearch::TestCase
-  def test_notify_index
+  def test_notifies_index
     klass = Class.new(Comment) do
       include ElasticSearch::Model
 
-      notify_index CommentIndex
+      notifies_index CommentIndex
     end
 
     comment = klass.new(message: "message")

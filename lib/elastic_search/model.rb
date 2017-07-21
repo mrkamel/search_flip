@@ -13,14 +13,14 @@ module ElasticSearch
     module ClassMethods
       # Notifies the index on after_save and after_destroy callbacks, such that
       # the index can re-index/delete the respective records. Works with all
-      # ORMs that support after_save and after_destroy callbacks, like eg.
+      # ORMs supporting after_save and after_destroy callbacks, like eg.
       # ActiveRecord, Mongoid, etc.
       #
       # @example
       #   class User < ActiveRecord::Base
       #     include ElasticSearch::Model
       #
-      #     notify_index UserIndex
+      #     notifies_index UserIndex
       #
       #     # ... is equivalent to:
       #
@@ -28,7 +28,7 @@ module ElasticSearch
       #     # after_destroy { |user| UserIndex.delete(user) }
       #   end
 
-      def notify_index(index)
+      def notifies_index(index)
         after_save { |record| index.import(record) }
         after_destroy { |record| index.delete(record) }
       end

@@ -446,6 +446,22 @@ end
 Thus, simply add your custom implementation of those methods that work with
 whatever ORM you use.
 
+## Automatic Indexing
+
+The ElasticSearch gem ships with a mixin using model callbacks to automatically
+re-index/destroy them from the respective index.
+
+```ruby
+class User < ActiveRecord::Base
+  include ElasticSearch::Model
+
+  notifies_index UserIndex
+end
+```
+
+Works with all ORMs supporting `after_save` and `after_destroy` like eg.
+ActiveRecord, Mongoid, etc.
+
 ## Feature Support
 
 * `#post_search` and `#profile` are only supported from up to ElasticSearch
@@ -458,11 +474,10 @@ whatever ORM you use.
 Things on the To do list before releasing it:
 
 1. Check if gem name is allowed
-2. Add convenience mixin for re-indexing ActiveRecord models on callbacks
-3. Switch to httpary or http-rb and use custom exceptions
-4. First class support for `nested`, `has_parent` and `has_child` queries
-5. Support collapse
-6. Create Logo
+2. Switch to httpary or http-rb and use custom exceptions
+3. First class support for `nested`, `has_parent` and `has_child` queries
+4. Support collapse
+5. Create Logo
 
 ## Links
 
