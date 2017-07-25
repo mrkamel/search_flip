@@ -718,7 +718,7 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
   end
 
   def test_failsafe
-    assert_raises RestClient::BadRequest do
+    assert_raises ElasticSearch::ResponseError do
       ProductIndex.search("syntax/error").records
     end
 

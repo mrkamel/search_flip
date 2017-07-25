@@ -258,7 +258,7 @@ module ElasticSearch
     # matching the query get deleted. Please note, for certain ElasticSearch
     # versions you need to install the delete-by-query plugin to get support
     # for this feature. Refreshes the index if the auto_refresh is enabled.
-    # Raises RestClient specific exceptions in case any errors occur.
+    # Raises ElasticSearch::ResponseError in case any errors occur.
     #
     # @see ElasticSearch::Config See ElasticSearch::Config for auto_refresh
     #
@@ -272,17 +272,14 @@ module ElasticSearch
       _request.delete(:size)
 
       if ElasticSearch.version.to_i >= 5
-        RestClient.post("#{target.type_url}/_delete_by_query", JSON.generate(_request), content_type: "application/json")
+        ElasticSearch::HTTPClient.post("#{target.type_url}/_delete_by_query", json: _request)
       else
-        RestClient::Request.execute(
-          :method => :delete,
-          url: "#{target.type_url}/_query",
-          payload: JSON.generate(_request),
-          headers: { content_type: "application/json" }
-        )
+        ElasticSearch::HTTPClient.delete("#{target.type_url}/_query", json: _request)
       end
 
       target.refresh if ElasticSearch::Config[:auto_refresh]
+
+      true
     end
 
     # Use to specify which fields of the source document you want ElasticSearch
@@ -571,11 +568,9 @@ module ElasticSearch
     alias_method :each, :find_each
 
     # Executes the search request for the current relation, ie sends the
-    # request to ElasticSearch and returns the response. Certain exceptions
-    # will be rescued if you specify the relation to be #failsafe, such that an
-    # empty response is returned instead. These exceptions are
-    # RestClient::BadRequest, RestClient::InternalServerError,
-    # RestClient::ServiceUnavailable and Errno::ECONNREFUSED.
+    # request to ElasticSearch and returns the response. Connection and
+    # response errors will be rescued if you specify the relation to be
+    # #failsafe, such that an empty response is returned instead.
     #
     # @example
     #   response = CommentIndex.search("hello world").execute
@@ -584,21 +579,26 @@ module ElasticSearch
 
     def execute
       @response ||= begin
-        if scroll_args && scroll_args[:id]
-          if ElasticSearch.version.to_i >= 2
-            ElasticSearch::Response.new self, JSON.parse(RestClient.post("#{target.base_url}/_search/scroll", JSON.generate(scroll: scroll_args[:timeout], scroll_id: scroll_args[:id]), content_type: "application/json"))
+        http_request = ElasticSearch::HTTPClient.headers(accept: "application/json")
+
+        http_response =
+          if scroll_args && scroll_args[:id]
+            if ElasticSearch.version.to_i >= 2
+              http_request.post("#{target.base_url}/_search/scroll", json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] })
+            else
+              http_request.post("#{target.base_url}/_search/scroll?scroll=#{scroll_args[:timeout]}", json: scroll_args[:id])
+            end
+          elsif scroll_args
+            http_request.post("#{target.type_url}/_search?scroll=#{scroll_args[:timeout]}", json: request)
           else
-            ElasticSearch::Response.new self, JSON.parse(RestClient.post("#{target.base_url}/_search/scroll?scroll=#{scroll_args[:timeout]}", scroll_args[:id], content_type: "application/json"))
+            http_request.post("#{target.type_url}/_search", json: request)
           end
-        elsif scroll_args
-          ElasticSearch::Response.new self, JSON.parse(RestClient.post("#{target.type_url}/_search?scroll=#{scroll_args[:timeout]}", JSON.generate(request), content_type: "application/json"))
-        else
-          ElasticSearch::Response.new self, JSON.parse(RestClient.post("#{target.type_url}/_search", JSON.generate(request), content_type: "application/json"))
-        end
-      rescue RestClient::BadRequest, RestClient::InternalServerError, RestClient::ServiceUnavailable, Errno::ECONNREFUSED => e
+
+        ElasticSearch::Response.new(self, http_response.parse)
+      rescue ElasticSearch::ConnectionError, ElasticSearch::ResponseError => e
         raise e unless failsafe_value
 
-        ElasticSearch::Response.new self, "took" => 0, "hits" => { "total" => 0, "hits" => [] }
+        ElasticSearch::Response.new(self, "took" => 0, "hits" => { "total" => 0, "hits" => [] })
       end
     end
 
@@ -612,7 +612,7 @@ module ElasticSearch
     #
     # @example
     #   CommentIndex.search("invalid/request").execute
-    #   # raises RestClient::BadRequest: 400 Bad Request
+    #   # raises ElasticSearch::ResponseError
     #
     #   # ...
     #

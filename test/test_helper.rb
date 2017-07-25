@@ -1,11 +1,14 @@
 
 require "minitest"
 require "minitest/autorun"
+require "webmock/minitest"
 require "mocha/mini_test"
 require "elastic_search"
 require "active_record"
 require "factory_girl"
 require "yaml"
+
+WebMock.allow_net_connect!
 
 ActiveRecord::Base.establish_connection YAML.load_file(File.expand_path("../database.yml", __FILE__))
 

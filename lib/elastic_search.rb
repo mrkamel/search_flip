@@ -1,10 +1,11 @@
 
 require "forwardable"
-require "rest-client"
+require "http"
 require "hashie"
 require "set"
 
 require "elastic_search/version"
+require "elastic_search/http_client"
 require "elastic_search/config"
 require "elastic_search/bulk"
 require "elastic_search/filterable_relation"
@@ -19,9 +20,19 @@ require "elastic_search/model"
 
 module ElasticSearch
   class NotSupportedError < StandardError; end
+  class ConnectionError < StandardError; end
+
+  class ResponseError < StandardError
+    attr_reader :code, :body
+
+    def initialize(code:, body:)
+      @code = code
+      @body = body
+    end
+  end
 
   # Uses the ElasticSearch Multi Search API to execute multiple search requests
-  # within a single request. Raises RestClient specific exceptions in case any
+  # within a single request. Raises ElasticSearch::ResponseError in case any
   # errors occur.
   #
   # @example
@@ -40,7 +51,7 @@ module ElasticSearch
     payload = payload.join("\n")
     payload << "\n"
 
-    JSON.parse(RestClient.post("#{ElasticSearch::Config[:base_url]}/_msearch", payload, content_type: "application/json"))["responses"].map.with_index do |response, index|
+    ElasticSearch::HTTPClient.headers(accept: "application/json", content_type: "application/x-ndjson").post("#{ElasticSearch::Config[:base_url]}/_msearch", body: payload).parse["responses"].map.with_index do |response, index|
       ElasticSearch::Response.new(relations[index], response)
     end
   end

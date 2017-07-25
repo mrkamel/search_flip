@@ -276,41 +276,49 @@ module ElasticSearch
         get_mapping
 
         true
-      rescue RestClient::NotFound
-        false
+      rescue ElasticSearch::ResponseError => e
+        return false if e.code == 404
+
+        raise e
       end
 
       # Fetches the index settings from ElasticSearch. Sends a GET request to
-      # index_url/_settings. Raises RestClient specific exceptions in case any
+      # index_url/_settings. Raises ElasticSearch::ResponseError in case any
       # errors occur.
       #
       # @return [Hash] The index settings
 
       def get_index_settings
-        JSON.parse RestClient.get("#{index_url}/_settings", content_type: "application/json")
+        ElasticSearch::HTTPClient.headers(accept: "application/json").get("#{index_url}/_settings").parse
       end
 
       # Creates the index within ElasticSearch and applies index settings, if
-      # specified. Raises RestClient specific exceptions in case any errors
+      # specified. Raises ElasticSearch::ResponseError in case any errors
       # occur.
 
       def create_index
-        RestClient.put index_url, JSON.generate(index_settings), content_type: "application/json"
+        ElasticSearch::HTTPClient.put(index_url, json: index_settings)
+
+        true
       end
 
       # Updates the index settings within ElasticSearch according to the index
-      # settings specified. Raises RestClient specific exceptions in case any
+      # settings specified. Raises ElasticSearch::ResponseError in case any
       # errors occur.
 
       def update_index_settings
-        RestClient.put "#{index_url}/_settings", JSON.generate(index_settings), content_type: "application/json"
+        ElasticSearch::HTTPClient.put("#{index_url}/_settings", json: index_settings)
+
+        true
       end
 
-      # Deletes the index from ElasticSearch. Raises RestClient specific
-      # exceptions in case any errors occur.
+      # Deletes the index from ElasticSearch. Raises ElasticSearch::ResponseError
+      # in case any errors occur.
 
       def delete_index
-        RestClient.delete index_url, content_type: "application/json"
+        ElasticSearch::HTTPClient.delete(index_url)
+
+        true
       end
 
       # Specifies a type mapping. Override to specify a custom mapping.
@@ -334,36 +342,41 @@ module ElasticSearch
       end
 
       # Updates the type mapping within ElasticSearch according to the mapping
-      # currently specified. Raises RestClient specific exceptions in case any
+      # currently specified. Raises ElasticSearch::ResponseError in case any
       # errors occur.
 
       def update_mapping
-        RestClient.put "#{type_url}/_mapping", JSON.generate(mapping), content_type: "application/json"
+        ElasticSearch::HTTPClient.put("#{type_url}/_mapping", json: mapping)
+
+        true
       end
 
-      # Retrieves the current type mapping from ElasticSearch. Raises RestClient
-      # specific exceptions in case any errors occur.
+      # Retrieves the current type mapping from ElasticSearch. Raises
+      # ElasticSearch::ResponseError in case any errors occur.
       #
       # @return [Hash] The current type mapping
 
       def get_mapping
-        JSON.parse RestClient.get("#{type_url}/_mapping", content_type: "application/json")
+        ElasticSearch::HTTPClient.headers(accept: "application/json").get("#{type_url}/_mapping").parse
       end
 
-      # Retrieves the document specified by id from ElasticSearch. Raises RestClient
-      # specific exceptions in case any errors occur.
+      # Retrieves the document specified by id from ElasticSearch. Raises
+      # ElasticSearch::ResponseError specific exceptions in case any errors
+      # occur.
       #
       # @return [Hash] The specified document
 
       def get(id, params = {})
-        JSON.parse RestClient.get("#{type_url}/#{id}", params: params, content_type: "application/json")
+        ElasticSearch::HTTPClient.headers(accept: "application/json").get("#{type_url}/#{id}", params: params).parse
       end
 
-      # Sends a index refresh request to ElasticSearch. Raises RestClient
-      # specific exceptions in case any errors occur.
+      # Sends a index refresh request to ElasticSearch. Raises
+      # ElasticSearch::ResponseError in case any errors occur.
 
       def refresh
-        RestClient.post "#{index_url}/_refresh", "{}", content_type: "application/json"
+        ElasticSearch::HTTPClient.post("#{index_url}/_refresh", json: {})
+
+        true
       end
 
       # Indexes the given record set, array of records or individual record.
@@ -379,7 +392,7 @@ module ElasticSearch
       # record set usually is an ActiveRecord::Relation, but can be any other
       # ORM as well. Uses the ElasticSearch bulk API no matter what is
       # provided. Refreshes the index if auto_refresh is enabled. Raises
-      # RestClient specific exceptions in case any errors occur.
+      # ElasticSearch::ResponseError in case any errors occur.
       #
       # @see #fetch_records See #fetch_records for other/custom ORMs
       # @see #record_id See #record_id for other/custom ORMs

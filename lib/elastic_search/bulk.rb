@@ -113,7 +113,7 @@ module ElasticSearch
     end
 
     def upload
-      response = RestClient.put(url, @payload, params: ignore_errors ? {} : { filter_path: "errors" }, content_type: "application/json")
+      response = ElasticSearch::HTTPClient.headers(content_type: "application/x-ndjson").put(url, body: @payload, params: ignore_errors ? {} : { filter_path: "errors" })
 
       return if options[:raise] == false
 

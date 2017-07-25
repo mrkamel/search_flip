@@ -8,7 +8,7 @@ module ElasticSearch
   # @return [String] The ElasticSearch server version
 
   def self.version
-    @version ||= JSON.parse(RestClient.get("#{Config[:base_url]}/", content_type: "application/json"))["version"]["number"]
+    @version ||= ElasticSearch::HTTPClient.get("#{Config[:base_url]}/").parse["version"]["number"]
   end
 
   Config = {
