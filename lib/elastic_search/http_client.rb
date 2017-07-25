@@ -1,5 +1,11 @@
 
 module ElasticSearch
+  # @api private
+  #
+  # The ElasticSearch::HTTPClient class wraps the http gem, is for internal use
+  # and responsible for the http request/response handling, ie communication
+  # with ElasticSearch Server.
+
   class HTTPClient
     class Request
       attr_accessor :headers_hash

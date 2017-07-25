@@ -401,7 +401,7 @@ syntax errors or ElasticSearch being unavailable, etc.
 
 ```ruby
 CommentIndex.search("invalid/request").execute
-# raises RestClient::BadRequest: 400 Bad Request
+# raises ElasticSearch::ResponseError
 
 # ...
 
