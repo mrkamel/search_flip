@@ -586,10 +586,10 @@ module ElasticSearch
             if ElasticSearch.version.to_i >= 2
               http_request.post("#{target.base_url}/_search/scroll", json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] })
             else
-              http_request.post("#{target.base_url}/_search/scroll?scroll=#{scroll_args[:timeout]}", json: scroll_args[:id])
+              http_request.headers(content_type: "text/plain").post("#{target.base_url}/_search/scroll", params: { scroll: scroll_args[:timeout] }, body: scroll_args[:id])
             end
           elsif scroll_args
-            http_request.post("#{target.type_url}/_search?scroll=#{scroll_args[:timeout]}", json: request)
+            http_request.post("#{target.type_url}/_search", params: { scroll: scroll_args[:timeout] }, json: request)
           else
             http_request.post("#{target.type_url}/_search", json: request)
           end

@@ -29,6 +29,10 @@ module ElasticSearch
       @code = code
       @body = body
     end
+
+    def to_s
+      "#{self.class.name} (#{code})"
+    end
   end
 
   # Uses the ElasticSearch Multi Search API to execute multiple search requests
