@@ -59,9 +59,9 @@ Available config options are:
   can be useful to separate the indices of e.g. testing and development environments.
 * `base_url` to tell ElasticSearch how to connect to your cluster
 * `bulk_limit` a global limit for bulk requests
-* `environment` tells ElasticSearch the current environment. This is used to
-  e.g. automatically refresh an index when indexing/deleting records in test
-  environment.
+* `auto_refresh` tells ElasticSearch to automatically refresh an index after
+* import, index, delete, etc operations. This is e.g. usuful for testing, etc.
+  Defaults to false.
 
 ## Usage
 
@@ -239,7 +239,8 @@ end
 ```
 
 Generally, aggregation results returned by ElasticSearch Server are wrapped in
-a `Hashie::Mash`, such that you can access them via:
+a `ElasticSearch::Result`, which wraps a `Hashie::Mash`such that you can access
+them via:
 
 ```ruby
 query.aggregations(:username)["mrkamel"].revenue.value
@@ -474,10 +475,9 @@ ActiveRecord, Mongoid, etc.
 Things on the To do list before releasing it:
 
 1. Check if gem name is allowed
-2. Switch to httpary or http-rb and use custom exceptions
-3. First class support for `nested`, `has_parent` and `has_child` queries
-4. Support collapse
-5. Create Logo
+2. First class support for `nested`, `has_parent` and `has_child` queries
+3. Support collapse
+4. Create Logo
 
 ## Links
 
