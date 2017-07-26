@@ -51,15 +51,46 @@ module ElasticSearch
         relation.failsafe_value = other.failsafe_value if other.failsafe_value != nil
         relation.scroll_args = other.scroll_args if other.scroll_args
         relation.custom_value = (relation.custom_value || {}).merge(other.custom_value) if other.custom_value
+        relation.search_values = (relation.search_values || []) + other.search_values if other.search_values
         relation.must_values = (relation.must_values || []) + other.must_values if other.must_values
         relation.must_not_values = (relation.must_not_values || []) + other.must_not_values if other.must_not_values
         relation.should_values = (relation.should_values || []) + other.should_values if other.should_values
         relation.filter_values = (relation.filter_values || []) + other.filter_values if other.filter_values
+        relation.post_search_values = (relation.post_search_values || []) + other.post_search_values if other.post_search_values
         relation.post_must_values = (relation.post_must_values || []) + other.post_must_values if other.post_must_values
         relation.post_must_not_values = (relation.post_must_not_values || []) + other.post_must_not_values if other.post_must_not_values
         relation.post_should_values = (relation.post_should_values || []) + other.post_should_values if other.post_should_values
         relation.post_filter_values = (relation.post_filter_vales || []) + other.post_filter_values if other.post_filter_values
         relation.aggregation_values = (relation.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values
+      end
+    end
+
+    # Creates a new relation while removing all specifies scopes. Currently,
+    # you can unscope :search, :post_search, :sort, :highlight, :suggest, :custom
+    # and :aggregate.
+    #
+    # @example
+    #   CommentIndex.search("hello world").aggregate(:user_id).unscope(:search, :aggregate)
+    #
+    # @param scopes [Symbol] All scopes that you want to remove
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
+    def unscope(*scopes)
+      unknown = scopes - [:search, :post_search, :sort, :highlight, :suggest, :custom, :aggregate]
+
+      raise(ArgumentError, "Can't unscope #{unknown.join(", ")}") if unknown.size > 0
+
+      scopes = scopes.to_set
+
+      fresh.tap do |relation|
+        relation.search_values = nil if scopes.include?(:search)
+        relation.post_search_values = nil if scopes.include?(:search)
+        relation.sort_values = nil if scopes.include?(:sort)
+        relation.hightlight_values = nil if scopes.include?(:highlight)
+        relation.suggest_values = nil if scopes.include?(:suggest)
+        relation.custom_values = nil if scopes.include?(:custom)
+        relation.aggregation_values = nil if scopes.include?(:aggregate)
       end
     end
 
@@ -92,11 +123,11 @@ module ElasticSearch
     def request
       res = {}
 
-      if must_values || must_not_values || should_values || filter_values
+      if must_values || search_values || must_not_values || should_values || filter_values
         if ElasticSearch.version.to_i >= 2
           res[:query] = {
             bool: {}.
-              merge(must_values ? { must: must_values } : {}).
+              merge(must_values || search_values ? { must: (must_values || []) + (search_values || [])} : {}).
               merge(must_not_values ? { must_not: must_not_values } : {}).
               merge(should_values ? { should: should_values } : {}).
               merge(filter_values ? { filter: filter_values } : {})
@@ -105,7 +136,7 @@ module ElasticSearch
           filters = (filter_values || []) + (must_not_values || []).map { |must_not_value| { not: must_not_value } }
 
           queries = {}.
-            merge(must_values ? { must: must_values } : {}).
+            merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {}).
             merge(should_values ? { should: should_values } : {})
 
           if filters.size > 0
@@ -127,11 +158,11 @@ module ElasticSearch
       res[:sort] = sort_values if sort_values
       res[:aggregations] = aggregation_values if aggregation_values
 
-      if post_must_values || post_must_not_values || post_should_values || post_filter_values
+      if post_must_values || post_search_values || post_must_not_values || post_should_values || post_filter_values
         if ElasticSearch.version.to_i >= 2
           res[:post_filter] = {
             bool: {}.
-              merge(post_must_values ? { must: post_must_values } : {}).
+              merge(post_must_values || post_search_values ? { must: (post_must_values || []) + (post_search_values || []) } : {}).
               merge(post_must_not_values ? { must_not: post_must_not_values } : {}).
               merge(post_should_values ? { should: post_should_values } : {}).
               merge(post_filter_values ? { filter: post_filter_values } : {})
@@ -140,7 +171,7 @@ module ElasticSearch
           post_filters = (post_filter_values || []) + (post_must_not_values || []).map { |post_must_not_value| { not: post_must_not_value } }
 
           post_queries = {}.
-            merge(post_must_values ? { must: post_must_values } : {}).
+            merge(post_must_values || post_search_values ? { must: (post_must_values || []) + (post_search_values || []) } : {}).
             merge(post_should_values ? { should: post_should_values } : {})
 
           post_filters_and_queries = post_filters + (post_queries.size > 0 ? [bool: post_queries] : [])

@@ -652,6 +652,17 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
     assert_equal [product1], ProductIndex.search("Title1 OR Title3").where(price: 5 .. 15).records
   end
 
+  def test_unscope
+    product1 = create(:product, title: "Title1", description: "Description1", price: 10)
+    product2 = create(:product, title: "Title2", description: "Description2", price: 20)
+    product3 = create(:product, title: "Title3", description: "Description2", price: 30)
+
+    ProductIndex.import [product1, product2, product3]
+
+    assert_equal [product1], ProductIndex.search("Title1 OR Title2").search("Title1 OR Title3").records
+    assert_equal [product1, product3].to_set, ProductIndex.search("Title1 OR Title2").unscope(:search).search("Title1 OR Title3").records.to_set
+  end
+
   def test_highlight
     product1 = create(:product, title: "Title1 highlight", description: "Description1 highlight")
     product2 = create(:product, title: "Title2 highlight", description: "Description2 highlight")

@@ -11,7 +11,7 @@ module ElasticSearch
   module FilterableRelation
     def self.included(base)
       base.class_eval do
-        attr_accessor :must_values, :must_not_values, :should_values, :filter_values
+        attr_accessor :search_values, :must_values, :must_not_values, :should_values, :filter_values
       end
     end
 
@@ -24,16 +24,14 @@ module ElasticSearch
     #
     # @param q [String] The query string query
     #
-    # @param options [Hash] Additional options for the query sring query, like
+    # @param options [Hash] Additional options for the query string query, like
     #   eg default_operator, default_field, etc.
     #
     # @return [ElasticSearch::Relation] A newly created extended relation
 
     def search(q, options = {})
-      if q.to_s.strip.length > 0
-        must query_string: { query: q, :default_operator => :AND }.merge(options)
-      else
-        fresh
+      fresh.tap do |relation|
+        relation.search_values = (search_values || []) + [query_string: { query: q, :default_operator => :AND }.merge(options)] if q.to_s.strip.length > 0
       end
     end
 

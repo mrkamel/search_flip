@@ -23,7 +23,7 @@ module ElasticSearch
   module PostFilterableRelation
     def self.included(base)
       base.class_eval do
-        attr_accessor :post_must_values, :post_must_not_values, :post_should_values, :post_filter_values
+        attr_accessor :post_search_values, :post_must_values, :post_must_not_values, :post_should_values, :post_filter_values
       end
     end
 
@@ -32,11 +32,11 @@ module ElasticSearch
     # ElasticSearch docs for further details.
     #
     # @example
-    #   CommentIndex.search("message:hello OR message:worl*")
+    #   CommentIndex.aggregate(:user_id).post_search("message:hello OR message:worl*")
     #
     # @param q [String] The query string query
     #
-    # @param options [Hash] Additional options for the query sring query, like
+    # @param options [Hash] Additional options for the query string query, like
     #   eg default_operator, default_field, etc.
     #
     # @return [ElasticSearch::Relation] A newly created extended relation
@@ -44,10 +44,8 @@ module ElasticSearch
     def post_search(q, options = {})
       raise(ElasticSearch::NotSupportedError) if ElasticSearch.version.to_i < 2
 
-      if q.to_s.strip.length > 0
-        post_must query_string: { query: q, :default_operator => :AND }.merge(options)
-      else
-        fresh
+      fresh.tap do |relation|
+        relation.post_search_values = (post_search_values || []) + [query_string: { query: q, :default_operator => :AND }.merge(options)] if q.to_s.strip.length > 0
       end
     end
 
