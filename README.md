@@ -297,8 +297,8 @@ query.results[0].highlight.title # => "<em>hello</em> world"
 ### Advanced Relation Methods
 
 There are even more methods to make your life easier, namely `source`,
-`scroll`, `profile`, `includes`, `preload`, `find_in_batches`, `find_each` and
-`failsafe` to name just a few:
+`scroll`, `profile`, `includes`, `preload`, `find_in_batches`, `find_each`,
+`failsafe` and `unscope` to name just a few:
 
 * `source`
 
@@ -420,7 +420,15 @@ CommentIndex.where(approved: true).merge(CommentIndex.search("hello"))
 # equivalent to: CommentIndex.where(approved: true).search("hello")
 ```
 
-For a full list of methods, check out the reference docs.
+* `unscope`
+
+You can even remove certain already added scopes from via `#unscope`:
+
+```ruby
+CommentIndex.aggregate(:username).search("hello world").unscope(:search, :aggregate)
+```
+
+For further details and a full list of methods, check out the reference docs.
 
 ## Non-ActiveRecord models
 

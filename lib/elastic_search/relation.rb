@@ -65,12 +65,12 @@ module ElasticSearch
       end
     end
 
-    # Creates a new relation while removing all specifies scopes. Currently,
+    # Creates a new relation while removing all specified scopes. Currently,
     # you can unscope :search, :post_search, :sort, :highlight, :suggest, :custom
     # and :aggregate.
     #
     # @example
-    #   CommentIndex.search("hello world").aggregate(:user_id).unscope(:search, :aggregate)
+    #   CommentIndex.search("hello world").aggregate(:username).unscope(:search, :aggregate)
     #
     # @param scopes [Symbol] All scopes that you want to remove
     #
