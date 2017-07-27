@@ -422,7 +422,7 @@ CommentIndex.where(approved: true).merge(CommentIndex.search("hello"))
 
 * `unscope`
 
-You can even remove certain already added scopes from via `#unscope`:
+You can even remove certain already added scopes via `#unscope`:
 
 ```ruby
 CommentIndex.aggregate(:username).search("hello world").unscope(:search, :aggregate)
@@ -486,6 +486,7 @@ Things on the To do list before releasing it:
 2. First class support for `nested`, `has_parent` and `has_child` queries
 3. Support collapse
 4. Create Logo
+5. Support more scopes in `unscope`
 
 ## Links
 

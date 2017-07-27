@@ -216,7 +216,7 @@ module ElasticSearch
 
       def_delegators :relation, :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where, :post_where_not, :post_filter, :post_range,
         :post_exists, :post_exists_not, :aggregate, :scroll, :source, :includes, :eager_load, :preload, :sort, :resort, :order, :reorder, :offset, :limit, :paginate,
-        :page, :per, :search, :highlight, :suggest, :custom, :find_in_batches, :find_each, :failsafe, :total_entries, :records
+        :page, :per, :search, :highlight, :suggest, :custom, :find_in_batches, :find_each, :failsafe, :total_entries, :total_count, :records
 
       # Override to specify the type name used within ElasticSearch. Recap,
       # this gem uses an individual index for each index class, because
