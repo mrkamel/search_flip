@@ -256,15 +256,17 @@ module ElasticSearch
       #   def self.index_settings
       #     {
       #       settings: {
-      #         number_of_shards: 1
-      #       }
+      #         number_of_shards: 10,
+      #         number_of_replicas: 2
+      #       },
+      #       mappings: mapping
       #     }
       #   end
       #
       # @return [Hash] The index settings
 
       def index_settings
-        {}
+        { mappings: mapping }
       end
 
       # Returns whether or not the associated ElasticSearch index already

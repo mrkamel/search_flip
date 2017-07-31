@@ -134,7 +134,7 @@ class CommentIndex
 end
 ```
 
-To specify a custom mapping:
+Optionally, specify a custom mapping:
 
 ```ruby
 class CommentIndex
@@ -151,6 +151,20 @@ class CommentIndex
   end
 
   # ...
+end
+```
+
+or index settings:
+
+```ruby
+def self.index_settings
+  {
+    settings: {
+      number_of_shards: 10,
+      number_of_replicas: 2
+    },
+    mappings: mapping
+  }
 end
 ```
 
