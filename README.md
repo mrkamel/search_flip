@@ -162,8 +162,7 @@ def self.index_settings
     settings: {
       number_of_shards: 10,
       number_of_replicas: 2
-    },
-    mappings: mapping
+    }
   }
 end
 ```
@@ -496,12 +495,11 @@ ActiveRecord, Mongoid, etc.
 
 Things on the To do list before releasing it:
 
-1. Create index with mapping
-2. Check if gem name is allowed
-3. First class support for `nested`, `has_parent` and `has_child` queries
-4. Support collapse
-5. Create Logo
-6. Support more scopes in `unscope`
+1. Check if gem name is allowed
+2. First class support for `nested`, `has_parent` and `has_child` queries
+3. Support collapse
+4. Create Logo
+5. Support more scopes in `unscope`
 
 ## Links
 
