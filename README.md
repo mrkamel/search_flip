@@ -9,7 +9,6 @@ these indices using a chainable, concise, yet powerful DSL. Finally, the
 ElasticSearch gem supports ElasticSearch Server 1.x, 2.x, 5.x. Check section
 [Feature Support](#feature-support) for version dependent features.
 
-
 ```ruby
 CommentIndex.search("hello world", default_field: "title").where(visible: true).aggregate(:user_id).sort(id: "desc")
 
@@ -495,11 +494,12 @@ ActiveRecord, Mongoid, etc.
 
 Things on the To do list before releasing it:
 
-1. Check if gem name is allowed
+1. Rename the project
 2. First class support for `nested`, `has_parent` and `has_child` queries
 3. Support collapse
 4. Create Logo
 5. Support more scopes in `unscope`
+6. Comparison with other gems
 
 ## Links
 
