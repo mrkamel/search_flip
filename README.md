@@ -19,6 +19,31 @@ end
 CommentIndex.range(:created_at, gt: Date.today - 1.week, lt: Date.today).where(state: ["approved", "pending"])
 ```
 
+## Comparison with other gems
+
+There are great ruby gems to work with Elasticsearch like e.g. searchkick and
+elasticsearch-ruby already. However, they don't have a chainable API. Compare
+yourself.
+
+```
+# elasticsearch-ruby
+Comment.search(
+  query: {
+    query_string: {
+      query: "hello world",
+      default_operator: "AND"
+    }
+  }
+)
+
+# searchkick
+Comment.search("hello world", where: { available: true }, order: { id: "desc" }, aggs: [:username])
+
+# elastic_search
+CommentIndex.where(available: true).search("hello world").sort(id: "desc").aggregate(:username)
+
+```
+
 ## Reference Docs
 
 See [http://www.rubydoc.info/github/mrkamel/elastic_search](http://www.rubydoc.info/github/mrkamel/elastic_search)

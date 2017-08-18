@@ -31,7 +31,7 @@ module ElasticSearch
     end
 
     def to_s
-      "#{self.class.name} (#{code})"
+      "#{self.class.name} (#{code}): #{body}"
     end
   end
 
