@@ -20,7 +20,7 @@ module ElasticSearch
     extend Forwardable
 
     attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values, :offset_value, :limit_value,
-      :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args, :custom_value
+      :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args, :custom_value, :terminate_after_value, :timeout_value
 
     # Creates a new relation while merging the attributes (constraints,
     # settings, etc) of the current relation with the attributes of another one
@@ -62,6 +62,37 @@ module ElasticSearch
         relation.post_should_values = (relation.post_should_values || []) + other.post_should_values if other.post_should_values
         relation.post_filter_values = (relation.post_filter_vales || []) + other.post_filter_values if other.post_filter_values
         relation.aggregation_values = (relation.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values
+        relation.terminate_after_value = other.terminate_after_value if other.terminate_after_value != nil
+        relation.timeout_value = other.timeout_value if other.timeout_value != nil
+      end
+    end
+
+    # Specifies a query timeout, such that the processing will be stopped after
+    # that timeout and only the results calculated up to that point will be
+    # processed and returned.
+    #
+    # @example
+    #   ProductIndex.timeout("3s").search("hello world")
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
+    def timeout(n)
+      fresh.tap do |relation|
+        relation.timeout_value = n
+      end
+    end
+
+    # Specifies early query termination, such that the processing will be
+    # stopped after the specified number of results has been accumulated.
+    #
+    # @example
+    #   ProductIndex.terminate_after(10_000).search("hello world")
+    #
+    # @return [ElasticSearch::Relation] A newly created extended relation
+
+    def terminate_after(n)
+      fresh.tap do |relation|
+        relation.terminate_after_value = n
       end
     end
 
@@ -153,6 +184,8 @@ module ElasticSearch
 
       res.update from: offset_value_with_default, size: limit_value_with_default
 
+      res[:timeout] = timeout_value if timeout_value
+      res[:terminate_after] = terminate_after_value if terminate_after_value
       res[:highlight] = highlight_values if highlight_values
       res[:suggest] = suggest_values if suggest_values
       res[:sort] = sort_values if sort_values

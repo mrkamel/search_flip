@@ -26,6 +26,22 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
     assert relation.relation === relation
   end
 
+  def test_timeout
+    query = ProductIndex.timeout("1s")
+
+    assert_equal "1s", query.request[:timeout]
+
+    query.execute
+  end
+
+  def test_terminate_after
+    query = ProductIndex.terminate_after(1)
+
+    assert_equal 1, query.request[:terminate_after]
+
+    query.execute
+  end
+
   def test_where
     product1 = create(:product, price: 100, category: "category1")
     product2 = create(:product, price: 200, category: "category2")
