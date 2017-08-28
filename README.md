@@ -465,6 +465,23 @@ You can even remove certain already added scopes via `#unscope`:
 CommentIndex.aggregate(:username).search("hello world").unscope(:search, :aggregate)
 ```
 
+* `timeout`
+
+Specify a timeout to limit query processing time:
+
+```ruby
+CommentIndex.timeout("3s").execute
+```
+
+* `terminate_after`
+
+Activate early query termination to stop query processing after the specified
+number of records has been found:
+
+```ruby
+CommentIndex.terminate_after(10).execute
+```
+
 For further details and a full list of methods, check out the reference docs.
 
 ## Non-ActiveRecord models
