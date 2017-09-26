@@ -542,6 +542,7 @@ Things on the To do list before releasing it:
 4. Create Logo
 5. Support more scopes in `unscope`
 6. Comparison with other gems
+7. Alias support
 
 ## Links
 
