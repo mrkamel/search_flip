@@ -84,7 +84,7 @@ Available config options are:
 * `base_url` to tell ElasticSearch how to connect to your cluster
 * `bulk_limit` a global limit for bulk requests
 * `auto_refresh` tells ElasticSearch to automatically refresh an index after
-* import, index, delete, etc operations. This is e.g. usuful for testing, etc.
+  import, index, delete, etc operations. This is e.g. usuful for testing, etc.
   Defaults to false.
 
 ## Usage
@@ -543,6 +543,8 @@ Things on the To do list before releasing it:
 5. Support more scopes in `unscope`
 6. Comparison with other gems
 7. Alias support
+8. `function_score` support
+9. `rescore` support
 
 ## Links
 
