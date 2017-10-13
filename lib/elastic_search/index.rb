@@ -518,7 +518,7 @@ module ElasticSearch
       #
       # @return [String] The ElasticSearch type URL
 
-      def type_url(base_url: base_url)
+      def type_url(base_url: self.base_url)
         "#{index_url(base_url: base_url)}/#{type_name}"
       end
 
@@ -527,7 +527,7 @@ module ElasticSearch
       #
       # @return [String] The ElasticSearch index URL
 
-      def index_url(base_url: base_url)
+      def index_url(base_url: self.base_url)
         "#{base_url}/#{index_name_with_prefix}"
       end
 
