@@ -518,8 +518,8 @@ module ElasticSearch
       #
       # @return [String] The ElasticSearch type URL
 
-      def type_url
-        "#{index_url}/#{type_name}"
+      def type_url(base_url: base_url)
+        "#{index_url(base_url: base_url)}/#{type_name}"
       end
 
       # Returns the ElasticSearch index URL, ie base URL and index name with
@@ -527,7 +527,7 @@ module ElasticSearch
       #
       # @return [String] The ElasticSearch index URL
 
-      def index_url
+      def index_url(base_url: base_url)
         "#{base_url}/#{index_name_with_prefix}"
       end
 

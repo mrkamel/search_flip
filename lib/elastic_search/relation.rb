@@ -636,26 +636,29 @@ module ElasticSearch
     # response errors will be rescued if you specify the relation to be
     # #failsafe, such that an empty response is returned instead.
     #
+    # @param base_url An optional alternative base_url to send the request
+    #   to for e.g. proxying
+    #
     # @example
     #   response = CommentIndex.search("hello world").execute
     #
     # @return [ElasticSearch::Response] The response object
 
-    def execute
+    def execute(base_url: target.base_url)
       @response ||= begin
         http_request = ElasticSearch::HTTPClient.headers(accept: "application/json")
 
         http_response =
           if scroll_args && scroll_args[:id]
             if ElasticSearch.version.to_i >= 2
-              http_request.post("#{target.base_url}/_search/scroll", json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] })
+              http_request.post("#{base_url}/_search/scroll", json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] })
             else
-              http_request.headers(content_type: "text/plain").post("#{target.base_url}/_search/scroll", params: { scroll: scroll_args[:timeout] }, body: scroll_args[:id])
+              http_request.headers(content_type: "text/plain").post("#{base_url}/_search/scroll", params: { scroll: scroll_args[:timeout] }, body: scroll_args[:id])
             end
           elsif scroll_args
-            http_request.post("#{target.type_url}/_search", params: { scroll: scroll_args[:timeout] }, json: request)
+            http_request.post("#{target.type_url(base_url: base_url)}/_search", params: { scroll: scroll_args[:timeout] }, json: request)
           else
-            http_request.post("#{target.type_url}/_search", json: request)
+            http_request.post("#{target.type_url(base_url: base_url)}/_search", json: request)
           end
 
         ElasticSearch::Response.new(self, http_response.parse)
