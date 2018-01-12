@@ -1,14 +1,14 @@
 
-module ElasticSearch
+module Searchist
   # Queries and returns the ElasticSearch server version used.
   #
   # @example
-  #   ElasticSearch.version # => e.g. 2.4.1
+  #   Searchist.version # => e.g. 2.4.1
   #
-  # @return [String] The ElasticSearch server version
+  # @return [String] The Searchist server version
 
   def self.version
-    @version ||= ElasticSearch::HTTPClient.get("#{Config[:base_url]}/").parse["version"]["number"]
+    @version ||= Searchist::HTTPClient.get("#{Config[:base_url]}/").parse["version"]["number"]
   end
 
   Config = {

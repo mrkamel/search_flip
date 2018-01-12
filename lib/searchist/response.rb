@@ -1,6 +1,6 @@
 
-module ElasticSearch
-  # The ElasticSearch::Response class wraps a raw ElasticSearch response and
+module Searchist
+  # The Searchist::Response class wraps a raw Searchist response and
   # decorates it with methods for aggregations, hits, records, pagination, etc.
 
   class Response
@@ -156,13 +156,13 @@ module ElasticSearch
       return current_page + 1
     end
 
-    # Returns the results, ie hits, wrapped in a ElasticSearch::Result object
+    # Returns the results, ie hits, wrapped in a Searchist::Result object
     # which basically is a Hashie::Mash. Check out the Hashie docs for further
     # details.
     #
     # @example
     #   CommentIndex.search("hello world").results
-    #   # => [#<ElasticSearch::Result ...>, ...]
+    #   # => [#<Searchist::Result ...>, ...]
     #
     # @return [Array] An array of results
 

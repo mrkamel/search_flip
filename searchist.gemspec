@@ -1,16 +1,16 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'elastic_search/version'
+require 'searchist/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "elastic_search"
-  spec.version       = ElasticSearch::VERSION
+  spec.name          = "searchist"
+  spec.version       = Searchist::VERSION
   spec.authors       = ["Benjamin Vetter"]
   spec.email         = ["vetter@flakks.com"]
-  spec.description   = %q{Compositional ElasticSearch client library}
+  spec.description   = %q{Compositional EasticSearch client library}
   spec.summary       = %q{Powerful ElasticSearch client library to easily build complex queries}
-  spec.homepage      = "https://github.com/mrkamel/elastic_search"
+  spec.homepage      = "https://github.com/mrkamel/searchist"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)

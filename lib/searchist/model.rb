@@ -1,6 +1,6 @@
 
-module ElasticSearch
-  # The ElasticSearch::Model mixin provides means to interact with associated
+module Searchist
+  # The Searchist::Model mixin provides means to interact with associated
   # index classes. For instance, you can notify an index about model changes
   # via callbacks, such that the index can subsequently re-index/delete the
   # respective records.
@@ -18,7 +18,7 @@ module ElasticSearch
       #
       # @example
       #   class User < ActiveRecord::Base
-      #     include ElasticSearch::Model
+      #     include Searchist::Model
       #
       #     notifies_index UserIndex
       #

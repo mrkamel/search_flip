@@ -1,7 +1,7 @@
 
 require File.expand_path("../../test_helper", __FILE__)
 
-class ElasticSearch::AggregationRelationTest < ElasticSearch::TestCase
+class Searchist::AggregationRelationTest < Searchist::TestCase
   def test_where
     product1 = create(:product, category: "category1", title: "title", description: "description")
     product2 = create(:product, category: "category2", title: "title", description: "description")

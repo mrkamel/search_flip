@@ -1,10 +1,10 @@
 
-module ElasticSearch
+module Searchist
   # @api private
   #
-  # The ElasticSearch::HTTPClient class wraps the http gem, is for internal use
-  # and responsible for the http request/response handling, ie communication
-  # with ElasticSearch Server.
+  # The Searchist::HTTPClient class wraps the http gem, is for internal use
+  # and responsible for the http request/response handling, ie communicating
+  # with ElasticSearch.
 
   class HTTPClient
     class Request
@@ -27,11 +27,11 @@ module ElasticSearch
       def execute(method, *args)
         response = HTTP.headers(headers_hash || {}).send(method, *args)
 
-        raise ElasticSearch::ResponseError.new(code: response.code, body: response.body.to_s) unless response.status.success?
+        raise Searchist::ResponseError.new(code: response.code, body: response.body.to_s) unless response.status.success?
 
         response
       rescue HTTP::ConnectionError => e
-        raise ElasticSearch::ConnectionError, e.message
+        raise Searchist::ConnectionError, e.message
       end
     end
 

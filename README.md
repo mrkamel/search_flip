@@ -1,12 +1,12 @@
 
-# ElasticSearch
+# Searchist
 
-[![Build Status](https://secure.travis-ci.org/mrkamel/elastic_search.png?branch=master)](http://travis-ci.org/mrkamel/elastic_search)
+[![Build Status](https://secure.travis-ci.org/mrkamel/searchist.png?branch=master)](http://travis-ci.org/mrkamel/searchist)
 
-Using the ElasticSearch gem it is dead-simple to create index classes that
-correspond to [ElasticSearch](https://www.elastic.co/) indices and to manipulate, query and aggregate
-these indices using a chainable, concise, yet powerful DSL. Finally, the
-ElasticSearch gem supports ElasticSearch Server 1.x, 2.x, 5.x. Check section
+Using Searchist it is dead-simple to create index classes that correspond to
+[ElasticSearch](https://www.elastic.co/) indices and to manipulate, query and
+aggregate these indices using a chainable, concise, yet powerful DSL. Finally,
+the Searchist supports ElasticSearch Server 1.x, 2.x, 5.x. Check section
 [Feature Support](#feature-support) for version dependent features.
 
 ```ruby
@@ -39,21 +39,21 @@ Comment.search(
 # searchkick
 Comment.search("hello world", where: { available: true }, order: { id: "desc" }, aggs: [:username])
 
-# elastic_search
+# searchist
 CommentIndex.where(available: true).search("hello world").sort(id: "desc").aggregate(:username)
 
 ```
 
 ## Reference Docs
 
-See [http://www.rubydoc.info/github/mrkamel/elastic_search](http://www.rubydoc.info/github/mrkamel/elastic_search)
+See [http://www.rubydoc.info/github/mrkamel/searchist](http://www.rubydoc.info/github/mrkamel/searchist)
 
 ## Install
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'elastic_search'
+gem 'searchist'
 ```
 
 and then execute
@@ -65,7 +65,7 @@ $ bundle
 or install it via
 
 ```
-$ gem install elastic_search
+$ gem install searchist
 ```
 
 ## Config
@@ -73,27 +73,27 @@ $ gem install elastic_search
 You can change global config options like:
 
 ```ruby
-ElasticSearch::Config[:environment] = "development"
-ElasticSearch::Config[:base_url] = "http://127.0.0.1:9200"
+Searchist::Config[:environment] = "development"
+Searchist::Config[:base_url] = "http://127.0.0.1:9200"
 ```
 
 Available config options are:
 
 * `index_prefix` to have a prefix added to your index names automatically. This
   can be useful to separate the indices of e.g. testing and development environments.
-* `base_url` to tell ElasticSearch how to connect to your cluster
+* `base_url` to tell searchist how to connect to your cluster
 * `bulk_limit` a global limit for bulk requests
-* `auto_refresh` tells ElasticSearch to automatically refresh an index after
+* `auto_refresh` tells searchist to automatically refresh an index after
   import, index, delete, etc operations. This is e.g. usuful for testing, etc.
   Defaults to false.
 
 ## Usage
 
-First, create a separate class for your index and include `ElasticSearch::Index`.
+First, create a separate class for your index and include `Searchist::Index`.
 
 ```ruby
 class CommentIndex
-  include ElasticSearch::Index
+  include Searchist::Index
 end
 ```
 
@@ -102,7 +102,7 @@ serialize the model for indexing.
 
 ```ruby
 class CommentIndex
-  include ElasticSearch::Index
+  include Searchist::Index
 
   def self.type_name
     "comments"
@@ -140,11 +140,11 @@ end
 CommentIndex.import(Comment.all) # => CommentIndex.import(Comment.preload(:user))
 ```
 
-Please note, ElasticSearch (the server) allows to have multiple types per
-index. However, this forces to have the same mapping for fields having the same
-name even though the fields live in different types of the same index. Thus,
-this gem is using a different index for each type by default, but you can
-change that. Simply supply a custom `index_name`.
+Please note, ElasticSearch allows to have multiple types per index. However,
+this forces to have the same mapping for fields having the same name even
+though the fields live in different types of the same index. Thus, this gem is
+using a different index for each type by default, but you can change that.
+Simply supply a custom `index_name`.
 
 ```ruby
 class CommentIndex
@@ -222,7 +222,7 @@ CommentIndex.where(username: "mrkamel").total_entries
 # => 13
 
 CommentIndex.aggregate(:username).aggregations(:username)
-# => {1=>#<ElasticSearch::Result doc_count=37 ...>, 2=>... }
+# => {1=>#<Searchist::Result doc_count=37 ...>, 2=>... }
 ...
 ```
 
@@ -245,9 +245,8 @@ end
 
 ## Advanced Usage
 
-The ElasticSearch gem supports even more advanced usages, like e.g. post
-filters, filtered aggregations or nested aggregations via simple to use
-API methods.
+Searchist supports even more advanced usages, like e.g. post filters, filtered
+aggregations or nested aggregations via simple to use API methods.
 
 ### Post filters
 
@@ -261,13 +260,13 @@ query = query.post_where(reviewed: true)
 query = query.post_search("username:a*")
 ```
 
-Checkout [PostFilterableRelation](http://www.rubydoc.info/github/mrkamel/elastic_search/ElasticSearch/PostFilterableRelation)
+Checkout [PostFilterableRelation](http://www.rubydoc.info/github/mrkamel/searchist/Searchist/PostFilterableRelation)
 for a complete API reference.
 
 ### Aggregations
 
-The ElasticSearch gem allows to elegantly specify nested aggregations,
-no matter how deeply nested:
+Searchist allows to elegantly specify nested aggregations, no matter how deeply
+nested:
 
 ```ruby
 query = OrderIndex.aggregate(:username, order: { revenue: "desc" }) do |aggregation|
@@ -276,7 +275,7 @@ end
 ```
 
 Generally, aggregation results returned by ElasticSearch Server are wrapped in
-a `ElasticSearch::Result`, which wraps a `Hashie::Mash`such that you can access
+a `Searchist::Result`, which wraps a `Hashie::Mash`such that you can access
 them via:
 
 ```ruby
@@ -306,8 +305,8 @@ end
 query.aggregations(:average_price).average_price.value
 ```
 
-Checkout [AggregatableRelation](http://www.rubydoc.info/github/mrkamel/elastic_search/ElasticSearch/AggregatableRelation)
-as well as [AggregationRelation](http://www.rubydoc.info/github/mrkamel/elastic_search/ElasticSearch/AggregationRelation)
+Checkout [AggregatableRelation](http://www.rubydoc.info/github/mrkamel/searchist/Searchist/AggregatableRelation)
+as well as [AggregationRelation](http://www.rubydoc.info/github/mrkamel/searchist/Searchist/AggregationRelation)
 for a complete API reference.
 
 ### Suggestions
@@ -348,7 +347,7 @@ CommentIndex.source([:id, :message]).search("hello world")
 
 * `paginate`, `page`, `per`
 
-The ElasticSearch gem supports
+Searchist supports
 [will_paginate](https://github.com/mislav/will_paginate) and
 [kaminari](https://github.com/kaminari/kaminari) compatible pagination. Thus,
 you can either use `#paginate` or `#page` in combination with `#per`:
@@ -439,12 +438,12 @@ syntax errors or ElasticSearch being unavailable, etc.
 
 ```ruby
 CommentIndex.search("invalid/request").execute
-# raises ElasticSearch::ResponseError
+# raises Searchist::ResponseError
 
 # ...
 
 CommentIndex.search("invalid/request").failsafe(true).execute
-# => #<ElasticSearch::Response ...>
+# => #<Searchist::Response ...>
 ```
 
 * `merge`
@@ -486,15 +485,15 @@ For further details and a full list of methods, check out the reference docs.
 
 ## Non-ActiveRecord models
 
-The ElasticSearch gem ships with built-in support for ActiveRecord models, but
-using non-ActiveRecord models is very easy. The model must implement a
-`find_each` class method and the Index class needs to implement
-`Index.record_id` and `Index.fetch_records`. The default implementations for
-the index class are as follows:
+Searchist ships with built-in support for ActiveRecord models, but using
+non-ActiveRecord models is very easy. The model must implement a `find_each`
+class method and the Index class needs to implement `Index.record_id` and
+`Index.fetch_records`. The default implementations for the index class are as
+follows:
 
 ```ruby
 class MyIndex
-  include ElasticSearch::Index
+  include Searchist::Index
 
   def self.record_id(object)
     object.id
@@ -511,12 +510,12 @@ whatever ORM you use.
 
 ## Automatic Indexing
 
-The ElasticSearch gem ships with a mixin using model callbacks to automatically
+Searchist ships with a mixin using model callbacks to automatically
 re-index/destroy them from the respective index.
 
 ```ruby
 class User < ActiveRecord::Base
-  include ElasticSearch::Model
+  include Searchist::Model
 
   notifies_index UserIndex
 end
@@ -549,8 +548,8 @@ Things on the To do list before releasing it:
 ## Links
 
 * ElasticSearch Server: [https://www.elastic.co/](https://www.elastic.co/)
-* Reference Docs: [http://www.rubydoc.info/github/mrkamel/elastic_search](http://www.rubydoc.info/github/mrkamel/elastic_search)
-* Travis: [http://travis-ci.org/mrkamel/elastic_search](http://travis-ci.org/mrkamel/elastic_search)
+* Reference Docs: [http://www.rubydoc.info/github/mrkamel/searchist](http://www.rubydoc.info/github/mrkamel/searchist)
+* Travis: [http://travis-ci.org/mrkamel/searchist](http://travis-ci.org/mrkamel/searchist)
 * will_paginate: [https://github.com/mislav/will_paginate](https://github.com/mislav/will_paginate)
 * kaminari: [https://github.com/kaminari/kaminari](https://github.com/kaminari/kaminari)
 

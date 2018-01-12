@@ -1,6 +1,6 @@
 
-module ElasticSearch
-  # The ElasticSearch::FilterableRelation mixin provides chainable methods like
+module Searchist
+  # The Searchist::FilterableRelation mixin provides chainable methods like
   # #where, #exists, #range, etc to add search filters to a relation.
   #
   # @example
@@ -27,7 +27,7 @@ module ElasticSearch
     # @param options [Hash] Additional options for the query string query, like
     #   eg default_operator, default_field, etc.
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def search(q, options = {})
       fresh.tap do |relation|
@@ -49,7 +49,7 @@ module ElasticSearch
     # @param hash [Hash] A field-to-filter mapping specifying filter values for
     #   the respective fields
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def where(hash)
       hash.inject(fresh) do |memo, (key, value)|
@@ -77,7 +77,7 @@ module ElasticSearch
     # @param hash [Hash] A field-to-filter mapping specifying filter values for the
     #   respective fields
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def where_not(hash)
       hash.inject(fresh) do |memo, (key, value)|
@@ -99,7 +99,7 @@ module ElasticSearch
     #
     # @param args [Array, Hash] The raw filter query arguments
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def filter(*args)
       fresh.tap do |relation|
@@ -115,7 +115,7 @@ module ElasticSearch
     #
     # @param args [Array, Hash] The raw must query arguments
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def must(*args)
       fresh.tap do |relation|
@@ -131,7 +131,7 @@ module ElasticSearch
     #
     # @param args [Array, Hash] The raw must_not query arguments
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def must_not(*args)
       fresh.tap do |relation|
@@ -147,7 +147,7 @@ module ElasticSearch
     #
     # @param args [Array, Hash] The raw should query arguments
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def should(*args)
       fresh.tap do |relation|
@@ -168,7 +168,7 @@ module ElasticSearch
     # @param field [Symbol, String] The field name to specify the range for
     # @param options [Hash] The range filter specification, like lt, lte, etc
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def range(field, options = {})
       filter range: { field => options }
@@ -196,7 +196,7 @@ module ElasticSearch
     #
     # @param options [Hash] Options for the match_all filter, like eg boost
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def match_all(options = {})
       filter match_all: options
@@ -210,7 +210,7 @@ module ElasticSearch
     #
     # @param field [Symbol, String] The field that should have a non-null value
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def exists(field)
       filter exists: { field: field }
@@ -224,7 +224,7 @@ module ElasticSearch
     #
     # @param field [Symbol, String] The field that should have a null value
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def exists_not(field)
       must_not exists: { field: field }

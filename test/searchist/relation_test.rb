@@ -1,10 +1,10 @@
 
 require File.expand_path("../../test_helper", __FILE__)
 
-class ElasticSearch::RelationTest < ElasticSearch::TestCase
+class Searchist::RelationTest < Searchist::TestCase
   should_delegate_methods :total_entries, :current_page, :previous_page, :prev_page, :next_page, :first_page?, :last_page?, :out_of_range?,
     :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions, :scope, :results, :records, :scroll_id, :raw_response,
-    to: :response, subject: ElasticSearch::Relation.new(target: ProductIndex)
+    to: :response, subject: Searchist::Relation.new(target: ProductIndex)
 
   def test_merge
     product1 = create(:product, price: 100, category: "category1")
@@ -225,7 +225,7 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
   end
 
   def test_post_search
-    return if ElasticSearch.version.to_i < 2
+    return if Searchist.version.to_i < 2
 
     product1 = create(:product, title: "title1", category: "category1")
     product2 = create(:product, title: "title2", category: "category2")
@@ -485,7 +485,7 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
   end
 
   def test_profile
-    return if ElasticSearch.version.to_i < 2
+    return if Searchist.version.to_i < 2
 
     assert_not_nil ProductIndex.profile(true).raw_response["profile"]
   end
@@ -745,7 +745,7 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
   end
 
   def test_failsafe
-    assert_raises ElasticSearch::ResponseError do
+    assert_raises Searchist::ResponseError do
       ProductIndex.search("syntax/error").records
     end
 

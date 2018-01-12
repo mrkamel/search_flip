@@ -3,7 +3,7 @@ require "minitest"
 require "minitest/autorun"
 require "webmock/minitest"
 require "mocha/mini_test"
-require "elastic_search"
+require "searchist"
 require "active_record"
 require "factory_girl"
 require "yaml"
@@ -12,7 +12,7 @@ WebMock.allow_net_connect!
 
 ActiveRecord::Base.establish_connection YAML.load_file(File.expand_path("../database.yml", __FILE__))
 
-ElasticSearch::Config[:auto_refresh] = true
+Searchist::Config[:auto_refresh] = true
 
 ActiveRecord::Base.connection.execute "DROP TABLE IF EXISTS products"
 
@@ -72,7 +72,7 @@ FactoryGirl.define do
 end
 
 class CommentIndex
-  include ElasticSearch::Index
+  include Searchist::Index
 
   def self.type_name
     "comments"
@@ -95,10 +95,10 @@ CommentIndex.create_index
 CommentIndex.update_mapping
 
 class ProductIndex
-  include ElasticSearch::Index
+  include Searchist::Index
 
   def self.mapping
-    if ElasticSearch.version.to_i >= 5
+    if Searchist.version.to_i >= 5
       {
         products: {
           properties: {
@@ -147,7 +147,7 @@ ProductIndex.create_index
 ProductIndex.update_mapping
 
 class TestIndex
-  include ElasticSearch::Index
+  include Searchist::Index
 
   def self.mapping
     {
@@ -166,7 +166,7 @@ end
 
 TestIndex.delete_index if TestIndex.index_exists?
 
-class ElasticSearch::TestCase < MiniTest::Test
+class Searchist::TestCase < MiniTest::Test
   include FactoryGirl::Syntax::Methods
 
   def self.should_delegate_method(method, to:, subject:, as: method)

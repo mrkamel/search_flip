@@ -1,9 +1,9 @@
 
-module ElasticSearch
-  # The ElasticSearch::Relation class serves the purpose of chaining various
+module Searchist
+  # The Searchist::Relation class serves the purpose of chaining various
   # filtering and aggregation methods. Each chainable method creates a new
   # relation object until a method is called that finally sends the respective
-  # request to ElasticSearch and then the result is returned.
+  # request to ElasticSearch and returns the result.
   #
   # @example
   #   CommentIndex.where(public: true).sort(id: "desc").limit(1_000).records
@@ -14,9 +14,9 @@ module ElasticSearch
   #   CommentIndex.sort("_doc").find_each { |comment| "..." }
 
   class Relation
-    include ElasticSearch::FilterableRelation
-    include ElasticSearch::PostFilterableRelation
-    include ElasticSearch::AggregatableRelation
+    include Searchist::FilterableRelation
+    include Searchist::PostFilterableRelation
+    include Searchist::AggregatableRelation
     extend Forwardable
 
     attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values, :offset_value, :limit_value,
@@ -32,7 +32,7 @@ module ElasticSearch
     #   CommentIndex.where(approved: true).merge(CommentIndex.range(:created_at, gt: Time.parse("2015-01-01")))
     #   CommentIndex.aggregate(:user_id).merge(CommentIndex.where(admin: true))
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def merge(other)
       other = other.relation
@@ -74,7 +74,7 @@ module ElasticSearch
     # @example
     #   ProductIndex.timeout("3s").search("hello world")
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def timeout(n)
       fresh.tap do |relation|
@@ -88,7 +88,7 @@ module ElasticSearch
     # @example
     #   ProductIndex.terminate_after(10_000).search("hello world")
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def terminate_after(n)
       fresh.tap do |relation|
@@ -105,7 +105,7 @@ module ElasticSearch
     #
     # @param scopes [Symbol] All scopes that you want to remove
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def unscope(*scopes)
       unknown = scopes - [:search, :post_search, :sort, :highlight, :suggest, :custom, :aggregate]
@@ -129,13 +129,13 @@ module ElasticSearch
     #
     # Convenience method to have a unified conversion api.
     #
-    # @return [ElasticSearch::Relation] Simply returns self
+    # @return [Searchist::Relation] Simply returns self
 
     def relation
       self
     end
 
-    # Creates a new ElasticSearch::Relation.
+    # Creates a new Searchist::Relation.
     #
     # @param attributes [Hash] Attributes to initialize the Relation with
 
@@ -155,7 +155,7 @@ module ElasticSearch
       res = {}
 
       if must_values || search_values || must_not_values || should_values || filter_values
-        if ElasticSearch.version.to_i >= 2
+        if Searchist.version.to_i >= 2
           res[:query] = {
             bool: {}.
               merge(must_values || search_values ? { must: (must_values || []) + (search_values || [])} : {}).
@@ -192,7 +192,7 @@ module ElasticSearch
       res[:aggregations] = aggregation_values if aggregation_values
 
       if post_must_values || post_search_values || post_must_not_values || post_should_values || post_filter_values
-        if ElasticSearch.version.to_i >= 2
+        if Searchist.version.to_i >= 2
           res[:post_filter] = {
             bool: {}.
               merge(post_must_values || post_search_values ? { must: (post_must_values || []) + (post_search_values || []) } : {}).
@@ -239,7 +239,7 @@ module ElasticSearch
     # @param options [Hash] Extra highlighting options. Check out the ElasticSearch
     #   docs for further details.
     #
-    # @return [ElasticSearch::Relation] A new relation including the highlighting
+    # @return [Searchist::Relation] A new relation including the highlighting
 
     def highlight(fields, options = {})
       fresh.tap do |relation|
@@ -268,7 +268,7 @@ module ElasticSearch
     # @param options [Hash] Additional suggestion options. Check out the ElasticSearch
     #   docs for further details.
     #
-    # @return [ElasticSearch::Relation] A new relation including the suggestion section
+    # @return [Searchist::Relation] A new relation including the suggestion section
 
     def suggest(name, options = {})
       fresh.tap do |relation|
@@ -284,7 +284,7 @@ module ElasticSearch
     #
     # @param value [Boolean] Whether query profiling should be enabled or not
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def profile(value)
       fresh.tap do |relation|
@@ -305,12 +305,12 @@ module ElasticSearch
     #   end
     #
     # @param id [String, nil] The scroll id of the last request returned by
-    #   ElasticSearch or nil
+    #   Searchist or nil
     #
     # @param timeout [String] The timeout of the scroll request, ie. how long
-    #   ElasticSearch should keep the scroll handle open
+    #   Searchist should keep the scroll handle open
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def scroll(id: nil, timeout: "1m")
       fresh.tap do |relation|
@@ -322,9 +322,9 @@ module ElasticSearch
     # matching the query get deleted. Please note, for certain ElasticSearch
     # versions you need to install the delete-by-query plugin to get support
     # for this feature. Refreshes the index if the auto_refresh is enabled.
-    # Raises ElasticSearch::ResponseError in case any errors occur.
+    # Raises Searchist::ResponseError in case any errors occur.
     #
-    # @see ElasticSearch::Config See ElasticSearch::Config for auto_refresh
+    # @see Searchist::Config See Searchist::Config for auto_refresh
     #
     # @example
     #   CommentIndex.range(lt: Time.parse("2014-01-01")).delete
@@ -335,13 +335,13 @@ module ElasticSearch
       _request.delete(:from)
       _request.delete(:size)
 
-      if ElasticSearch.version.to_i >= 5
-        ElasticSearch::HTTPClient.post("#{target.type_url}/_delete_by_query", json: _request)
+      if Searchist.version.to_i >= 5
+        Searchist::HTTPClient.post("#{target.type_url}/_delete_by_query", json: _request)
       else
-        ElasticSearch::HTTPClient.delete("#{target.type_url}/_query", json: _request)
+        Searchist::HTTPClient.delete("#{target.type_url}/_query", json: _request)
       end
 
-      target.refresh if ElasticSearch::Config[:auto_refresh]
+      target.refresh if Searchist::Config[:auto_refresh]
 
       true
     end
@@ -354,7 +354,7 @@ module ElasticSearch
     #
     # @param value [Array] Array listing the field names of the source document
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def source(value)
       fresh.tap do |relation|
@@ -373,7 +373,7 @@ module ElasticSearch
     # @param args The args that get passed to the includes method of
     #   ActiveRecord or other ORMs
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def includes(*args)
       fresh.tap do |relation|
@@ -392,7 +392,7 @@ module ElasticSearch
     # @param args The args that get passed to the eager load method of
     #   ActiveRecord or other ORMs
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def eager_load(*args)
       fresh.tap do |relation|
@@ -411,7 +411,7 @@ module ElasticSearch
     # @param args The args that get passed to the preload method of
     #   ActiveRecord or other ORMs
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def preload(*args)
       fresh.tap do |relation|
@@ -444,7 +444,7 @@ module ElasticSearch
     #
     # @param args The sort values that get passed to ElasticSearch
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def sort(*args)
       fresh.tap do |relation|
@@ -464,7 +464,7 @@ module ElasticSearch
     #
     #   CommentIndex.sort(id: "desc")
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
     #
     # @see #sort See #sort for more details
 
@@ -490,7 +490,7 @@ module ElasticSearch
     #
     # @param hash [Hash] The custom section that is added to the request
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def custom(hash)
       fresh.tap do |relation|
@@ -498,7 +498,7 @@ module ElasticSearch
       end
     end
 
-    # Sets the request offset, ie ElasticSearch's from parameter that is used
+    # Sets the request offset, ie Searchist's from parameter that is used
     # to skip results in the result set from being returned.
     #
     # @example
@@ -507,7 +507,7 @@ module ElasticSearch
     # @param n [Fixnum] The offset value, ie the number of results that are
     #   skipped in the result set
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def offset(n)
       fresh.tap do |relation|
@@ -532,7 +532,7 @@ module ElasticSearch
     # @param n [Fixnum] The limit value, ie the max number of results that
     #   should be returned
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def limit(n)
       fresh.tap do |relation|
@@ -558,7 +558,7 @@ module ElasticSearch
     # @param page [#to_i] The current page
     # @param per_page [#to_i] The number of results per page
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def paginate(page:, per_page: limit_value_with_default)
       page = [page.to_i, 1].max
@@ -591,7 +591,7 @@ module ElasticSearch
     # @option options timeout [String] The timeout per scroll request, ie how
     #   long ElasticSearch will keep the request handle open.
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def find_in_batches(options = {})
       return enum_for(:find_in_batches, options) unless block_given?
@@ -624,7 +624,7 @@ module ElasticSearch
     # @option options timeout [String] The timeout per scroll request, ie how
     #   long ElasticSearch will keep the request handle open.
     #
-    # @return [ElasticSearch::Relation] A newly created extended relation
+    # @return [Searchist::Relation] A newly created extended relation
 
     def find_each(options = {})
       return enum_for(:find_each, options) unless block_given?
@@ -649,15 +649,15 @@ module ElasticSearch
     # @example
     #   response = CommentIndex.search("hello world").execute
     #
-    # @return [ElasticSearch::Response] The response object
+    # @return [Searchist::Response] The response object
 
     def execute(base_url: target.base_url)
       @response ||= begin
-        http_request = ElasticSearch::HTTPClient.headers(accept: "application/json")
+        http_request = Searchist::HTTPClient.headers(accept: "application/json")
 
         http_response =
           if scroll_args && scroll_args[:id]
-            if ElasticSearch.version.to_i >= 2
+            if Searchist.version.to_i >= 2
               http_request.post("#{base_url}/_search/scroll", json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] })
             else
               http_request.headers(content_type: "text/plain").post("#{base_url}/_search/scroll", params: { scroll: scroll_args[:timeout] }, body: scroll_args[:id])
@@ -668,11 +668,11 @@ module ElasticSearch
             http_request.post("#{target.type_url(base_url: base_url)}/_search", json: request)
           end
 
-        ElasticSearch::Response.new(self, http_response.parse)
-      rescue ElasticSearch::ConnectionError, ElasticSearch::ResponseError => e
+        Searchist::Response.new(self, http_response.parse)
+      rescue Searchist::ConnectionError, Searchist::ResponseError => e
         raise e unless failsafe_value
 
-        ElasticSearch::Response.new(self, "took" => 0, "hits" => { "total" => 0, "hits" => [] })
+        Searchist::Response.new(self, "took" => 0, "hits" => { "total" => 0, "hits" => [] })
       end
     end
 
@@ -686,16 +686,16 @@ module ElasticSearch
     #
     # @example
     #   CommentIndex.search("invalid/request").execute
-    #   # raises ElasticSearch::ResponseError
+    #   # raises Searchist::ResponseError
     #
     #   # ...
     #
     #   CommentIndex.search("invalid/request").failsafe(true).execute
-    #   # => #<ElasticSearch::Response ...>
+    #   # => #<Searchist::Response ...>
     #
     # @param value [Boolean] Whether or not the relation should be failsafe
     #
-    # @return [ElasticSearch::Response] A newly created extended relation
+    # @return [Searchist::Response] A newly created extended relation
 
     def failsafe(value)
       fresh.tap do |relation|
@@ -709,7 +709,7 @@ module ElasticSearch
     # @example
     #   CommentIndex.search("hello world").fresh
     #
-    # @return [ElasticSearch::Response] A dupped relation with the response
+    # @return [Searchist::Response] A dupped relation with the response
     #   cache being cleared
 
     def fresh
