@@ -589,7 +589,7 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
 
     ProductIndex.import [product1, product2, product3, product4]
 
-    assert_equal [product2, product1, product3, product4], ProductIndex.sort(rank: :desc, price: :asc).records
+    assert_equal [product2, product1, product3, product4], ProductIndex.sort({ rank: :desc }, { price: :asc }).records
     assert_equal [product2, product1, product3, product4], ProductIndex.sort(rank: :desc).sort(:price).records
     assert_equal [product2, product1, product4, product3], ProductIndex.sort(:price).sort(rank: :desc).records
   end
@@ -602,7 +602,7 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
 
     ProductIndex.import [product1, product2, product3, product4]
 
-    assert_equal [product2, product1, product3, product4], ProductIndex.sort(:price).resort(rank: :desc, price: :asc).records
+    assert_equal [product2, product1, product3, product4], ProductIndex.sort(:price).resort({ rank: :desc }, { price: :asc }).records
     assert_equal [product2, product1, product4, product3], ProductIndex.sort(rank: :desc).resort(:price).records
   end
 

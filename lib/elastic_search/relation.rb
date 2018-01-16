@@ -426,11 +426,18 @@ module ElasticSearch
     # script, etc here as well.
     #
     # @example Default usage
-    #   CommentIndex.sort(user_id: "asc", id: "desc")
+    #   CommentIndex.sort(:user_id, :id)
     #
     #   # Same as
     #
+    #   CommentIndex.sort(:user_id).sort(:id)
+    #
+    # @example Default hash usage
     #   CommentIndex.sort(user_id: "asc").sort(id: "desc")
+    #
+    #   # Same as
+    #
+    #   CommentIndex.sort({ user_id: "asc" }, { id: "desc" })
     #
     # @example Sort by native script
     #   CommentIndex.sort("_script" => "sort_script", lang: "native", order: "asc", type: "number")
