@@ -25,7 +25,7 @@ There are great ruby gems to work with Elasticsearch like e.g. searchkick and
 elasticsearch-ruby already. However, they don't have a chainable API. Compare
 yourself.
 
-```
+```ruby
 # elasticsearch-ruby
 Comment.search(
   query: {
