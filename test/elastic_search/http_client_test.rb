@@ -2,7 +2,7 @@
 require File.expand_path("../../test_helper", __FILE__)
 
 class ElasticSearch::HTTPClientTest < ElasticSearch::TestCase
-  [:get, :put, :delete, :post].each do |method|
+  [:get, :put, :delete, :post, :head].each do |method|
     define_method :"test_#{method}" do
       stub_request(method, "http://localhost/path").with(body: "body", query: { key: "value" }).to_return(body: "success")
 

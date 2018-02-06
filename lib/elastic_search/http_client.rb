@@ -16,7 +16,7 @@ module ElasticSearch
         end
       end
 
-      [:get, :post, :put, :delete].each do |method|
+      [:get, :post, :put, :delete, :head].each do |method|
         define_method method do |*args|
           execute(method, *args)
         end
@@ -42,7 +42,7 @@ module ElasticSearch
     class << self
       extend Forwardable
 
-      def_delegators :request, :headers, :get, :post, :put, :delete
+      def_delegators :request, :headers, :get, :post, :put, :delete, :head
     end
   end
 end
