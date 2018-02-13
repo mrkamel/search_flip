@@ -89,6 +89,18 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
     refute_includes records, rejected
   end
 
+  def test_where_with_nil
+    expected = create(:product, price: nil)
+    rejected = create(:product, price: 100)
+
+    ProductIndex.import [expected, rejected]
+
+    records = ProductIndex.where(price: nil).records
+
+    assert_includes records, expected
+    refute_includes records, rejected
+  end
+
   def test_where_not
     product1 = create(:product, price: 100, category: "category1")
     product2 = create(:product, price: 200, category: "category2")
@@ -134,6 +146,18 @@ class ElasticSearch::RelationTest < ElasticSearch::TestCase
     assert_includes records, expected
     refute_includes records, rejected1
     refute_includes records, rejected2
+  end
+
+  def test_where_not_with_nil
+    expected = create(:product, price: 100)
+    rejected = create(:product, price: nil)
+
+    ProductIndex.import [expected, rejected]
+
+    records = ProductIndex.where_not(price: nil).records
+
+    assert_includes records, expected
+    refute_includes records, rejected
   end
 
   def test_filter
