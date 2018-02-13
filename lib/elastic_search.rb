@@ -59,5 +59,22 @@ module ElasticSearch
       ElasticSearch::Response.new(relations[index], response)
     end
   end
+
+  # Used to manipulate, ie add and remove index aliases. Raises an
+  # ElasticSearch::ResponseError in case any errors occur.
+  #
+  # @example
+  #   ElasticSearch.post_aliases(actions: [
+  #     { remove: { index: "test1", alias: "alias1" }},
+  #     { add: { index: "test2", alias: "alias1" }}
+  #   ])
+  #
+  # @param payload [Hash] The raw request payload
+  #
+  # @return [ElasticSearch::Response] The raw response
+
+  def self.aliases(payload)
+    ElasticSearch::HTTPClient.headers(accept: "application/json").post("#{ElasticSearch::Config[:base_url]}/_aliases", body: JSON.generate(payload))
+  end
 end
 

@@ -12,5 +12,15 @@ class ElasticSearchTest < ElasticSearch::TestCase
     assert_equal 1, responses[0].total_entries
     assert_equal 1, responses[1].total_entries
   end
+
+  def test_post
+    assert ElasticSearch.aliases(actions: [
+      add: { index: "products", alias: "alias1" }
+    ])
+
+    assert ElasticSearch.aliases(actions: [
+      remove: { index: "products", alias: "alias1" }
+    ])
+  end
 end
 
