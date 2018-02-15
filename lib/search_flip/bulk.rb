@@ -1,10 +1,10 @@
 
-module Searchist
-  # The Searchist::Bulk class implements the bulk support, ie it collects
+module SearchFlip
+  # The SearchFlip::Bulk class implements the bulk support, ie it collects
   # single requests and emits batches of requests.
   #
   # @example
-  #   Searchist::Bulk.new "http://127.0.0.1:9200/index/type/_bulk" do |bulk|
+  #   SearchFlip::Bulk.new "http://127.0.0.1:9200/index/type/_bulk" do |bulk|
   #     bulk.create record.id, JSON.generate(MyIndex.serialize(record))
   #     bulk.index record.id, JSON.generate(MyIndex.serialize(record)), version: record.version, version_type: "external"
   #     bulk.delete record.id, routing: record.user_id
@@ -22,12 +22,12 @@ module Searchist
     # present within the buffer.
     #
     # @example Basic use
-    #   Searchist::Bulk.new "http://127.0.0.1:9200/index/type/_bulk" do |bulk|
+    #   SearchFlip::Bulk.new "http://127.0.0.1:9200/index/type/_bulk" do |bulk|
     #     # ...
     #   end
     #
     # @example Ignore certain errors
-    #   Searchist::Bulk.new "http://127.0.0.1:9200/index/type/_bulk", 1_000, ignore_errors: [409] do |bulk|
+    #   SearchFlip::Bulk.new "http://127.0.0.1:9200/index/type/_bulk", 1_000, ignore_errors: [409] do |bulk|
     #     # ...
     #   end
     #
@@ -113,7 +113,7 @@ module Searchist
     end
 
     def upload
-      response = Searchist::HTTPClient.headers(accept: "application/json", content_type: "application/x-ndjson").put(url, body: @payload, params: ignore_errors ? {} : { filter_path: "errors" })
+      response = SearchFlip::HTTPClient.headers(accept: "application/json", content_type: "application/x-ndjson").put(url, body: @payload, params: ignore_errors ? {} : { filter_path: "errors" })
 
       return if options[:raise] == false
 
@@ -121,13 +121,13 @@ module Searchist
 
       return unless parsed_response["errors"]
 
-      raise(Searchist::Bulk::Error, response[0 .. 30]) unless ignore_errors
+      raise(SearchFlip::Bulk::Error, response[0 .. 30]) unless ignore_errors
 
       parsed_response["items"].each do |item|
         item.each do |_, _item|
           status = _item["status"]
 
-          raise(Searchist::Bulk::Error, JSON.generate(_item)) if !status.between?(200, 299) && !ignore_errors.include?(status)
+          raise(SearchFlip::Bulk::Error, JSON.generate(_item)) if !status.between?(200, 299) && !ignore_errors.include?(status)
         end
       end
     ensure

@@ -1,8 +1,8 @@
 
-module Searchist
+module SearchFlip
   # @api private
   #
-  # The Searchist::HTTPClient class wraps the http gem, is for internal use
+  # The SearchFlip::HTTPClient class wraps the http gem, is for internal use
   # and responsible for the http request/response handling, ie communicating
   # with ElasticSearch.
 
@@ -27,11 +27,11 @@ module Searchist
       def execute(method, *args)
         response = HTTP.headers(headers_hash || {}).send(method, *args)
 
-        raise Searchist::ResponseError.new(code: response.code, body: response.body.to_s) unless response.status.success?
+        raise SearchFlip::ResponseError.new(code: response.code, body: response.body.to_s) unless response.status.success?
 
         response
       rescue HTTP::ConnectionError => e
-        raise Searchist::ConnectionError, e.message
+        raise SearchFlip::ConnectionError, e.message
       end
     end
 

@@ -1,7 +1,7 @@
 
 require File.expand_path("../../test_helper", __FILE__)
 
-class Searchist::BulkTest < Searchist::TestCase
+class SearchFlip::BulkTest < SearchFlip::TestCase
   def test_bulk
     product1, product2 = create_list(:product, 2)
 
@@ -25,7 +25,7 @@ class Searchist::BulkTest < Searchist::TestCase
 
     ProductIndex.import [product1, product2]
 
-    assert_raises "Searchist::Bulk::Error" do
+    assert_raises "SearchFlip::Bulk::Error" do
       ProductIndex.bulk do |bulk|
         bulk.create product1.id, JSON.generate(ProductIndex.serialize(product1))
         bulk.create product2.id, JSON.generate(ProductIndex.serialize(product1))
@@ -45,7 +45,7 @@ class Searchist::BulkTest < Searchist::TestCase
       bulk.index product.id, JSON.generate(ProductIndex.serialize(product)), version: 1, version_type: "external_gt"
     end
 
-    assert_raises "Searchist::Bulk::Error" do
+    assert_raises "SearchFlip::Bulk::Error" do
       ProductIndex.bulk do |bulk|
         bulk.index product.id, JSON.generate(ProductIndex.serialize(product)), version: 1, version_type: "external_gt"
       end

@@ -1,12 +1,12 @@
 
-module Searchist
-  # The Searchist::AggregationRelation class puts together everything
+module SearchFlip
+  # The SearchFlip::AggregationRelation class puts together everything
   # required to use the ElasticSearch aggregation framework via mixins and
   # adds a method to convert it to a hash format to be used in the request.
 
   class AggregationRelation
-    include Searchist::FilterableRelation
-    include Searchist::AggregatableRelation
+    include SearchFlip::FilterableRelation
+    include SearchFlip::AggregatableRelation
 
     # @api private
     #
@@ -19,7 +19,7 @@ module Searchist
       res[:aggregations] = aggregation_values if aggregation_values
 
       if must_values || search_values || must_not_values || should_values || filter_values
-        if Searchist.version.to_i >= 2
+        if SearchFlip.version.to_i >= 2
           res[:filter] = {
             bool: {}.
               merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {}).
@@ -47,7 +47,7 @@ module Searchist
     #
     # Simply dups the object for api compatability.
     #
-    # @return [Searchist::AggregationRelation] The dupped object
+    # @return [SearchFlip::AggregationRelation] The dupped object
 
     def fresh
       dup

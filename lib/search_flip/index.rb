@@ -1,6 +1,6 @@
 
-module Searchist
-  # The Searchist::Index mixin makes your class correspond to an
+module SearchFlip
+  # The SearchFlip::Index mixin makes your class correspond to an
   # ElasticSearch index. Your class can then create or delete the index, modify
   # the mapping, import records, delete records and query the index. This gem
   # uses an individual ElasticSearch index for each index class, because
@@ -9,7 +9,7 @@ module Searchist
   #
   # @example Simple index class
   #   class CommentIndex
-  #     include Searchist::Index
+  #     include SearchFlip::Index
   #
   #     def self.model
   #       Comment
@@ -205,13 +205,13 @@ module Searchist
 
       # @api private
       #
-      # Creates an Searchist::Relation for the current index, which is used
+      # Creates an SearchFlip::Relation for the current index, which is used
       # as a base for chaining relation methods.
       #
-      # @return [Searchist::Relation] The base for chaining relation methods
+      # @return [SearchFlip::Relation] The base for chaining relation methods
 
       def relation
-        Searchist::Relation.new(target: self)
+        SearchFlip::Relation.new(target: self)
       end
 
       def_delegators :relation, :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where, :post_where_not, :post_filter, :post_range,
@@ -241,12 +241,12 @@ module Searchist
       # @api private
       #
       # Returns the full name of the index within ElasticSearch, ie with prefix
-      # specified via Searchist::Config[:index_prefix].
+      # specified via SearchFlip::Config[:index_prefix].
       #
       # @return [String] The full index name
 
       def index_name_with_prefix
-        "#{Searchist::Config[:index_prefix]}#{index_name}"
+        "#{SearchFlip::Config[:index_prefix]}#{index_name}"
       end
 
       # Override to specify index settings like number of shards, analyzers,
@@ -277,47 +277,47 @@ module Searchist
         get_mapping
 
         true
-      rescue Searchist::ResponseError => e
+      rescue SearchFlip::ResponseError => e
         return false if e.code == 404
 
         raise e
       end
 
       # Fetches the index settings from ElasticSearch. Sends a GET request to
-      # index_url/_settings. Raises Searchist::ResponseError in case any
+      # index_url/_settings. Raises SearchFlip::ResponseError in case any
       # errors occur.
       #
       # @return [Hash] The index settings
 
       def get_index_settings
-        Searchist::HTTPClient.headers(accept: "application/json").get("#{index_url}/_settings").parse
+        SearchFlip::HTTPClient.headers(accept: "application/json").get("#{index_url}/_settings").parse
       end
 
       # Creates the index within ElasticSearch and applies index settings, if
-      # specified. Raises Searchist::ResponseError in case any errors
+      # specified. Raises SearchFlip::ResponseError in case any errors
       # occur.
 
       def create_index
-        Searchist::HTTPClient.put(index_url, json: index_settings)
+        SearchFlip::HTTPClient.put(index_url, json: index_settings)
 
         true
       end
 
       # Updates the index settings within ElasticSearch according to the index
-      # settings specified. Raises Searchist::ResponseError in case any
+      # settings specified. Raises SearchFlip::ResponseError in case any
       # errors occur.
 
       def update_index_settings
-        Searchist::HTTPClient.put("#{index_url}/_settings", json: index_settings)
+        SearchFlip::HTTPClient.put("#{index_url}/_settings", json: index_settings)
 
         true
       end
 
-      # Deletes the index from ElasticSearch. Raises Searchist::ResponseError
+      # Deletes the index from ElasticSearch. Raises SearchFlip::ResponseError
       # in case any errors occur.
 
       def delete_index
-        Searchist::HTTPClient.delete(index_url)
+        SearchFlip::HTTPClient.delete(index_url)
 
         true
       end
@@ -343,39 +343,39 @@ module Searchist
       end
 
       # Updates the type mapping within ElasticSearch according to the mapping
-      # currently specified. Raises Searchist::ResponseError in case any
+      # currently specified. Raises SearchFlip::ResponseError in case any
       # errors occur.
 
       def update_mapping
-        Searchist::HTTPClient.put("#{type_url}/_mapping", json: mapping)
+        SearchFlip::HTTPClient.put("#{type_url}/_mapping", json: mapping)
 
         true
       end
 
       # Retrieves the current type mapping from ElasticSearch. Raises
-      # Searchist::ResponseError in case any errors occur.
+      # SearchFlip::ResponseError in case any errors occur.
       #
       # @return [Hash] The current type mapping
 
       def get_mapping
-        Searchist::HTTPClient.headers(accept: "application/json").get("#{type_url}/_mapping").parse
+        SearchFlip::HTTPClient.headers(accept: "application/json").get("#{type_url}/_mapping").parse
       end
 
       # Retrieves the document specified by id from ElasticSearch. Raises
-      # Searchist::ResponseError specific exceptions in case any errors
+      # SearchFlip::ResponseError specific exceptions in case any errors
       # occur.
       #
       # @return [Hash] The specified document
 
       def get(id, params = {})
-        Searchist::HTTPClient.headers(accept: "application/json").get("#{type_url}/#{id}", params: params).parse
+        SearchFlip::HTTPClient.headers(accept: "application/json").get("#{type_url}/#{id}", params: params).parse
       end
 
       # Sends a index refresh request to ElasticSearch. Raises
-      # Searchist::ResponseError in case any errors occur.
+      # SearchFlip::ResponseError in case any errors occur.
 
       def refresh
-        Searchist::HTTPClient.post("#{index_url}/_refresh", json: {})
+        SearchFlip::HTTPClient.post("#{index_url}/_refresh", json: {})
 
         true
       end
@@ -393,11 +393,11 @@ module Searchist
       # record set usually is an ActiveRecord::Relation, but can be any other
       # ORM as well. Uses the ElasticSearch bulk API no matter what is
       # provided. Refreshes the index if auto_refresh is enabled. Raises
-      # Searchist::ResponseError in case any errors occur.
+      # SearchFlip::ResponseError in case any errors occur.
       #
       # @see #fetch_records See #fetch_records for other/custom ORMs
       # @see #record_id See #record_id for other/custom ORMs
-      # @see Searchist::Config See Searchist::Config for auto_refresh
+      # @see SearchFlip::Config See SearchFlip::Config for auto_refresh
       #
       # @example
       #   CommentIndex.import Comment.all
@@ -484,7 +484,7 @@ module Searchist
       # update and delete requests can be appended to the bulk request. Sends a
       # refresh request afterwards if auto_refresh is enabled.
       #
-      # @see Searchist::Config See Searchist::Config for auto_refresh
+      # @see SearchFlip::Config See SearchFlip::Config for auto_refresh
       #
       # @example
       #   CommentIndex.bulk ignore_errors: [409] do |bulk|
@@ -506,11 +506,11 @@ module Searchist
       #   raise.
  
       def bulk(options = {})
-        Searchist::Bulk.new("#{type_url}/_bulk", Searchist::Config[:bulk_limit], options) do |indexer|
+        SearchFlip::Bulk.new("#{type_url}/_bulk", SearchFlip::Config[:bulk_limit], options) do |indexer|
           yield indexer
         end
 
-        refresh if Searchist::Config[:auto_refresh]
+        refresh if SearchFlip::Config[:auto_refresh]
       end
 
       # Returns the full ElasticSearch type URL, ie base URL, index name with
@@ -537,7 +537,7 @@ module Searchist
       # @return [String] The ElasticSearch base URL
 
       def base_url
-        Searchist::Config[:base_url]
+        SearchFlip::Config[:base_url]
       end
     end
   end

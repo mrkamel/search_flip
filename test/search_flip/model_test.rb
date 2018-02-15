@@ -1,10 +1,10 @@
 
 require File.expand_path("../../test_helper", __FILE__)
 
-class Searchist::ModelTest < Searchist::TestCase
+class SearchFlip::ModelTest < SearchFlip::TestCase
   def test_notifies_index
     klass = Class.new(Comment) do
-      include Searchist::Model
+      include SearchFlip::Model
 
       notifies_index CommentIndex
     end

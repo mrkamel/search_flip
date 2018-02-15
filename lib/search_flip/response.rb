@@ -1,6 +1,6 @@
 
-module Searchist
-  # The Searchist::Response class wraps a raw Searchist response and
+module SearchFlip
+  # The SearchFlip::Response class wraps a raw SearchFlip response and
   # decorates it with methods for aggregations, hits, records, pagination, etc.
 
   class Response
@@ -156,13 +156,13 @@ module Searchist
       return current_page + 1
     end
 
-    # Returns the results, ie hits, wrapped in a Searchist::Result object
+    # Returns the results, ie hits, wrapped in a SearchFlip::Result object
     # which basically is a Hashie::Mash. Check out the Hashie docs for further
     # details.
     #
     # @example
     #   CommentIndex.search("hello world").results
-    #   # => [#<Searchist::Result ...>, ...]
+    #   # => [#<SearchFlip::Result ...>, ...]
     #
     # @return [Array] An array of results
 

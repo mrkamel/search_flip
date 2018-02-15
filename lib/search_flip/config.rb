@@ -1,14 +1,14 @@
 
-module Searchist
+module SearchFlip
   # Queries and returns the ElasticSearch server version used.
   #
   # @example
-  #   Searchist.version # => e.g. 2.4.1
+  #   SearchFlip.version # => e.g. 2.4.1
   #
-  # @return [String] The Searchist server version
+  # @return [String] The SearchFlip server version
 
   def self.version
-    @version ||= Searchist::HTTPClient.get("#{Config[:base_url]}/").parse["version"]["number"]
+    @version ||= SearchFlip::HTTPClient.get("#{Config[:base_url]}/").parse["version"]["number"]
   end
 
   Config = {

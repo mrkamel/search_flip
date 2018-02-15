@@ -1,7 +1,7 @@
 
 require File.expand_path("../../test_helper", __FILE__)
 
-class Searchist::ResponseTest < Searchist::TestCase
+class SearchFlip::ResponseTest < SearchFlip::TestCase
   def test_total_entries
     ProductIndex.import create_list(:product, 3)
 

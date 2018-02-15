@@ -1,6 +1,6 @@
 
-module Searchist
-  # The Searchist::AggregatableRelation mixin provides handy methods for
+module SearchFlip
+  # The SearchFlip::AggregatableRelation mixin provides handy methods for
   # using the ElasticSearch aggregation framework, which can be chained with
   # each other, all other relation methods and even nested.
   #
@@ -23,7 +23,7 @@ module Searchist
     #   query = CommentIndex.where(public: true).aggregate(:user_id, size: 100)
     #
     #   query.aggregations(:user_id)
-    #   # => { 4 => #<Searchist::Result ...>, 7 => #<Searchist::Result ...>, ... }
+    #   # => { 4 => #<SearchFlip::Result ...>, 7 => #<SearchFlip::Result ...>, ... }
     #
     # @example Simple range aggregation
     #   ranges = [{ to: 50 }, { from: 50, to: 100 }, { from: 100 }]
@@ -57,7 +57,7 @@ module Searchist
         hash = field_or_hash.is_a?(Hash) ? field_or_hash : { field_or_hash => { terms: { field: field_or_hash }.merge(options) } }
 
         if block
-          aggregation_relation = block.call(Searchist::AggregationRelation.new)
+          aggregation_relation = block.call(SearchFlip::AggregationRelation.new)
 
           field_or_hash.is_a?(Hash) ? hash[field_or_hash.keys.first].merge!(aggregation_relation.to_hash) : hash[field_or_hash].merge!(aggregation_relation.to_hash)
         end

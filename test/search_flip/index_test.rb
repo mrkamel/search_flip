@@ -1,7 +1,7 @@
 
 require File.expand_path("../../test_helper", __FILE__)
 
-class Searchist::IndexTest < Searchist::TestCase
+class SearchFlip::IndexTest < SearchFlip::TestCase
   should_delegate_methods :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where,
     :post_where_not, :post_filter, :post_range, :post_exists, :post_exists_not, :aggregate, :scroll, :source, :includes,
     :eager_load, :preload, :sort, :resort, :order, :reorder, :offset, :limit, :paginate, :page, :per, :search,
@@ -86,7 +86,7 @@ class Searchist::IndexTest < Searchist::TestCase
 
     assert_equal "http://127.0.0.1:9200/products2", ProductIndex.index_url
 
-    Searchist::Config[:index_prefix] = "prefix-"
+    SearchFlip::Config[:index_prefix] = "prefix-"
 
     assert_equal "http://127.0.0.1:9200/prefix-products2", ProductIndex.index_url
 
@@ -94,7 +94,7 @@ class Searchist::IndexTest < Searchist::TestCase
 
     assert_equal "http://127.0.0.1:9200/prefix-products3", ProductIndex.index_url
 
-    Searchist::Config[:index_prefix] = nil
+    SearchFlip::Config[:index_prefix] = nil
   end
 
   def test_type_url
@@ -136,7 +136,7 @@ class Searchist::IndexTest < Searchist::TestCase
       ProductIndex.import products, {}, version: 2, version_type: "external"
       ProductIndex.import products, { ignore_errors: [409] }, version: 2, version_type: "external"
 
-      assert_raises Searchist::Bulk::Error do
+      assert_raises SearchFlip::Bulk::Error do
         ProductIndex.import products, {}, version: 2, version_type: "external"
       end
     end
@@ -182,7 +182,7 @@ class Searchist::IndexTest < Searchist::TestCase
     end
 
     assert_no_difference "ProductIndex.total_entries" do
-      assert_raises Searchist::Bulk::Error do
+      assert_raises SearchFlip::Bulk::Error do
         ProductIndex.create products
       end
     end
@@ -249,7 +249,7 @@ class Searchist::IndexTest < Searchist::TestCase
       ProductIndex.create products
     end
 
-    assert_raises Searchist::Bulk::Error do
+    assert_raises SearchFlip::Bulk::Error do
       ProductIndex.create products
     end
   end
@@ -267,7 +267,7 @@ class Searchist::IndexTest < Searchist::TestCase
 
     products = create_list(:product, 2)
 
-    if Searchist.version.to_i >= 5
+    if SearchFlip.version.to_i >= 5
       assert_difference "ProductIndex.total_entries", 2 do
         ProductIndex.create products, {}, routing: "r1"
       end
@@ -285,7 +285,7 @@ class Searchist::IndexTest < Searchist::TestCase
   def test_create_with_class_options
     products = create_list(:product, 2)
 
-    if Searchist.version.to_i >= 5
+    if SearchFlip.version.to_i >= 5
       ProductIndex.stubs(:index_options).returns(routing: "r1")
 
       assert_difference "ProductIndex.total_entries", 2 do
@@ -333,7 +333,7 @@ class Searchist::IndexTest < Searchist::TestCase
     end
 
     assert_no_difference "ProductIndex.total_entries" do
-      assert_raises "Searchist::Bulk::Error" do
+      assert_raises "SearchFlip::Bulk::Error" do
         ProductIndex.bulk do |indexer|
           indexer.index 1, JSON.generate(id: 1), version: 1, version_type: "external"
           indexer.index 2, JSON.generate(id: 2), version: 1, version_type: "external"

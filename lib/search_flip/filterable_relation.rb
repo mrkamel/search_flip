@@ -1,6 +1,6 @@
 
-module Searchist
-  # The Searchist::FilterableRelation mixin provides chainable methods like
+module SearchFlip
+  # The SearchFlip::FilterableRelation mixin provides chainable methods like
   # #where, #exists, #range, etc to add search filters to a relation.
   #
   # @example
@@ -27,7 +27,7 @@ module Searchist
     # @param options [Hash] Additional options for the query string query, like
     #   eg default_operator, default_field, etc.
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def search(q, options = {})
       fresh.tap do |relation|
@@ -45,11 +45,12 @@ module Searchist
     #   CommentIndex.where(id: 1 .. 100)
     #   CommentIndex.where(created_at: Time.parse("2016-01-01") .. Time.parse("2017-01-01"))
     #   CommentIndex.where(id: 1, message: "hello")
+    #   CommentIndex.where(state: nil)
     #
     # @param hash [Hash] A field-to-filter mapping specifying filter values for
     #   the respective fields
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def where(hash)
       hash.inject(fresh) do |memo, (key, value)|
@@ -73,11 +74,12 @@ module Searchist
     #   CommentIndex.where_not(state: "approved")
     #   CommentIndex.where_not(created_at: Time.parse("2016-01-01") .. Time.parse("2017-01-01"))
     #   CommentIndex.where_not(id: [1, 2, 3], state: "new")
+    #   CommentIndex.where_not(state: nil)
     #
     # @param hash [Hash] A field-to-filter mapping specifying filter values for the
     #   respective fields
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def where_not(hash)
       hash.inject(fresh) do |memo, (key, value)|
@@ -99,7 +101,7 @@ module Searchist
     #
     # @param args [Array, Hash] The raw filter query arguments
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def filter(*args)
       fresh.tap do |relation|
@@ -115,7 +117,7 @@ module Searchist
     #
     # @param args [Array, Hash] The raw must query arguments
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def must(*args)
       fresh.tap do |relation|
@@ -131,7 +133,7 @@ module Searchist
     #
     # @param args [Array, Hash] The raw must_not query arguments
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def must_not(*args)
       fresh.tap do |relation|
@@ -147,7 +149,7 @@ module Searchist
     #
     # @param args [Array, Hash] The raw should query arguments
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def should(*args)
       fresh.tap do |relation|
@@ -168,7 +170,7 @@ module Searchist
     # @param field [Symbol, String] The field name to specify the range for
     # @param options [Hash] The range filter specification, like lt, lte, etc
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def range(field, options = {})
       filter range: { field => options }
@@ -196,7 +198,7 @@ module Searchist
     #
     # @param options [Hash] Options for the match_all filter, like eg boost
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def match_all(options = {})
       filter match_all: options
@@ -210,7 +212,7 @@ module Searchist
     #
     # @param field [Symbol, String] The field that should have a non-null value
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def exists(field)
       filter exists: { field: field }
@@ -224,7 +226,7 @@ module Searchist
     #
     # @param field [Symbol, String] The field that should have a null value
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def exists_not(field)
       must_not exists: { field: field }

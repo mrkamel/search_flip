@@ -1,5 +1,5 @@
 
-module Searchist
+module SearchFlip
   VERSION = "0.0.1"
 end
 

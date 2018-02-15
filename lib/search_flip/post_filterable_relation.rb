@@ -1,6 +1,6 @@
 
-module Searchist
-  # The Searchist::PostFilterableRelation mixin provides chainable methods
+module SearchFlip
+  # The SearchFlip::PostFilterableRelation mixin provides chainable methods
   # like #post_where, #post_exists, #post_range, etc to add and apply search
   # filters after aggregations have already been calculated.
   #
@@ -39,10 +39,10 @@ module Searchist
     # @param options [Hash] Additional options for the query string query, like
     #   eg default_operator, default_field, etc.
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def post_search(q, options = {})
-      raise(Searchist::NotSupportedError) if Searchist.version.to_i < 2
+      raise(SearchFlip::NotSupportedError) if SearchFlip.version.to_i < 2
 
       fresh.tap do |relation|
         relation.post_search_values = (post_search_values || []) + [query_string: { query: q, :default_operator => :AND }.merge(options)] if q.to_s.strip.length > 0
@@ -69,7 +69,7 @@ module Searchist
     # @param hash [Hash] A field-to-filter mapping specifying filter values for
     #   the respective fields
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def post_where(hash)
       hash.inject(fresh) do |memo, (key, value)|
@@ -102,7 +102,7 @@ module Searchist
     # @param hash [Hash] A field-to-filter mapping specifying filter values for the
     #   respective fields
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def post_where_not(hash)
       hash.inject(fresh) do |memo, (key,value)|
@@ -128,7 +128,7 @@ module Searchist
     #
     # @param args [Array, Hash] The raw filter query arguments
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def post_filter(*args)
       fresh.tap do |relation|
@@ -148,7 +148,7 @@ module Searchist
     #
     # @param args [Array, Hash] The raw must query arguments
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def post_must(*args)
       fresh.tap do |relation|
@@ -168,7 +168,7 @@ module Searchist
     #
     # @param args [Array, Hash] The raw must_not query arguments
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def post_must_not(*args)
       fresh.tap do |relation|
@@ -188,7 +188,7 @@ module Searchist
     #
     # @param args [Array, Hash] The raw should query arguments
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def post_should(*args)
       fresh.tap do |relation|
@@ -212,7 +212,7 @@ module Searchist
     # @param field [Symbol, String] The field name to specify the range for
     # @param options [Hash] The range filter specification, like lt, lte, etc
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def post_range(field, options = {})
       post_filter range: { field => options }
@@ -227,7 +227,7 @@ module Searchist
     #
     # @param field [Symbol, String] The field that should have a non-null value
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def post_exists(field)
       post_filter exists: { field: field }
@@ -242,7 +242,7 @@ module Searchist
     #
     # @param field [Symbol, String] The field that should have a null value
     #
-    # @return [Searchist::Relation] A newly created extended relation
+    # @return [SearchFlip::Relation] A newly created extended relation
 
     def post_exists_not(field)
       post_must_not exists: { field: field }
