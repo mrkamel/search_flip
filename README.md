@@ -6,7 +6,7 @@
 Using SearchFlip it is dead-simple to create index classes that correspond to
 [ElasticSearch](https://www.elastic.co/) indices and to manipulate, query and
 aggregate these indices using a chainable, concise, yet powerful DSL. Finally,
-the SearchFlip supports ElasticSearch Server 1.x, 2.x, 5.x. Check section
+SearchFlip supports ElasticSearch Server 1.x, 2.x, 5.x. Check section
 [Feature Support](#feature-support) for version dependent features.
 
 ```ruby
@@ -46,7 +46,8 @@ CommentIndex.where(available: true).search("hello world").sort(id: "desc").aggre
 
 ## Reference Docs
 
-See [http://www.rubydoc.info/github/mrkamel/search_flip](http://www.rubydoc.info/github/mrkamel/search_flip)
+SearchFlip has a great documentation.
+Check youself at [http://www.rubydoc.info/github/mrkamel/search_flip](http://www.rubydoc.info/github/mrkamel/search_flip)
 
 ## Install
 
