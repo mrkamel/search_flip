@@ -6,15 +6,15 @@ module SearchFlip
   class Response
     extend Forwardable
 
-    attr_accessor :relation, :response
+    attr_accessor :criteria, :response
 
     # @api private
     #
-    # Initializes a new response object for the provided relation and raw
+    # Initializes a new response object for the provided criteria and raw
     # ElasticSearch response.
 
-    def initialize(relation, response)
-      self.relation = relation
+    def initialize(criteria, response)
+      self.criteria = criteria
       self.response = response
     end
 
@@ -103,7 +103,7 @@ module SearchFlip
     # @return [Fixnum] The current page number
 
     def current_page
-      1 + (relation.offset_value_with_default / relation.limit_value_with_default.to_f).ceil
+      1 + (criteria.offset_value_with_default / criteria.limit_value_with_default.to_f).ceil
     end
 
     # Returns the number of total pages for the current pagination settings, ie
@@ -116,7 +116,7 @@ module SearchFlip
     # @return [Fixnum] The total number of pages
 
     def total_pages
-      [(total_entries / relation.limit_value_with_default.to_f).ceil, 1].max
+      [(total_entries / criteria.limit_value_with_default.to_f).ceil, 1].max
     end
 
     # Returns the previous page number or nil if no previous page exists, ie if
@@ -227,7 +227,7 @@ module SearchFlip
       @records ||= begin
         sort_map = ids.each_with_index.each_with_object({}) { |(id, index), hash| hash[id.to_s] = index }
 
-        scope.to_a.sort_by { |record| sort_map[relation.target.record_id(record).to_s] }
+        scope.to_a.sort_by { |record| sort_map[criteria.target.record_id(record).to_s] }
       end
     end
 
@@ -237,16 +237,16 @@ module SearchFlip
     # depending on the ORM you're using.
     #
     # @example
-    #   CommentIndex.preload(:user).scope # => #<Comment::ActiveRecord_Relation:0x0...>
+    #   CommentIndex.preload(:user).scope # => #<Comment::ActiveRecord_Criteria:0x0...>
     #
     # @return The scope for the array of ids in the current result set
 
     def scope
-      res = relation.target.fetch_records(ids)
+      res = criteria.target.fetch_records(ids)
 
-      res = res.includes(*relation.includes_values) if relation.includes_values
-      res = res.eager_load(*relation.eager_load_values) if relation.eager_load_values
-      res = res.preload(*relation.preload_values) if relation.preload_values
+      res = res.includes(*criteria.includes_values) if criteria.includes_values
+      res = res.eager_load(*criteria.eager_load_values) if criteria.eager_load_values
+      res = res.preload(*criteria.preload_values) if criteria.preload_values
 
       res
     end

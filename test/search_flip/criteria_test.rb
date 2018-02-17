@@ -1,10 +1,10 @@
 
 require File.expand_path("../../test_helper", __FILE__)
 
-class SearchFlip::RelationTest < SearchFlip::TestCase
+class SearchFlip::CriteriaTest < SearchFlip::TestCase
   should_delegate_methods :total_entries, :current_page, :previous_page, :prev_page, :next_page, :first_page?, :last_page?, :out_of_range?,
     :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions, :scope, :results, :records, :scroll_id, :raw_response,
-    to: :response, subject: SearchFlip::Relation.new(target: ProductIndex)
+    to: :response, subject: SearchFlip::Criteria.new(target: ProductIndex)
 
   def test_merge
     product1 = create(:product, price: 100, category: "category1")
@@ -20,10 +20,10 @@ class SearchFlip::RelationTest < SearchFlip::TestCase
     refute_includes query.records, product3
   end
 
-  def test_relation
-    relation = ProductIndex.relation
+  def test_criteria
+    criteria = ProductIndex.criteria
 
-    assert relation.relation === relation
+    assert criteria.criteria === criteria
   end
 
   def test_timeout
@@ -495,16 +495,16 @@ class SearchFlip::RelationTest < SearchFlip::TestCase
 
     ProductIndex.import products
 
-    relation = ProductIndex.limit(10).scroll(timeout: "1m")
+    criteria = ProductIndex.limit(10).scroll(timeout: "1m")
 
     result = []
     iterations = 0
 
-    until relation.records.empty?
-      result += relation.records
+    until criteria.records.empty?
+      result += criteria.records
       iterations += 1
 
-      relation = relation.scroll(id: relation.scroll_id, timeout: "1m")
+      criteria = criteria.scroll(id: criteria.scroll_id, timeout: "1m")
     end
 
     assert_equal result.to_set, products.to_set
@@ -758,7 +758,7 @@ class SearchFlip::RelationTest < SearchFlip::TestCase
   def test_fresh
     create :product
 
-    query = ProductIndex.relation.tap(&:records)
+    query = ProductIndex.criteria.tap(&:records)
 
     assert_not_nil query.instance_variable_get(:@response)
 
@@ -769,11 +769,11 @@ class SearchFlip::RelationTest < SearchFlip::TestCase
   def test_respond_to?
     temp_index = Class.new(ProductIndex)
 
-    refute temp_index.relation.respond_to?(:test_scope)
+    refute temp_index.criteria.respond_to?(:test_scope)
 
     temp_index.scope(:test_scope) { match_all }
 
-    assert temp_index.relation.respond_to?(:test_scope)
+    assert temp_index.criteria.respond_to?(:test_scope)
   end
 
   def test_method_missing
@@ -786,7 +786,7 @@ class SearchFlip::RelationTest < SearchFlip::TestCase
 
     temp_index.scope(:with_title) { |title| where(title: title) }
 
-    records = temp_index.relation.with_title("expected").records
+    records = temp_index.criteria.with_title("expected").records
 
     assert_includes records, expected
     refute_includes records, rejected

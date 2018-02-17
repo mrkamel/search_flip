@@ -1,8 +1,8 @@
 
 module SearchFlip
-  # The SearchFlip::Relation class serves the purpose of chaining various
+  # The SearchFlip::Criteria class serves the purpose of chaining various
   # filtering and aggregation methods. Each chainable method creates a new
-  # relation object until a method is called that finally sends the respective
+  # criteria object until a method is called that finally sends the respective
   # request to ElasticSearch and returns the result.
   #
   # @example
@@ -13,57 +13,57 @@ module SearchFlip
   #   CommentIndex.exists(:user_id).paginate(page: 1, per_page: 100)
   #   CommentIndex.sort("_doc").find_each { |comment| "..." }
 
-  class Relation
-    include SearchFlip::FilterableRelation
-    include SearchFlip::PostFilterableRelation
-    include SearchFlip::AggregatableRelation
+  class Criteria
+    include SearchFlip::FilterableCriteria
+    include SearchFlip::PostFilterableCriteria
+    include SearchFlip::AggregatableCriteria
     extend Forwardable
 
     attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values, :offset_value, :limit_value,
       :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args, :custom_value, :terminate_after_value, :timeout_value
 
-    # Creates a new relation while merging the attributes (constraints,
-    # settings, etc) of the current relation with the attributes of another one
-    # passed as argument. For multi-value contstraints the resulting relation
-    # will include constraints of both relations. For single-value constraints,
-    # the values of the relation passed as an argument are used.
+    # Creates a new criteria while merging the attributes (constraints,
+    # settings, etc) of the current criteria with the attributes of another one
+    # passed as argument. For multi-value contstraints the resulting criteria
+    # will include constraints of both criterias. For single-value constraints,
+    # the values of the criteria passed as an argument are used.
     #
     # @example
     #   CommentIndex.where(approved: true).merge(CommentIndex.range(:created_at, gt: Time.parse("2015-01-01")))
     #   CommentIndex.aggregate(:user_id).merge(CommentIndex.where(admin: true))
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def merge(other)
-      other = other.relation
+      other = other.criteria
 
-      fresh.tap do |relation|
-        relation.profile_value = other.profile_value if other.profile_value != nil
-        relation.source_value = (relation.source_value || []) + other.source_value if other.source_value
-        relation.sort_values = (relation.sort_values || []) + other.sort_values if other.sort_values
-        relation.highlight_values = (relation.highlight_values || {}).merge(other.highlight_values) if other.highlight_values
-        relation.suggest_values = (relation.suggest_values || {}).merge(other.suggest_values) if other.suggest_values
-        relation.offset_value = other.offset_value if other.offset_value
-        relation.limit_value = other.limit_value if other.limit_value
-        relation.includes_values = (relation.includes_values || []) + other.includes_values if other.includes_values
-        relation.preload_values = (relation.preload_values || []) + other.preload_values if other.preload_values
-        relation.eager_load_values = (relation.eager_load_values || []) + other.eager_load_values if other.eager_load_values
-        relation.failsafe_value = other.failsafe_value if other.failsafe_value != nil
-        relation.scroll_args = other.scroll_args if other.scroll_args
-        relation.custom_value = (relation.custom_value || {}).merge(other.custom_value) if other.custom_value
-        relation.search_values = (relation.search_values || []) + other.search_values if other.search_values
-        relation.must_values = (relation.must_values || []) + other.must_values if other.must_values
-        relation.must_not_values = (relation.must_not_values || []) + other.must_not_values if other.must_not_values
-        relation.should_values = (relation.should_values || []) + other.should_values if other.should_values
-        relation.filter_values = (relation.filter_values || []) + other.filter_values if other.filter_values
-        relation.post_search_values = (relation.post_search_values || []) + other.post_search_values if other.post_search_values
-        relation.post_must_values = (relation.post_must_values || []) + other.post_must_values if other.post_must_values
-        relation.post_must_not_values = (relation.post_must_not_values || []) + other.post_must_not_values if other.post_must_not_values
-        relation.post_should_values = (relation.post_should_values || []) + other.post_should_values if other.post_should_values
-        relation.post_filter_values = (relation.post_filter_vales || []) + other.post_filter_values if other.post_filter_values
-        relation.aggregation_values = (relation.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values
-        relation.terminate_after_value = other.terminate_after_value if other.terminate_after_value != nil
-        relation.timeout_value = other.timeout_value if other.timeout_value != nil
+      fresh.tap do |criteria|
+        criteria.profile_value = other.profile_value if other.profile_value != nil
+        criteria.source_value = (criteria.source_value || []) + other.source_value if other.source_value
+        criteria.sort_values = (criteria.sort_values || []) + other.sort_values if other.sort_values
+        criteria.highlight_values = (criteria.highlight_values || {}).merge(other.highlight_values) if other.highlight_values
+        criteria.suggest_values = (criteria.suggest_values || {}).merge(other.suggest_values) if other.suggest_values
+        criteria.offset_value = other.offset_value if other.offset_value
+        criteria.limit_value = other.limit_value if other.limit_value
+        criteria.includes_values = (criteria.includes_values || []) + other.includes_values if other.includes_values
+        criteria.preload_values = (criteria.preload_values || []) + other.preload_values if other.preload_values
+        criteria.eager_load_values = (criteria.eager_load_values || []) + other.eager_load_values if other.eager_load_values
+        criteria.failsafe_value = other.failsafe_value if other.failsafe_value != nil
+        criteria.scroll_args = other.scroll_args if other.scroll_args
+        criteria.custom_value = (criteria.custom_value || {}).merge(other.custom_value) if other.custom_value
+        criteria.search_values = (criteria.search_values || []) + other.search_values if other.search_values
+        criteria.must_values = (criteria.must_values || []) + other.must_values if other.must_values
+        criteria.must_not_values = (criteria.must_not_values || []) + other.must_not_values if other.must_not_values
+        criteria.should_values = (criteria.should_values || []) + other.should_values if other.should_values
+        criteria.filter_values = (criteria.filter_values || []) + other.filter_values if other.filter_values
+        criteria.post_search_values = (criteria.post_search_values || []) + other.post_search_values if other.post_search_values
+        criteria.post_must_values = (criteria.post_must_values || []) + other.post_must_values if other.post_must_values
+        criteria.post_must_not_values = (criteria.post_must_not_values || []) + other.post_must_not_values if other.post_must_not_values
+        criteria.post_should_values = (criteria.post_should_values || []) + other.post_should_values if other.post_should_values
+        criteria.post_filter_values = (criteria.post_filter_vales || []) + other.post_filter_values if other.post_filter_values
+        criteria.aggregation_values = (criteria.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values
+        criteria.terminate_after_value = other.terminate_after_value if other.terminate_after_value != nil
+        criteria.timeout_value = other.timeout_value if other.timeout_value != nil
       end
     end
 
@@ -74,11 +74,11 @@ module SearchFlip
     # @example
     #   ProductIndex.timeout("3s").search("hello world")
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def timeout(n)
-      fresh.tap do |relation|
-        relation.timeout_value = n
+      fresh.tap do |criteria|
+        criteria.timeout_value = n
       end
     end
 
@@ -88,15 +88,15 @@ module SearchFlip
     # @example
     #   ProductIndex.terminate_after(10_000).search("hello world")
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def terminate_after(n)
-      fresh.tap do |relation|
-        relation.terminate_after_value = n
+      fresh.tap do |criteria|
+        criteria.terminate_after_value = n
       end
     end
 
-    # Creates a new relation while removing all specified scopes. Currently,
+    # Creates a new criteria while removing all specified scopes. Currently,
     # you can unscope :search, :post_search, :sort, :highlight, :suggest, :custom
     # and :aggregate.
     #
@@ -105,7 +105,7 @@ module SearchFlip
     #
     # @param scopes [Symbol] All scopes that you want to remove
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def unscope(*scopes)
       unknown = scopes - [:search, :post_search, :sort, :highlight, :suggest, :custom, :aggregate]
@@ -114,14 +114,14 @@ module SearchFlip
 
       scopes = scopes.to_set
 
-      fresh.tap do |relation|
-        relation.search_values = nil if scopes.include?(:search)
-        relation.post_search_values = nil if scopes.include?(:search)
-        relation.sort_values = nil if scopes.include?(:sort)
-        relation.hightlight_values = nil if scopes.include?(:highlight)
-        relation.suggest_values = nil if scopes.include?(:suggest)
-        relation.custom_values = nil if scopes.include?(:custom)
-        relation.aggregation_values = nil if scopes.include?(:aggregate)
+      fresh.tap do |criteria|
+        criteria.search_values = nil if scopes.include?(:search)
+        criteria.post_search_values = nil if scopes.include?(:search)
+        criteria.sort_values = nil if scopes.include?(:sort)
+        criteria.hightlight_values = nil if scopes.include?(:highlight)
+        criteria.suggest_values = nil if scopes.include?(:suggest)
+        criteria.custom_values = nil if scopes.include?(:custom)
+        criteria.aggregation_values = nil if scopes.include?(:aggregate)
       end
     end
 
@@ -129,15 +129,15 @@ module SearchFlip
     #
     # Convenience method to have a unified conversion api.
     #
-    # @return [SearchFlip::Relation] Simply returns self
+    # @return [SearchFlip::Criteria] Simply returns self
 
-    def relation
+    def criteria
       self
     end
 
-    # Creates a new SearchFlip::Relation.
+    # Creates a new SearchFlip::Criteria.
     #
-    # @param attributes [Hash] Attributes to initialize the Relation with
+    # @param attributes [Hash] Attributes to initialize the Criteria with
 
     def initialize(attributes = {})
       attributes.each do |key, value|
@@ -239,11 +239,11 @@ module SearchFlip
     # @param options [Hash] Extra highlighting options. Check out the ElasticSearch
     #   docs for further details.
     #
-    # @return [SearchFlip::Relation] A new relation including the highlighting
+    # @return [SearchFlip::Criteria] A new criteria including the highlighting
 
     def highlight(fields, options = {})
-      fresh.tap do |relation|
-        relation.highlight_values = (relation.highlight_values || {}).merge(options)
+      fresh.tap do |criteria|
+        criteria.highlight_values = (criteria.highlight_values || {}).merge(options)
 
         hash = if fields.is_a?(Hash)
           fields
@@ -253,7 +253,7 @@ module SearchFlip
           { fields => {} }
         end
 
-        relation.highlight_values[:fields] = (relation.highlight_values[:fields] || {}).merge(hash)
+        criteria.highlight_values[:fields] = (criteria.highlight_values[:fields] || {}).merge(hash)
       end
     end
 
@@ -268,11 +268,11 @@ module SearchFlip
     # @param options [Hash] Additional suggestion options. Check out the ElasticSearch
     #   docs for further details.
     #
-    # @return [SearchFlip::Relation] A new relation including the suggestion section
+    # @return [SearchFlip::Criteria] A new criteria including the suggestion section
 
     def suggest(name, options = {})
-      fresh.tap do |relation|
-        relation.suggest_values = (relation.suggest_values || {}).merge(name => options)
+      fresh.tap do |criteria|
+        criteria.suggest_values = (criteria.suggest_values || {}).merge(name => options)
       end
     end
 
@@ -284,11 +284,11 @@ module SearchFlip
     #
     # @param value [Boolean] Whether query profiling should be enabled or not
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def profile(value)
-      fresh.tap do |relation|
-        relation.profile_value = value
+      fresh.tap do |criteria|
+        criteria.profile_value = value
       end
     end
 
@@ -310,11 +310,11 @@ module SearchFlip
     # @param timeout [String] The timeout of the scroll request, ie. how long
     #   SearchFlip should keep the scroll handle open
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def scroll(id: nil, timeout: "1m")
-      fresh.tap do |relation|
-        relation.scroll_args = { id: id, timeout: timeout }
+      fresh.tap do |criteria|
+        criteria.scroll_args = { id: id, timeout: timeout }
       end
     end
 
@@ -354,11 +354,11 @@ module SearchFlip
     #
     # @param value [Array] Array listing the field names of the source document
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def source(value)
-      fresh.tap do |relation|
-        relation.source_value = value
+      fresh.tap do |criteria|
+        criteria.source_value = value
       end
     end
 
@@ -373,11 +373,11 @@ module SearchFlip
     # @param args The args that get passed to the includes method of
     #   ActiveRecord or other ORMs
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def includes(*args)
-      fresh.tap do |relation|
-        relation.includes_values = (includes_values || []) + args
+      fresh.tap do |criteria|
+        criteria.includes_values = (includes_values || []) + args
       end
     end
 
@@ -392,11 +392,11 @@ module SearchFlip
     # @param args The args that get passed to the eager load method of
     #   ActiveRecord or other ORMs
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def eager_load(*args)
-      fresh.tap do |relation|
-        relation.eager_load_values = (eager_load_values || []) + args
+      fresh.tap do |criteria|
+        criteria.eager_load_values = (eager_load_values || []) + args
       end
     end
 
@@ -411,11 +411,11 @@ module SearchFlip
     # @param args The args that get passed to the preload method of
     #   ActiveRecord or other ORMs
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def preload(*args)
-      fresh.tap do |relation|
-        relation.preload_values = (preload_values || []) + args
+      fresh.tap do |criteria|
+        criteria.preload_values = (preload_values || []) + args
       end
     end
 
@@ -444,11 +444,11 @@ module SearchFlip
     #
     # @param args The sort values that get passed to ElasticSearch
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def sort(*args)
-      fresh.tap do |relation|
-        relation.sort_values = (sort_values || []) + args
+      fresh.tap do |criteria|
+        criteria.sort_values = (sort_values || []) + args
       end
     end
 
@@ -464,13 +464,13 @@ module SearchFlip
     #
     #   CommentIndex.sort(id: "desc")
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
     #
     # @see #sort See #sort for more details
 
     def resort(*args)
-      fresh.tap do |relation|
-        relation.sort_values = args
+      fresh.tap do |criteria|
+        criteria.sort_values = args
       end
     end
 
@@ -478,7 +478,7 @@ module SearchFlip
 
     # Adds a fully custom field/section to the request, such that upcoming or
     # minor ElasticSearch features as well as other custom requirements can be
-    # used without having yet specialized relation methods.
+    # used without having yet specialized criteria methods.
     #
     # @note Use with caution, because using #custom will potentiall override
     #   other sections like +aggregations+, +query+, +sort+, etc if you use the
@@ -490,11 +490,11 @@ module SearchFlip
     #
     # @param hash [Hash] The custom section that is added to the request
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def custom(hash)
-      fresh.tap do |relation|
-        relation.custom_value = (custom_value || {}).merge(hash)
+      fresh.tap do |criteria|
+        criteria.custom_value = (custom_value || {}).merge(hash)
       end
     end
 
@@ -507,11 +507,11 @@ module SearchFlip
     # @param n [Fixnum] The offset value, ie the number of results that are
     #   skipped in the result set
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def offset(n)
-      fresh.tap do |relation|
-        relation.offset_value = n.to_i
+      fresh.tap do |criteria|
+        criteria.offset_value = n.to_i
       end
     end
 
@@ -532,11 +532,11 @@ module SearchFlip
     # @param n [Fixnum] The limit value, ie the max number of results that
     #   should be returned
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def limit(n)
-      fresh.tap do |relation|
-        relation.limit_value = n.to_i
+      fresh.tap do |criteria|
+        criteria.limit_value = n.to_i
       end
     end
 
@@ -548,7 +548,7 @@ module SearchFlip
       (limit_value || 30).to_i
     end
 
-    # Sets pagination parameters for the relation by using offset and limit,
+    # Sets pagination parameters for the criteria by using offset and limit,
     # ie ElasticSearch's from and size parameters.
     #
     # @example
@@ -558,7 +558,7 @@ module SearchFlip
     # @param page [#to_i] The current page
     # @param per_page [#to_i] The number of results per page
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def paginate(page:, per_page: limit_value_with_default)
       page = [page.to_i, 1].max
@@ -575,7 +575,7 @@ module SearchFlip
       paginate(page: offset_value_with_default / limit_value_with_default + 1, per_page: n)
     end
 
-    # Fetches the records specified by the relation in batches using the
+    # Fetches the records specified by the criteria in batches using the
     # ElasicSearch scroll API and yields each batch. The batch size and scroll
     # API timeout can be specified. Check out the ElasticSearch docs for
     # further details.
@@ -591,7 +591,7 @@ module SearchFlip
     # @option options timeout [String] The timeout per scroll request, ie how
     #   long ElasticSearch will keep the request handle open.
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def find_in_batches(options = {})
       return enum_for(:find_in_batches, options) unless block_given?
@@ -599,12 +599,12 @@ module SearchFlip
       batch_size = options[:batch_size] || 1_000
       timeout = options[:timeout] || "1m"
 
-      relation = limit(batch_size).scroll(timeout: timeout)
+      criteria = limit(batch_size).scroll(timeout: timeout)
 
-      until relation.records.empty?
-        yield relation.records
+      until criteria.records.empty?
+        yield criteria.records
 
-        relation = relation.scroll(id: relation.scroll_id, timeout: timeout)
+        criteria = criteria.scroll(id: criteria.scroll_id, timeout: timeout)
       end
     end
 
@@ -624,7 +624,7 @@ module SearchFlip
     # @option options timeout [String] The timeout per scroll request, ie how
     #   long ElasticSearch will keep the request handle open.
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def find_each(options = {})
       return enum_for(:find_each, options) unless block_given?
@@ -638,9 +638,9 @@ module SearchFlip
 
     alias_method :each, :find_each
 
-    # Executes the search request for the current relation, ie sends the
+    # Executes the search request for the current criteria, ie sends the
     # request to ElasticSearch and returns the response. Connection and
-    # response errors will be rescued if you specify the relation to be
+    # response errors will be rescued if you specify the criteria to be
     # #failsafe, such that an empty response is returned instead.
     #
     # @param base_url An optional alternative base_url to send the request
@@ -678,9 +678,9 @@ module SearchFlip
 
     alias_method :response, :execute
 
-    # Marks the relation to be failsafe, ie certain exceptions raised due to
+    # Marks the criteria to be failsafe, ie certain exceptions raised due to
     # invalid queries, inavailability of ElasticSearch, etc get rescued and an
-    # empty relation is returned instead.
+    # empty criteria is returned instead.
     #
     # @see #execute See #execute for further details
     #
@@ -693,28 +693,28 @@ module SearchFlip
     #   CommentIndex.search("invalid/request").failsafe(true).execute
     #   # => #<SearchFlip::Response ...>
     #
-    # @param value [Boolean] Whether or not the relation should be failsafe
+    # @param value [Boolean] Whether or not the criteria should be failsafe
     #
-    # @return [SearchFlip::Response] A newly created extended relation
+    # @return [SearchFlip::Response] A newly created extended criteria
 
     def failsafe(value)
-      fresh.tap do |relation|
-        relation.failsafe_value = value
+      fresh.tap do |criteria|
+        criteria.failsafe_value = value
       end
     end
 
-    # Returns a fresh, ie dupped, relation with the response cache being
+    # Returns a fresh, ie dupped, criteria with the response cache being
     # cleared.
     #
     # @example
     #   CommentIndex.search("hello world").fresh
     #
-    # @return [SearchFlip::Response] A dupped relation with the response
+    # @return [SearchFlip::Response] A dupped criteria with the response
     #   cache being cleared
 
     def fresh
-      dup.tap do |relation|
-        relation.instance_variable_set(:@response, nil)
+      dup.tap do |criteria|
+        criteria.instance_variable_set(:@response, nil)
       end
     end
 

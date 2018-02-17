@@ -205,16 +205,16 @@ module SearchFlip
 
       # @api private
       #
-      # Creates an SearchFlip::Relation for the current index, which is used
-      # as a base for chaining relation methods.
+      # Creates an SearchFlip::Criteria for the current index, which is used
+      # as a base for chaining criteria methods.
       #
-      # @return [SearchFlip::Relation] The base for chaining relation methods
+      # @return [SearchFlip::Criteria] The base for chaining criteria methods
 
-      def relation
-        SearchFlip::Relation.new(target: self)
+      def criteria
+        SearchFlip::Criteria.new(target: self)
       end
 
-      def_delegators :relation, :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where, :post_where_not, :post_filter, :post_range,
+      def_delegators :criteria, :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where, :post_where_not, :post_filter, :post_range,
         :post_exists, :post_exists_not, :aggregate, :scroll, :source, :includes, :eager_load, :preload, :sort, :resort, :order, :reorder, :offset, :limit, :paginate,
         :page, :per, :search, :highlight, :suggest, :custom, :find_in_batches, :find_each, :failsafe, :total_entries, :total_count, :timeout, :terminate_after, :records
 

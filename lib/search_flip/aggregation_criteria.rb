@@ -1,12 +1,12 @@
 
 module SearchFlip
-  # The SearchFlip::AggregationRelation class puts together everything
+  # The SearchFlip::AggregationCriteria class puts together everything
   # required to use the ElasticSearch aggregation framework via mixins and
   # adds a method to convert it to a hash format to be used in the request.
 
-  class AggregationRelation
-    include SearchFlip::FilterableRelation
-    include SearchFlip::AggregatableRelation
+  class AggregationCriteria
+    include SearchFlip::FilterableCriteria
+    include SearchFlip::AggregatableCriteria
 
     # @api private
     #
@@ -47,7 +47,7 @@ module SearchFlip
     #
     # Simply dups the object for api compatability.
     #
-    # @return [SearchFlip::AggregationRelation] The dupped object
+    # @return [SearchFlip::AggregationCriteria] The dupped object
 
     def fresh
       dup

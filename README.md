@@ -251,7 +251,7 @@ aggregations or nested aggregations via simple to use API methods.
 
 ### Post filters
 
-All relation methods (`#where`, `#where_not`, `#range`, etc.) are available
+All criteria methods (`#where`, `#where_not`, `#range`, etc.) are available
 in post filter mode as well, ie. filters/queries applied after aggregations
 are calculated. Checkout the ElasticSearch docs for further info.
 
@@ -261,7 +261,7 @@ query = query.post_where(reviewed: true)
 query = query.post_search("username:a*")
 ```
 
-Checkout [PostFilterableRelation](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/PostFilterableRelation)
+Checkout [PostFilterableCriteria](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/PostFilterableCriteria)
 for a complete API reference.
 
 ### Aggregations
@@ -292,7 +292,7 @@ query.aggregations # => returns the raw aggregation section
 query.aggregations["username"]["buckets"].detect { |bucket| bucket["key"] == "mrkamel" }["revenue"]["value"] # => 238.50
 ```
 
-Once again, the relation methods (`#where`, `#range`, etc.) are available in
+Once again, the criteria methods (`#where`, `#range`, etc.) are available in
 aggregations as well:
 
 ```ruby
@@ -306,8 +306,8 @@ end
 query.aggregations(:average_price).average_price.value
 ```
 
-Checkout [AggregatableRelation](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/AggregatableRelation)
-as well as [AggregationRelation](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/AggregationRelation)
+Checkout [AggregatableCriteria](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/AggregatableCriteria)
+as well as [AggregationCriteria](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/AggregationCriteria)
 for a complete API reference.
 
 ### Suggestions
@@ -331,7 +331,7 @@ query = CommentIndex.highlight(:title).search("hello")
 query.results[0].highlight.title # => "<em>hello</em> world"
 ```
 
-### Advanced Relation Methods
+### Advanced Criteria Methods
 
 There are even more methods to make your life easier, namely `source`,
 `scroll`, `profile`, `includes`, `preload`, `find_in_batches`, `find_each`,
@@ -449,8 +449,8 @@ CommentIndex.search("invalid/request").failsafe(true).execute
 
 * `merge`
 
-You can merge relations, ie. combine the attributes (constraints, settings,
-etc) of two individual relations:
+You can merge criterias, ie. combine the attributes (constraints, settings,
+etc) of two individual criterias:
 
 ```ruby
 CommentIndex.where(approved: true).merge(CommentIndex.search("hello"))

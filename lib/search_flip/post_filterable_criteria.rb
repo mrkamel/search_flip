@@ -1,6 +1,6 @@
 
 module SearchFlip
-  # The SearchFlip::PostFilterableRelation mixin provides chainable methods
+  # The SearchFlip::PostFilterableCriteria mixin provides chainable methods
   # like #post_where, #post_exists, #post_range, etc to add and apply search
   # filters after aggregations have already been calculated.
   #
@@ -20,14 +20,14 @@ module SearchFlip
   #
   #   query = query.post_where(price: 20 ... 50)
 
-  module PostFilterableRelation
+  module PostFilterableCriteria
     def self.included(base)
       base.class_eval do
         attr_accessor :post_search_values, :post_must_values, :post_must_not_values, :post_should_values, :post_filter_values
       end
     end
 
-    # Adds a post query string query to the relation while using AND as the
+    # Adds a post query string query to the criteria while using AND as the
     # default operator unless otherwise specified. Check out the
     # ElasticSearch docs for further details.
     #
@@ -39,17 +39,17 @@ module SearchFlip
     # @param options [Hash] Additional options for the query string query, like
     #   eg default_operator, default_field, etc.
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_search(q, options = {})
       raise(SearchFlip::NotSupportedError) if SearchFlip.version.to_i < 2
 
-      fresh.tap do |relation|
-        relation.post_search_values = (post_search_values || []) + [query_string: { query: q, :default_operator => :AND }.merge(options)] if q.to_s.strip.length > 0
+      fresh.tap do |criteria|
+        criteria.post_search_values = (post_search_values || []) + [query_string: { query: q, :default_operator => :AND }.merge(options)] if q.to_s.strip.length > 0
       end
     end
 
-    # Adds post filters to your relation for the supplied hash composed of
+    # Adds post filters to your criteria for the supplied hash composed of
     # field-to-filter mappings which specify terms, term or range filters,
     # depending on the type of the respective hash value, namely array, range
     # or scalar type like Fixnum, String, etc.
@@ -69,7 +69,7 @@ module SearchFlip
     # @param hash [Hash] A field-to-filter mapping specifying filter values for
     #   the respective fields
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_where(hash)
       hash.inject(fresh) do |memo, (key, value)|
@@ -102,7 +102,7 @@ module SearchFlip
     # @param hash [Hash] A field-to-filter mapping specifying filter values for the
     #   respective fields
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_where_not(hash)
       hash.inject(fresh) do |memo, (key,value)|
@@ -116,7 +116,7 @@ module SearchFlip
       end
     end
 
-    # Adds raw post filter queries to the relation.
+    # Adds raw post filter queries to the criteria.
     #
     # @example Raw post term filter query
     #   query = CommentIndex.aggregate("...")
@@ -128,15 +128,15 @@ module SearchFlip
     #
     # @param args [Array, Hash] The raw filter query arguments
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_filter(*args)
-      fresh.tap do |relation|
-        relation.post_filter_values = (post_filter_values || []) + args
+      fresh.tap do |criteria|
+        criteria.post_filter_values = (post_filter_values || []) + args
       end
     end
 
-    # Adds raw post must queries to the relation.
+    # Adds raw post must queries to the criteria.
     #
     # @example Raw post term must query
     #   query = CommentIndex.aggregate("...")
@@ -148,15 +148,15 @@ module SearchFlip
     #
     # @param args [Array, Hash] The raw must query arguments
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_must(*args)
-      fresh.tap do |relation|
-        relation.post_must_values = (post_must_values || []) + args
+      fresh.tap do |criteria|
+        criteria.post_must_values = (post_must_values || []) + args
       end
     end
 
-    # Adds raw post must_not queries to the relation.
+    # Adds raw post must_not queries to the criteria.
     #
     # @example Raw post term must_not query
     #   query = CommentIndex.aggregate("...")
@@ -168,15 +168,15 @@ module SearchFlip
     #
     # @param args [Array, Hash] The raw must_not query arguments
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_must_not(*args)
-      fresh.tap do |relation|
-        relation.post_must_not_values = (post_must_not_values || []) + args
+      fresh.tap do |criteria|
+        criteria.post_must_not_values = (post_must_not_values || []) + args
       end
     end
 
-    # Adds raw post should queries to the relation.
+    # Adds raw post should queries to the criteria.
     #
     # @example Raw post term should query
     #   query = CommentIndex.aggregate("...")
@@ -188,15 +188,15 @@ module SearchFlip
     #
     # @param args [Array, Hash] The raw should query arguments
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_should(*args)
-      fresh.tap do |relation|
-        relation.post_should_values = (post_should_values || []) + args
+      fresh.tap do |criteria|
+        criteria.post_should_values = (post_should_values || []) + args
       end
     end
 
-    # Adds a post range filter to the relation without being forced to specify
+    # Adds a post range filter to the criteria without being forced to specify
     # the left and right end of the range, such that you can eg simply specify
     # lt, lte, gt and gte. For fully specified ranges, you can easily use
     # #post_where, etc. Check out the ElasticSearch docs for further details
@@ -212,13 +212,13 @@ module SearchFlip
     # @param field [Symbol, String] The field name to specify the range for
     # @param options [Hash] The range filter specification, like lt, lte, etc
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_range(field, options = {})
       post_filter range: { field => options }
     end
 
-    # Adds a post exists filter to the relation, which selects all documents
+    # Adds a post exists filter to the criteria, which selects all documents
     # for which the specified field has a non-null value.
     #
     # @example
@@ -227,13 +227,13 @@ module SearchFlip
     #
     # @param field [Symbol, String] The field that should have a non-null value
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_exists(field)
       post_filter exists: { field: field }
     end
 
-    # Adds a post exists not filter to the relation, which selects all documents
+    # Adds a post exists not filter to the criteria, which selects all documents
     # for which the specified field's value is null.
     #
     # @example
@@ -242,7 +242,7 @@ module SearchFlip
     #
     # @param field [Symbol, String] The field that should have a null value
     #
-    # @return [SearchFlip::Relation] A newly created extended relation
+    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_exists_not(field)
       post_must_not exists: { field: field }
