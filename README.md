@@ -6,7 +6,7 @@
 Using SearchFlip it is dead-simple to create index classes that correspond to
 [ElasticSearch](https://www.elastic.co/) indices and to manipulate, query and
 aggregate these indices using a chainable, concise, yet powerful DSL. Finally,
-SearchFlip supports ElasticSearch Server 1.x, 2.x, 5.x. Check section
+SearchFlip supports ElasticSearch 1.x, 2.x, 5.x. Check section
 [Feature Support](#feature-support) for version dependent features.
 
 ```ruby
@@ -230,8 +230,8 @@ CommentIndex.aggregate(:username).aggregations(:username)
 delete records:
 
 ```ruby
-# for ElasticSearch 2.x, the delete-by-query plugin is required for the
-# following query:
+# for ElasticSearch >= 2.x and < 5.x, the delete-by-query plugin is required
+# for the following query:
 
 CommentIndex.match_all.delete
 
@@ -275,15 +275,15 @@ query = OrderIndex.aggregate(:username, order: { revenue: "desc" }) do |aggregat
 end
 ```
 
-Generally, aggregation results returned by ElasticSearch Server are wrapped in
-a `SearchFlip::Result`, which wraps a `Hashie::Mash`such that you can access
-them via:
+Generally, aggregation results returned by ElasticSearch are wrapped in a
+`SearchFlip::Result`, which wraps a `Hashie::Mash`such that you can access them
+via:
 
 ```ruby
 query.aggregations(:username)["mrkamel"].revenue.value
 ```
 
-Still, if you want to get the raw aggregations returned by ElasticSearch Server,
+Still, if you want to get the raw aggregations returned by ElasticSearch,
 access them without supplying any aggregation name to `#aggregations`:
 
 ```ruby
@@ -423,8 +423,8 @@ end
 
 * `find_each`
 
-Like `#find_in_batches`, used `#find_each` to fetch records in batches, but yields
-one one record at a time.
+Like `#find_in_batches`, use `#find_each` to fetch records in batches, but yields
+one record at a time.
 
 ```ruby
 CommentIndex.search("hello world").find_each(batch_size: 100) do |record|
@@ -528,7 +528,7 @@ ActiveRecord, Mongoid, etc.
 ## Feature Support
 
 * `#post_search` and `#profile` are only supported from up to ElasticSearch
-  Server version >= 2.
+  version >= 2.
 * for ElasticSearch 2.x, the delete-by-query plugin is required to delete
   records via queries
 
@@ -548,7 +548,7 @@ Things on the To do list before releasing it:
 
 ## Links
 
-* ElasticSearch Server: [https://www.elastic.co/](https://www.elastic.co/)
+* ElasticSearch: [https://www.elastic.co/](https://www.elastic.co/)
 * Reference Docs: [http://www.rubydoc.info/github/mrkamel/search_flip](http://www.rubydoc.info/github/mrkamel/search_flip)
 * Travis: [http://travis-ci.org/mrkamel/search_flip](http://travis-ci.org/mrkamel/search_flip)
 * will_paginate: [https://github.com/mislav/will_paginate](https://github.com/mislav/will_paginate)

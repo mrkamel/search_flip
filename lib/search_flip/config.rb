@@ -1,11 +1,11 @@
 
 module SearchFlip
-  # Queries and returns the ElasticSearch server version used.
+  # Queries and returns the ElasticSearch version used.
   #
   # @example
   #   SearchFlip.version # => e.g. 2.4.1
   #
-  # @return [String] The SearchFlip server version
+  # @return [String] The ElasticSearch version
 
   def self.version
     @version ||= SearchFlip::HTTPClient.get("#{Config[:base_url]}/").parse["version"]["number"]
