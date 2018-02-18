@@ -261,7 +261,7 @@ query = query.post_where(reviewed: true)
 query = query.post_search("username:a*")
 ```
 
-Checkout [PostFilterableCriteria](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/PostFilterableCriteria)
+Checkout [PostFilterable](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/PostFilterable)
 for a complete API reference.
 
 ### Aggregations
@@ -306,7 +306,7 @@ end
 query.aggregations(:average_price).average_price.value
 ```
 
-Checkout [AggregatableCriteria](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/AggregatableCriteria)
+Checkout [Aggregatable](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/Aggregatable)
 as well as [AggregationCriteria](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/AggregationCriteria)
 for a complete API reference.
 

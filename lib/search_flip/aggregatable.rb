@@ -1,14 +1,14 @@
 
 module SearchFlip
-  # The SearchFlip::AggregatableCriteria mixin provides handy methods for
-  # using the ElasticSearch aggregation framework, which can be chained with
+  # The SearchFlip::Aggregatable mixin provides handy methods for using
+  # the ElasticSearch aggregation framework, which can be chained with
   # each other, all other criteria methods and even nested.
   #
   # @example
   #   ProductIndex.where(available: true).aggregate(:tags, size: 50)
   #   OrderIndex.aggregate(revenue: { sum: { field: "price" }})
 
-  module AggregatableCriteria
+  module Aggregatable
     def self.included(base)
       base.class_eval do
         attr_accessor :aggregation_values
@@ -39,7 +39,6 @@ module SearchFlip
     #   end
     #
     # @example Nested histogram aggregation
-    #
     #   OrderIndex.aggregate(histogram: { date_histogram: { field: "price", interval: "month" }}) do |aggregation|
     #     aggregation.aggregate(:user_id)
     #   end

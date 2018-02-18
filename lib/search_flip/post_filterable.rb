@@ -1,7 +1,7 @@
 
 module SearchFlip
-  # The SearchFlip::PostFilterableCriteria mixin provides chainable methods
-  # like #post_where, #post_exists, #post_range, etc to add and apply search
+  # The SearchFlip::PostFilterable mixin provides chainable methods like
+  # #post_where, #post_exists, #post_range, etc to add and apply search
   # filters after aggregations have already been calculated.
   #
   # @example
@@ -20,7 +20,7 @@ module SearchFlip
   #
   #   query = query.post_where(price: 20 ... 50)
 
-  module PostFilterableCriteria
+  module PostFilterable
     def self.included(base)
       base.class_eval do
         attr_accessor :post_search_values, :post_must_values, :post_must_not_values, :post_should_values, :post_filter_values

@@ -1,6 +1,6 @@
 
 module SearchFlip
-  # The SearchFlip::FilterableCriteria mixin provides chainable methods like
+  # The SearchFlip::Filterable mixin provides chainable methods like
   # #where, #exists, #range, etc to add search filters to a criteria.
   #
   # @example
@@ -8,7 +8,7 @@ module SearchFlip
   #   CommentIndex.exists(:user_id)
   #   CommentIndex.range(:created_at, gt: Date.today - 7)
 
-  module FilterableCriteria
+  module Filterable
     def self.included(base)
       base.class_eval do
         attr_accessor :search_values, :must_values, :must_not_values, :should_values, :filter_values

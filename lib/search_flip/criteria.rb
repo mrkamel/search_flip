@@ -14,9 +14,9 @@ module SearchFlip
   #   CommentIndex.sort("_doc").find_each { |comment| "..." }
 
   class Criteria
-    include SearchFlip::FilterableCriteria
-    include SearchFlip::PostFilterableCriteria
-    include SearchFlip::AggregatableCriteria
+    include SearchFlip::Filterable
+    include SearchFlip::PostFilterable
+    include SearchFlip::Aggregatable
     extend Forwardable
 
     attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values, :offset_value, :limit_value,

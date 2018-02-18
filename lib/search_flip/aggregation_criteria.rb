@@ -5,8 +5,8 @@ module SearchFlip
   # adds a method to convert it to a hash format to be used in the request.
 
   class AggregationCriteria
-    include SearchFlip::FilterableCriteria
-    include SearchFlip::AggregatableCriteria
+    include SearchFlip::Filterable
+    include SearchFlip::Aggregatable
 
     # @api private
     #
