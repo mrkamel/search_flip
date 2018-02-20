@@ -6,7 +6,7 @@
 Using SearchFlip it is dead-simple to create index classes that correspond to
 [ElasticSearch](https://www.elastic.co/) indices and to manipulate, query and
 aggregate these indices using a chainable, concise, yet powerful DSL. Finally,
-SearchFlip supports ElasticSearch 1.x, 2.x, 5.x. Check section
+SearchFlip supports ElasticSearch 1.x, 2.x, 5.x, 6.x. Check section
 [Feature Support](#feature-support) for version dependent features.
 
 ```ruby
