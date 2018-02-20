@@ -58,6 +58,8 @@ module SearchFlip
           memo.filter terms: { key => value }
         elsif value.is_a?(Range)
           memo.filter range: { key => { gte: value.min, lte: value.max } }
+        elsif value.nil?
+          memo.exists_not key
         else
           memo.filter term: { key => value }
         end
@@ -87,6 +89,8 @@ module SearchFlip
           memo.must_not terms: { key => value }
         elsif value.is_a?(Range)
           memo.must_not range: { key => { gte: value.min, lte: value.max } }
+        elsif value.nil?
+          memo.exists key
         else
           memo.must_not term: { key => value }
         end

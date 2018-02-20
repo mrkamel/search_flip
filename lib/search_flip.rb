@@ -59,5 +59,22 @@ module SearchFlip
       SearchFlip::Response.new(criterias[index], response)
     end
   end
+
+  # Used to manipulate, ie add and remove index aliases. Raises an
+  # SearchFlip::ResponseError in case any errors occur.
+  #
+  # @example
+  #   ElasticSearch.post_aliases(actions: [
+  #     { remove: { index: "test1", alias: "alias1" }},
+  #     { add: { index: "test2", alias: "alias1" }}
+  #   ])
+  #
+  # @param payload [Hash] The raw request payload
+  #
+  # @return [SearchFlip::Response] The raw response
+
+  def self.aliases(payload)
+    SearchFlip::HTTPClient.headers(accept: "application/json").post("#{SearchFlip::Config[:base_url]}/_aliases", body: JSON.generate(payload))
+  end
 end
 

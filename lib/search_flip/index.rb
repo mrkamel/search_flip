@@ -274,7 +274,7 @@ module SearchFlip
       # @return [Boolean] Whether or not the index exists
 
       def index_exists?
-        get_mapping
+        SearchFlip::HTTPClient.headers(accept: "application/json").head(index_url)
 
         true
       rescue SearchFlip::ResponseError => e
