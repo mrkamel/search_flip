@@ -30,6 +30,7 @@ module SearchFlip
 
       def notifies_index(index)
         after_save { |record| index.import(record) }
+        after_touch { |record| index.import(record) }
         after_destroy { |record| index.delete(record) }
       end
     end

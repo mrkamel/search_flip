@@ -15,6 +15,12 @@ class SearchFlip::ModelTest < SearchFlip::TestCase
       comment.save!
     end
 
+    CommentIndex.delete(comment)
+
+    assert_difference "CommentIndex.total_entries" do
+      comment.touch
+    end
+
     assert_difference "CommentIndex.total_entries", -1 do
       comment.destroy
     end
