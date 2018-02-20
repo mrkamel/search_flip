@@ -307,7 +307,7 @@ query.aggregations(:average_price).average_price.value
 ```
 
 Checkout [Aggregatable](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/Aggregatable)
-as well as [AggregationCriteria](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/AggregationCriteria)
+as well as [Aggregation](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/Aggregation)
 for a complete API reference.
 
 ### Suggestions

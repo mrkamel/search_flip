@@ -56,9 +56,9 @@ module SearchFlip
         hash = field_or_hash.is_a?(Hash) ? field_or_hash : { field_or_hash => { terms: { field: field_or_hash }.merge(options) } }
 
         if block
-          aggregation_criteria = block.call(SearchFlip::AggregationCriteria.new)
+          aggregation = block.call(SearchFlip::Aggregation.new)
 
-          field_or_hash.is_a?(Hash) ? hash[field_or_hash.keys.first].merge!(aggregation_criteria.to_hash) : hash[field_or_hash].merge!(aggregation_criteria.to_hash)
+          field_or_hash.is_a?(Hash) ? hash[field_or_hash.keys.first].merge!(aggregation.to_hash) : hash[field_or_hash].merge!(aggregation.to_hash)
         end
 
         criteria.aggregation_values = (aggregation_values || {}).merge(hash)

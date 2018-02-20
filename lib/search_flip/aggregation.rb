@@ -1,10 +1,10 @@
 
 module SearchFlip
-  # The SearchFlip::AggregationCriteria class puts together everything
+  # The SearchFlip::Aggregation class puts together everything
   # required to use the ElasticSearch aggregation framework via mixins and
   # adds a method to convert it to a hash format to be used in the request.
 
-  class AggregationCriteria
+  class Aggregation
     include SearchFlip::Filterable
     include SearchFlip::Aggregatable
 
@@ -47,7 +47,7 @@ module SearchFlip
     #
     # Simply dups the object for api compatability.
     #
-    # @return [SearchFlip::AggregationCriteria] The dupped object
+    # @return [SearchFlip::Aggregation] The dupped object
 
     def fresh
       dup
