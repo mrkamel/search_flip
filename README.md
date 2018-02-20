@@ -509,22 +509,6 @@ end
 Thus, simply add your custom implementation of those methods that work with
 whatever ORM you use.
 
-## Automatic Indexing
-
-SearchFlip ships with a mixin using model callbacks to automatically
-re-index/destroy them from the respective index.
-
-```ruby
-class User < ActiveRecord::Base
-  include SearchFlip::Model
-
-  notifies_index UserIndex
-end
-```
-
-Works with all ORMs supporting `after_save` and `after_destroy` like eg.
-ActiveRecord, Mongoid, etc.
-
 ## Feature Support
 
 * `#post_search` and `#profile` are only supported from up to ElasticSearch
