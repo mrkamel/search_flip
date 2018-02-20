@@ -16,7 +16,6 @@ require "search_flip/criteria"
 require "search_flip/response"
 require "search_flip/result"
 require "search_flip/index"
-require "search_flip/model"
 
 module SearchFlip
   class NotSupportedError < StandardError; end
