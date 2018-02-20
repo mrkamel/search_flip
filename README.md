@@ -520,15 +520,13 @@ whatever ORM you use.
 
 Things on the To do list before releasing it:
 
-1. Rename the project
-2. First class support for `nested`, `has_parent` and `has_child` queries
-3. Support collapse
-4. Create Logo
-5. Support more scopes in `unscope`
-6. Comparison with other gems
-7. Alias support
-8. `function_score` support
-9. `rescore` support
+1. First class support for `nested`, `has_parent` and `has_child` queries
+2. Support collapse
+3. Create Logo
+4. Support more scopes in `unscope`
+5. `function_score` support
+6. `rescore` support
+7. Model lifecycle support
 
 ## Links
 
