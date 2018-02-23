@@ -21,3 +21,11 @@ class DateTime
   end
 end
 
+if defined?(ActiveSupport)
+  class ActiveSupport::TimeWithZone
+    def to_json
+      iso8601(6).to_json
+    end
+  end
+end
+
