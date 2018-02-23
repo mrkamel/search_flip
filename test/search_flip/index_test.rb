@@ -327,22 +327,22 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
   def test_bulk
     assert_difference "ProductIndex.total_entries", 2 do
       ProductIndex.bulk do |indexer|
-        indexer.index 1, SearchFlip::JSON.generate(id: 1)
-        indexer.index 2, SearchFlip::JSON.generate(id: 2)
+        indexer.index 1, id: 1
+        indexer.index 2, id: 2
       end
     end
 
     assert_no_difference "ProductIndex.total_entries" do
       assert_raises "SearchFlip::Bulk::Error" do
         ProductIndex.bulk do |indexer|
-          indexer.index 1, SearchFlip::JSON.generate(id: 1), version: 1, version_type: "external"
-          indexer.index 2, SearchFlip::JSON.generate(id: 2), version: 1, version_type: "external"
+          indexer.index 1, { id: 1 }, version: 1, version_type: "external"
+          indexer.index 2, { id: 2 }, version: 1, version_type: "external"
         end
       end
 
       ProductIndex.bulk ignore_errors: [409] do |indexer|
-        indexer.index 1, SearchFlip::JSON.generate(id: 1), version: 1, version_type: "external"
-        indexer.index 2, SearchFlip::JSON.generate(id: 2), version: 1, version_type: "external"
+        indexer.index 1, { id: 1 }, version: 1, version_type: "external"
+        indexer.index 2, { id: 2 }, version: 1, version_type: "external"
       end
     end
   end

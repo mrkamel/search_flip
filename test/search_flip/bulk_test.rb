@@ -7,8 +7,8 @@ class SearchFlip::BulkTest < SearchFlip::TestCase
 
     assert_difference "ProductIndex.total_entries", 2 do
       ProductIndex.bulk do |bulk|
-        bulk.create product1.id, SearchFlip::JSON.generate(ProductIndex.serialize(product1))
-        bulk.create product2.id, SearchFlip::JSON.generate(ProductIndex.serialize(product1))
+        bulk.create product1.id, ProductIndex.serialize(product1)
+        bulk.create product2.id, ProductIndex.serialize(product1)
       end
     end
 
@@ -27,14 +27,14 @@ class SearchFlip::BulkTest < SearchFlip::TestCase
 
     assert_raises "SearchFlip::Bulk::Error" do
       ProductIndex.bulk do |bulk|
-        bulk.create product1.id, SearchFlip::JSON.generate(ProductIndex.serialize(product1))
-        bulk.create product2.id, SearchFlip::JSON.generate(ProductIndex.serialize(product1))
+        bulk.create product1.id, ProductIndex.serialize(product1)
+        bulk.create product2.id, ProductIndex.serialize(product1)
       end
     end
 
     ProductIndex.bulk(ignore_errors: [409]) do |bulk|
-      bulk.create product1.id, SearchFlip::JSON.generate(ProductIndex.serialize(product1))
-      bulk.create product2.id, SearchFlip::JSON.generate(ProductIndex.serialize(product1))
+      bulk.create product1.id, ProductIndex.serialize(product1)
+      bulk.create product2.id, ProductIndex.serialize(product1)
     end
   end
 
@@ -42,12 +42,12 @@ class SearchFlip::BulkTest < SearchFlip::TestCase
     product = create(:product)
 
     ProductIndex.bulk do |bulk|
-      bulk.index product.id, SearchFlip::JSON.generate(ProductIndex.serialize(product)), version: 1, version_type: "external_gt"
+      bulk.index product.id, ProductIndex.serialize(product), version: 1, version_type: "external_gt"
     end
 
     assert_raises "SearchFlip::Bulk::Error" do
       ProductIndex.bulk do |bulk|
-        bulk.index product.id, SearchFlip::JSON.generate(ProductIndex.serialize(product)), version: 1, version_type: "external_gt"
+        bulk.index product.id, ProductIndex.serialize(product), version: 1, version_type: "external_gt"
       end
     end
   end

@@ -5,10 +5,10 @@ module SearchFlip
   #
   # @example
   #   SearchFlip::Bulk.new "http://127.0.0.1:9200/index/type/_bulk" do |bulk|
-  #     bulk.create record.id, SearchFlip::JSON.generate(MyIndex.serialize(record))
-  #     bulk.index record.id, SearchFlip::JSON.generate(MyIndex.serialize(record)), version: record.version, version_type: "external"
+  #     bulk.create record.id, MyIndex.serialize(record)
+  #     bulk.index record.id, MyIndex.serialize(record), version: record.version, version_type: "external"
   #     bulk.delete record.id, routing: record.user_id
-  #     bulk.update record.id, SearchFlip::JSON.generate(MyIndex.serialize(record))
+  #     bulk.update record.id, doc: MyIndex.serialize(record)
   #   end
 
   class Bulk
@@ -61,8 +61,8 @@ module SearchFlip
     # @param options [options] Options for the index request, like eg routing
     #   and versioning
 
-    def index(id, json, options = {})
-      perform :index, id, json, options
+    def index(id, object, options = {})
+      perform :index, id, SearchFlip::JSON.generate(object), options
     end
 
     # Adds an index request to the bulk batch
@@ -80,8 +80,8 @@ module SearchFlip
     # @param options [options] Options for the index request, like eg routing
     #   and versioning
 
-    def create(id, json, options = {})
-      perform :create, id, json, options
+    def create(id, object, options = {})
+      perform :create, id, SearchFlip::JSON.generate(object), options
     end
 
     # Adds a update request to the bulk batch.
@@ -91,8 +91,8 @@ module SearchFlip
     # @param options [options] Options for the index request, like eg routing
     #   and versioning
 
-    def update(id, json, options = {})
-      perform :update, id, json, options
+    def update(id, object, options = {})
+      perform :update, id, SearchFlip::JSON.generate(object), options
     end
 
     # Adds a delete request to the bulk batch.

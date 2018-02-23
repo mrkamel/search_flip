@@ -421,7 +421,7 @@ module SearchFlip
       def index(scope, options = {}, _index_options = {})
         bulk options do |indexer|
           each_record(scope, index_scope: true) do |object|
-            indexer.index record_id(object), SearchFlip::JSON.generate(serialize(object)), index_options(object).merge(_index_options)
+            indexer.index record_id(object), serialize(object), index_options(object).merge(_index_options)
           end
         end
 
@@ -439,7 +439,7 @@ module SearchFlip
       def create(scope, options = {}, _index_options = {})
         bulk options do |indexer|
           each_record(scope, index_scope: true) do |object|
-            indexer.create record_id(object), SearchFlip::JSON.generate(serialize(object)), index_options(object).merge(_index_options)
+            indexer.create record_id(object), serialize(object), index_options(object).merge(_index_options)
           end
         end
 
@@ -457,7 +457,7 @@ module SearchFlip
       def update(scope, options = {}, _index_options = {})
         bulk options do |indexer|
           each_record(scope, index_scope: true) do |object|
-            indexer.update record_id(object), SearchFlip::JSON.generate(:doc => serialize(object)), index_options(object).merge(_index_options)
+            indexer.update record_id(object), { doc: serialize(object) }, index_options(object).merge(_index_options)
           end
         end
 
@@ -488,7 +488,7 @@ module SearchFlip
       #
       # @example
       #   CommentIndex.bulk ignore_errors: [409] do |bulk|
-      #     bulk.create comment.id, SearchFlip::JSON.generate(CommentIndex.serialize(comment)),
+      #     bulk.create comment.id, CommentIndex.serialize(comment),
       #       version: comment.version, version_type: "external_gte"
       #
       #     bulk.delete comment.id, routing: comment.user_id
