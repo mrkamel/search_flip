@@ -6,6 +6,7 @@ require "mocha/mini_test"
 require "search_flip"
 require "active_record"
 require "factory_girl"
+require "timecop"
 require "yaml"
 
 WebMock.allow_net_connect!

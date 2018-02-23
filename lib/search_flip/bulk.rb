@@ -5,10 +5,10 @@ module SearchFlip
   #
   # @example
   #   SearchFlip::Bulk.new "http://127.0.0.1:9200/index/type/_bulk" do |bulk|
-  #     bulk.create record.id, JSON.generate(MyIndex.serialize(record))
-  #     bulk.index record.id, JSON.generate(MyIndex.serialize(record)), version: record.version, version_type: "external"
+  #     bulk.create record.id, SearchFlip::JSON.generate(MyIndex.serialize(record))
+  #     bulk.index record.id, SearchFlip::JSON.generate(MyIndex.serialize(record)), version: record.version, version_type: "external"
   #     bulk.delete record.id, routing: record.user_id
-  #     bulk.update record.id, JSON.generate(MyIndex.serialize(record))
+  #     bulk.update record.id, SearchFlip::JSON.generate(MyIndex.serialize(record))
   #   end
 
   class Bulk
@@ -127,7 +127,7 @@ module SearchFlip
         item.each do |_, _item|
           status = _item["status"]
 
-          raise(SearchFlip::Bulk::Error, JSON.generate(_item)) if !status.between?(200, 299) && !ignore_errors.include?(status)
+          raise(SearchFlip::Bulk::Error, SearchFlip::JSON.generate(_item)) if !status.between?(200, 299) && !ignore_errors.include?(status)
         end
       end
     ensure
@@ -135,7 +135,7 @@ module SearchFlip
     end
 
     def perform(action, id, json = nil, options = {})
-      @payload << JSON.generate(action => options.merge(_id: id))
+      @payload << SearchFlip::JSON.generate(action => options.merge(_id: id))
       @payload << "\n"
 
       if json

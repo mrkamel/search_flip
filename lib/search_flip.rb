@@ -2,9 +2,11 @@
 require "forwardable"
 require "http"
 require "hashie"
+require "oj"
 require "set"
 
 require "search_flip/version"
+require "search_flip/json"
 require "search_flip/http_client"
 require "search_flip/config"
 require "search_flip/bulk"
@@ -48,7 +50,7 @@ module SearchFlip
 
   def self.msearch(criterias)
     payload = criterias.flat_map do |criteria|
-      [JSON.generate(index: criteria.target.index_name_with_prefix, type: criteria.target.type_name), JSON.generate(criteria.request)]
+      [SearchFlip::JSON.generate(index: criteria.target.index_name_with_prefix, type: criteria.target.type_name), SearchFlip::JSON.generate(criteria.request)]
     end
 
     payload = payload.join("\n")
@@ -73,7 +75,7 @@ module SearchFlip
   # @return [SearchFlip::Response] The raw response
 
   def self.aliases(payload)
-    SearchFlip::HTTPClient.headers(accept: "application/json").post("#{SearchFlip::Config[:base_url]}/_aliases", body: JSON.generate(payload))
+    SearchFlip::HTTPClient.headers(accept: "application/json").post("#{SearchFlip::Config[:base_url]}/_aliases", body: SearchFlip::JSON.generate(payload))
   end
 end
 

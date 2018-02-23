@@ -26,8 +26,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "activerecord", ">= 3.0"
   spec.add_development_dependency "webmock"
+  spec.add_development_dependency "timecop"
 
   spec.add_dependency "http"
   spec.add_dependency "hashie"
+  spec.add_dependency "oj"
 end
 
