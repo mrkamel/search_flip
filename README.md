@@ -138,7 +138,7 @@ class CommentIndex
   end
 end
 
-CommentIndex.import(Comment.all) # => CommentIndex.import(Comment.preload(:user))
+CommentIndex.import(Comment.all) # => CommentIndex.import(Comment.all.preload(:user))
 ```
 
 Please note, ElasticSearch allows to have multiple types per index. However,
@@ -572,11 +572,46 @@ Things on the To do list before releasing it:
 
 1. First class support for `nested`, `has_parent` and `has_child` queries
 2. Support collapse
-3. Create Logo
-4. Support more scopes in `unscope`
-5. `function_score` support
-6. `rescore` support
-7. Model lifecycle support
+3. Support more scopes in `unscope`
+4. `function_score` support
+5. `rescore` support
+6. Model lifecycle support
+
+## Keeping your Models and Indices in Sync
+
+* Option 1) use `after_...` hooks to synchronously index the records when
+  changed.
+* Option 2) use `after_commit` to synchronously enqueue jobs to asynchronously
+  index the records in a batched fashion, optimally.
+
+Issues of Option 1) and 2):
+
+* Option 1) potentially indexes changes that are subsequentlly rolled back.
+* Option 2) potentially misses updates, because e.g. an app server crashes
+  in between.
+
+To mitigate these issues you need:
+
+* Option 3) use `after_...` hooks to enqueue jobs to to asynchronously index
+  the records in batches with delay of `max_transaction_time` (e.g. 5 minutes)
+  and use `after_commit` to asynchrously index the records instantly.
+
+Issues of Option 3)
+
+* Every update initiates 2 index updates
+* stale reads (only if errors occur) which however repair automatically after
+  `max_transaction_time`
+* Depending on the job queue server (e.g. redis) there are multiple additional
+  error conditions (lost writes due to client-server connection issues,
+  lost writes due to master-slave failover, etc)
+
+To mitigate these issues you want to use Option 3) with Apache Kafka. Without
+going into much detail, you won't see lost writes due to the design of Apache
+Kafka - if properly configured (without any warranties, of course). We've not
+yet seen lost writes. However, consult the Apache Kafka docs as well as aphyr's
+great series of [Jepsen Tests](https://aphyr.com/posts/293-jepsen-kafka).
+
+TODO what does SearchFlip want to ship?
 
 ## Links
 
