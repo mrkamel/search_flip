@@ -138,7 +138,9 @@ class ProductIndex
       description: product.description,
       category: product.category,
       price: product.price,
-      rank: product.rank
+      rank: product.rank,
+      created_at: product.created_at,
+      updated_at: product.updated_at
     }
   end
 end

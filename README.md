@@ -566,90 +566,26 @@ require "search_flip/to_json"
 * for ElasticSearch 2.x, the delete-by-query plugin is required to delete
   records via queries
 
-## TODO
-
-Things on the To do list before releasing it:
-
-1. First class support for `nested`, `has_parent` and `has_child` queries
-2. Support collapse
-3. Support more scopes in `unscope`
-4. `function_score` support
-5. `rescore` support
-6. Model lifecycle support
-
 ## Keeping your Models and Indices in Sync
 
-SearchFlip currently doesn't ship with any means to keep your models and
-indices in sync, because this is a complex task and every option has pros and
-cons.
-
-1. Synchronous Indexing
-
-```ruby
-class Comment < ActiveRecord::Base
-  after_save { |comment| CommentIndex.import(comment) }
-  after_destroy { |comment| CommentIndex.delete(comment) }
-  after_touch { |comment| CommentIndex.import(comment) }
-end
-```
-
-This navive approach synchronously indexes the records when changed. However,
-the approach's caveats are:
-
-* it slows down your database transactions
-* it doesn't use the ElasticSearch bulk API
-* it indexes not yet committed changes, such that any ROLLBACK will result
-  in inconsistencies between database and ElasticSearch
-
-Thus, you don't want to use this method except for testing
-
-2. Asynchronous Indexing
+Besides the most basic approach to get you started, SarchFlip currently doesn't
+ship with any means to automatically keep your models and indices in sync,
+because every method is very much bound to the concrete environment and depends
+on your concrete requirements. In addition, the methods to achieve model/index
+consistency can get arbitrarily complex and we want to keep this bloat out of
+the SearchFlip codebase.
 
 ```ruby
 class Comment < ActiveRecord::Base
-  after_commit { |comment| JobQueue.enq CommentIndexJob.new(comment.id) }
+  include SearchFlip::Model
+
+  notifies_index(CommentIndex)
 end
 ```
 
-The asynchronous approach doesn't slow down your database transactions and can
-potentially use the ElasticSearch bulk API. However:
-
-* it can loose updates when e.g. your app server crashes between committing the
-  database transaction and enqueuing the index job
-
-This leads to:
-
-3. Asynchronous Indexing with Automatic Repair
-
-```ruby
-class Comment < ActiveRecord::Base
-  after_save { |comment| SomeJobQueue.enq CommentIndexRepairJob.new(comment.id), delay: 5.minutes }
-  after_destroy { |comment| SomeJobQueue.enq CommentIndexRepairJob.new(comment.id), delay: 5.minutes }
-  after_touch { |comment| SomeJobQueue.enq CommentIndexRepairJob.new(comment.id), delay: 5.minutes }
-
-  after_comment { |comment| SomeJobQueue.enq CommentIndexJob.new(comment.id) }
-end
-```
-
-Here, we enqueue a repair job from within the database transaction in addition
-to the job that gets enqueued on transaction commit. Repair jobs are enqueued
-with a delay of eg. 5 minutes to ensure that the database transaction will be
-committed/rolled back when the repair job actually gets executed. The issues of
-this option are:
-
-* Every database update initiates 2 index updates (unless the repair job can
-  determine the cases when nothing needs to be repaired)
-* Depending on the job queue server (eg. redis) there are multiple additional
-  error conditions (lost writes due to client server connection issues or due
-  to master-slave failover conditions, etc)
-
-To mitigate these issues you might want to use this option with Apache Kafka
-instead of Redis. Without going into the details and without any warranties:
-you should not see lost updates when using Apache Kafka, if properly configured
-(eg. 3 nodes, `default.replication.factor: 3`, `required_acks: -1`,
-`min_insync_replicas: 2`). We've not yet seen lost writes, yet. However, consult
-the Apache Kafka docs as well as aphyr's great series of [Jepsen
-Tests](https://aphyr.com/posts/293-jepsen-kafka).
+It uses `after_commit` (if applicable, `after_save`, `after_destroy` and
+`after_touch` otherwise) hooks to synchronously update the index when your
+model changes.
 
 ## Links
 
