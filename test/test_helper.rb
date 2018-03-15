@@ -156,7 +156,7 @@ class TestIndex
     {
       test: {
         properties: {
-          test_field: { type: "string" }
+          test_field: { type: "date" }
         }
       }
     }

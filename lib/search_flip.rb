@@ -76,7 +76,7 @@ module SearchFlip
   # @return [SearchFlip::Response] The raw response
 
   def self.aliases(payload)
-    SearchFlip::HTTPClient.headers(accept: "application/json").post("#{SearchFlip::Config[:base_url]}/_aliases", body: SearchFlip::JSON.generate(payload))
+    SearchFlip::HTTPClient.headers(accept: "application/json", content_type: "application/json").post("#{SearchFlip::Config[:base_url]}/_aliases", body: SearchFlip::JSON.generate(payload))
   end
 end
 
