@@ -2,6 +2,8 @@
 # SearchFlip
 
 [![Build Status](https://secure.travis-ci.org/mrkamel/search_flip.png?branch=master)](http://travis-ci.org/mrkamel/search_flip)
+[![Gem Version](https://badge.fury.io/rb/search_flip.svg)](http://badge.fury.io/rb/search_flip)
+[![Dependency Status](https://gemnasium.com/badges/github.com/mrkamel/search_flip.svg)](https://gemnasium.com/github.com/mrkamel/search_flip)
 
 Using SearchFlip it is dead-simple to create index classes that correspond to
 [ElasticSearch](https://www.elastic.co/) indices and to manipulate, query and
