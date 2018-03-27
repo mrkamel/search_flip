@@ -1,7 +1,7 @@
 
 # SearchFlip
 
-Full-Featured ElasticSearch Ruby Client with a Chainable DSL
+**Full-Featured ElasticSearch Ruby Client with a Chainable DSL**
 
 [![Build Status](https://secure.travis-ci.org/mrkamel/search_flip.png?branch=master)](http://travis-ci.org/mrkamel/search_flip)
 [![Gem Version](https://badge.fury.io/rb/search_flip.svg)](http://badge.fury.io/rb/search_flip)

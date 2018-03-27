@@ -6,7 +6,7 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
     :post_where_not, :post_filter, :post_range, :post_exists, :post_exists_not, :aggregate, :scroll, :source, :includes,
     :eager_load, :preload, :sort, :resort, :order, :reorder, :offset, :limit, :paginate, :page, :per, :search,
     :find_in_batches, :highlight, :suggest, :custom, :find_each, :failsafe, :total_entries, :total_count, :terminate_after,
-    :timeout, to: :criteria, subject: ProductIndex
+    :timeout, :should, :should_not, :must, :must_not, to: :criteria, subject: ProductIndex
 
   def test_create_index
     assert TestIndex.create_index
