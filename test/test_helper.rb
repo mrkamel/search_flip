@@ -2,7 +2,7 @@
 require "minitest"
 require "minitest/autorun"
 require "webmock/minitest"
-require "mocha/mini_test"
+require "mocha/minitest"
 require "search_flip"
 require "active_record"
 require "factory_bot"
@@ -240,4 +240,3 @@ class SearchFlip::TestCase < MiniTest::Test
     Product.delete_all
   end
 end
-
