@@ -5,7 +5,7 @@ require "webmock/minitest"
 require "mocha/mini_test"
 require "search_flip"
 require "active_record"
-require "factory_girl"
+require "factory_bot"
 require "timecop"
 require "yaml"
 
@@ -35,7 +35,7 @@ class Product < ActiveRecord::Base
   has_many :comments
 end
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :product
 end
 
@@ -50,7 +50,7 @@ class User < ActiveRecord::Base
   has_many :products
 end
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :user
 end
 
@@ -68,7 +68,7 @@ class Comment < ActiveRecord::Base
   belongs_to :product
 end
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :comment
 end
 
@@ -170,7 +170,7 @@ end
 TestIndex.delete_index if TestIndex.index_exists?
 
 class SearchFlip::TestCase < MiniTest::Test
-  include FactoryGirl::Syntax::Methods
+  include FactoryBot::Syntax::Methods
 
   def self.should_delegate_method(method, to:, subject:, as: method)
     define_method :"test_delegate_#{method}_to_#{to}" do
