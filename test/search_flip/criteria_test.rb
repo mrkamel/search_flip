@@ -755,6 +755,19 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     assert_equal [[expected1, expected2], [expected3]], ProductIndex.where(title: "expected").sort(:rank).find_in_batches(batch_size: 2).to_a
   end
 
+  def test_find_results_in_batches
+    expected1 = create(:product, title: "expected", rank: 1)
+    expected2 = create(:product, title: "expected", rank: 2)
+    expected3 = create(:product, title: "expected", rank: 3)
+    rejected = create(:product, title: "rejected")
+
+    create :product, title: "rejected"
+
+    ProductIndex.import [expected1, expected2, expected3, rejected]
+
+    assert_equal [[expected1.id, expected2.id], [expected3.id]], ProductIndex.where(title: "expected").sort(:rank).find_results_in_batches(batch_size: 2).map { |batch| batch.map(&:id) }
+  end
+
   def test_find_each
     expected1 = create(:product, title: "expected", rank: 1)
     expected2 = create(:product, title: "expected", rank: 2)

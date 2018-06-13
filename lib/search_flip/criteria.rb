@@ -590,21 +590,36 @@ module SearchFlip
     #   batch. Uses #limit to control the batch size.
     # @option options timeout [String] The timeout per scroll request, ie how
     #   long ElasticSearch will keep the request handle open.
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def find_in_batches(options = {})
       return enum_for(:find_in_batches, options) unless block_given?
 
-      batch_size = options[:batch_size] || 1_000
-      timeout = options[:timeout] || "1m"
-
-      criteria = limit(batch_size).scroll(timeout: timeout)
-
-      until criteria.ids.empty?
+      yield_in_batches(options) do |criteria|
         yield(criteria.records) if criteria.records.size > 0
+      end
+    end
 
-        criteria = criteria.scroll(id: criteria.scroll_id, timeout: timeout)
+    # Fetches the results specified by the criteria in batches using the
+    # ElasticSearch scroll API and yields each batch. The batch size and scroll
+    # API timeout can be specified. Checkout out the ElasticSearch docs for
+    # further details.
+    #
+    # @example
+    #   CommentIndex.search("hello world").find_results_in_batches(batch_size: 100) do |batch|
+    #     # ...
+    #   end
+    #
+    # @param options [Hash] The options to control the fetching of batches
+    # @option options batch_size [Fixnum] The number of records to fetch per
+    #   batch. Uses #limit to control the batch size.
+    # @option options timeout [String] The timeout per scroll request, ie how
+    #   long ElasticSearch will keep the request handle open.
+
+    def find_results_in_batches(options = {})
+      return enum_for(:find_results_in_batches, options) unless block_given?
+
+      yield_in_batches(options) do |criteria|
+        yield criteria.results
       end
     end
 
@@ -623,8 +638,6 @@ module SearchFlip
     #   batch. Uses #limit to control the batch size.
     # @option options timeout [String] The timeout per scroll request, ie how
     #   long ElasticSearch will keep the request handle open.
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def find_each(options = {})
       return enum_for(:find_each, options) unless block_given?
@@ -732,6 +745,23 @@ module SearchFlip
 
     def_delegators :response, :total_entries, :total_count, :current_page, :previous_page, :prev_page, :next_page, :first_page?, :last_page?, :out_of_range?, :total_pages,
       :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions, :scope, :results, :records, :scroll_id, :raw_response
+
+    private
+
+    def yield_in_batches(options = {})
+      return enum_for(:yield_in_batches, options) unless block_given?
+
+      batch_size = options[:batch_size] || 1_000
+      timeout = options[:timeout] || "1m"
+
+      criteria = limit(batch_size).scroll(timeout: timeout)
+
+      until criteria.ids.empty?
+        yield criteria.response
+
+        criteria = criteria.scroll(id: criteria.scroll_id, timeout: timeout)
+      end
+    end
   end
 end
 
