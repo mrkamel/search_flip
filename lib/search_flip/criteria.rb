@@ -601,8 +601,8 @@ module SearchFlip
 
       criteria = limit(batch_size).scroll(timeout: timeout)
 
-      until criteria.records.empty?
-        yield criteria.records
+      until criteria.ids.empty?
+        yield(criteria.records) if criteria.records.size > 0
 
         criteria = criteria.scroll(id: criteria.scroll_id, timeout: timeout)
       end

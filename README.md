@@ -381,7 +381,7 @@ end
 
 * `profile`
 
-Use `#profile` To enable query profiling:
+Use `#profile` to enable query profiling:
 
 ```ruby
 query = CommentIndex.profile(true)
