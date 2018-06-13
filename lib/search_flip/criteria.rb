@@ -598,11 +598,13 @@ module SearchFlip
 
       batch_size = options[:batch_size] || 1_000
       timeout = options[:timeout] || "1m"
+      use_raw_hashes = options[:raw_results] || false
 
       criteria = limit(batch_size).scroll(timeout: timeout)
 
-      until criteria.records.empty?
-        yield criteria.records
+      no_more_results = use_raw_hashes ? criteria.last_page? : criteria.records.empty?
+      until no_more_results
+        yield(use_raw_hashes ? criteria.results : criteria.records)
 
         criteria = criteria.scroll(id: criteria.scroll_id, timeout: timeout)
       end
