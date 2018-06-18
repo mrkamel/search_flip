@@ -341,7 +341,7 @@ query.results[0].highlight.title # => "<em>hello</em> world"
 
 There are even more methods to make your life easier, namely `source`,
 `scroll`, `profile`, `includes`, `preload`, `find_in_batches`, `find_each`,
-`failsafe` and `unscope` to name just a few:
+`find_results_in_batches`, `failsafe` and `unscope` to name just a few:
 
 * `source`
 
@@ -423,6 +423,17 @@ The batch size and scroll API timeout can be specified.
 
 ```ruby
 CommentIndex.search("hello world").find_in_batches(batch_size: 100) do |batch|
+  # ...
+end
+```
+
+* `find_results_in_batches`
+
+Used like `find_in_batches`, but yielding the raw results instead of database
+records. Again, the batch size and scroll API timeout can be specified.
+
+```ruby
+CommentIndex.search("hello world").find_results_in_batches(batch_size: 100) do |batch|
   # ...
 end
 ```
