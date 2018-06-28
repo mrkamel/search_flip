@@ -88,7 +88,7 @@ module SearchFlip
       # @return [Hash] The hash-representation of the record
 
       def serialize(record)
-        raise NotImplementedError
+        raise SearchFlip::MethodNotImplemented, "You must implement #{name}::serialize(record)"
       end
 
       # Adds a named scope to the index.
@@ -227,7 +227,7 @@ module SearchFlip
       # @return [String] The name used for the type within the index
 
       def type_name
-        raise NotImplementedError
+        raise SearchFlip::MethodNotImplemented, "You must implement #{name}::type_name"
       end
 
       # Returns the base name of the index within ElasticSearch, ie the index

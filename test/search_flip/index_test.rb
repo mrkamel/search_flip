@@ -8,6 +8,26 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
     :find_in_batches, :highlight, :suggest, :custom, :find_each, :failsafe, :total_entries, :total_count, :terminate_after,
     :timeout, :should, :should_not, :must, :must_not, to: :criteria, subject: ProductIndex
 
+  def test_serialize_exception
+    klass = Class.new do
+      include SearchFlip::Index
+    end
+
+    assert_raises SearchFlip::MethodNotImplemented do
+      klass.serialize(Hashie::Mash)
+    end
+  end
+
+  def test_type_name_exception
+    klass = Class.new do
+      include SearchFlip::Index
+    end
+
+    assert_raises SearchFlip::MethodNotImplemented do
+      klass.serialize(Hashie::Mash)
+    end
+  end
+
   def test_create_index
     assert TestIndex.create_index
     assert TestIndex.index_exists?
