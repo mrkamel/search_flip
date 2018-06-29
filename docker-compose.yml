@@ -1,0 +1,6 @@
+version: '2' 
+services:
+  elasticsearch:
+    image: $ES_IMAGE
+    ports:
+      - 9200:9200
