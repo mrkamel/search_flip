@@ -11,7 +11,7 @@ require "yaml"
 
 WebMock.allow_net_connect!
 
-ActiveRecord::Base.establish_connection YAML.load_file(File.expand_path("../database.yml", __FILE__))
+ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 
 SearchFlip::Config[:auto_refresh] = true
 

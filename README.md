@@ -618,3 +618,17 @@ model changes.
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
+## Running the test suite
+
+Running the tests is super easy. The test suite uses sqlite, such that you only
+need to install ElasticSearch. You can install ElasticSearch on your own, or
+you can e.g. use docker-compose:
+
+```
+$ cd search_flip
+$ sudo ES_IMAGE=elasticsearch:5.4 docker-compose up
+$ rake test
+```
+
+That's it.
+
