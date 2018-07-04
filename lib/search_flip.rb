@@ -67,7 +67,7 @@ module SearchFlip
   # SearchFlip::ResponseError in case any errors occur.
   #
   # @example
-  #   ElasticSearch.post_aliases(actions: [
+  #   SearchFlip.aliases(actions: [
   #     { remove: { index: "test1", alias: "alias1" }},
   #     { add: { index: "test2", alias: "alias1" }}
   #   ])
