@@ -5,7 +5,7 @@ env:
   - ES_IMAGE=elasticsearch:1
   - ES_IMAGE=plainpicture/elasticsearch:2.4.1_delete-by-query
   - ES_IMAGE=elasticsearch:5.4
-  - ES_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:6.3.0
+  - ES_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:6.5.0
 rvm:
   - ruby-head
 before_install:
