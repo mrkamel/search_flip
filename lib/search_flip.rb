@@ -52,13 +52,21 @@ module SearchFlip
 
   def self.msearch(criterias)
     payload = criterias.flat_map do |criteria|
-      [SearchFlip::JSON.generate(index: criteria.target.index_name_with_prefix, type: criteria.target.type_name), SearchFlip::JSON.generate(criteria.request)]
+      [
+        SearchFlip::JSON.generate(index: criteria.target.index_name_with_prefix, type: criteria.target.type_name),
+        SearchFlip::JSON.generate(criteria.request)
+      ]
     end
 
     payload = payload.join("\n")
     payload << "\n"
 
-    SearchFlip::HTTPClient.headers(accept: "application/json", content_type: "application/x-ndjson").post("#{SearchFlip::Config[:base_url]}/_msearch", body: payload).parse["responses"].map.with_index do |response, index|
+    raw_response =
+      SearchFlip::HTTPClient
+        .headers(accept: "application/json", content_type: "application/x-ndjson")
+        .post("#{SearchFlip::Config[:base_url]}/_msearch", body: payload)
+
+    raw_response.parse["responses"].map.with_index do |response, index|
       SearchFlip::Response.new(criterias[index], response)
     end
   end
@@ -77,7 +85,9 @@ module SearchFlip
   # @return [SearchFlip::Response] The raw response
 
   def self.aliases(payload)
-    SearchFlip::HTTPClient.headers(accept: "application/json", content_type: "application/json").post("#{SearchFlip::Config[:base_url]}/_aliases", body: SearchFlip::JSON.generate(payload))
+    SearchFlip::HTTPClient
+      .headers(accept: "application/json", content_type: "application/json")
+      .post("#{SearchFlip::Config[:base_url]}/_aliases", body: SearchFlip::JSON.generate(payload))
   end
 end
 

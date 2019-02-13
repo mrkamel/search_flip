@@ -1,5 +1,5 @@
 
-require File.expand_path("../test_helper", __FILE__)
+require File.expand_path("test_helper", __dir__)
 
 class SearchFlipTest < SearchFlip::TestCase
   def test_msearch
@@ -14,13 +14,8 @@ class SearchFlipTest < SearchFlip::TestCase
   end
 
   def test_aliases
-    assert SearchFlip.aliases(actions: [
-      add: { index: "products", alias: "alias1" }
-    ])
-
-    assert SearchFlip.aliases(actions: [
-      remove: { index: "products", alias: "alias1" }
-    ])
+    assert SearchFlip.aliases(actions: [add: { index: "products", alias: "alias1" }])
+    assert SearchFlip.aliases(actions: [remove: { index: "products", alias: "alias1" }])
   end
 end
 

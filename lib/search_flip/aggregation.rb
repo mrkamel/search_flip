@@ -21,18 +21,18 @@ module SearchFlip
       if must_values || search_values || must_not_values || should_values || filter_values
         if SearchFlip.version.to_i >= 2
           res[:filter] = {
-            bool: {}.
-              merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {}).
-              merge(must_not_values ? { must_not: must_not_values } : {}).
-              merge(should_values ? { should: should_values } : {}).
-              merge(filter_values ? { filter: filter_values } : {})
+            bool: {}
+              .merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {})
+              .merge(must_not_values ? { must_not: must_not_values } : {})
+              .merge(should_values ? { should: should_values } : {})
+              .merge(filter_values ? { filter: filter_values } : {})
           }
         else
           filters = (filter_values || []) + (must_not_values || []).map { |must_not_value| { not: must_not_value } }
 
-          queries = {}.
-            merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {}).
-            merge(should_values ? { should: should_values } : {})
+          queries = {}
+            .merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {})
+            .merge(should_values ? { should: should_values } : {})
 
           filters_and_queries = filters + (queries.size > 0 ? [bool: queries] : [])
 

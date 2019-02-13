@@ -1,9 +1,10 @@
 
-require File.expand_path("../../test_helper", __FILE__)
+require File.expand_path("../test_helper", __dir__)
 
 class SearchFlip::CriteriaTest < SearchFlip::TestCase
-  should_delegate_methods :total_entries, :current_page, :previous_page, :prev_page, :next_page, :first_page?, :last_page?, :out_of_range?,
-    :total_pages, :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions, :scope, :results, :records, :scroll_id, :raw_response,
+  should_delegate_methods :total_entries, :current_page, :previous_page, :prev_page, :next_page,
+    :first_page?, :last_page?, :out_of_range?, :total_pages, :hits, :ids, :count, :size, :length,
+    :took, :aggregations, :suggestions, :scope, :results, :records, :scroll_id, :raw_response,
     to: :response, subject: SearchFlip::Criteria.new(target: ProductIndex)
 
   def test_merge
@@ -13,7 +14,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     ProductIndex.import [product1, product2, product3]
 
-    query = ProductIndex.where(price: 50 .. 250).aggregate(:category).merge(ProductIndex.where(category: "category1"))
+    query = ProductIndex.where(price: 50..250).aggregate(:category).merge(ProductIndex.where(category: "category1"))
 
     assert_includes query.records, product1
     refute_includes query.records, product2
@@ -23,7 +24,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
   def test_criteria
     criteria = ProductIndex.criteria
 
-    assert criteria.criteria === criteria
+    assert_equal criteria.criteria.object_id, criteria.object_id
   end
 
   def test_timeout
@@ -49,7 +50,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     ProductIndex.import [product1, product2, product3]
 
-    query1 = ProductIndex.where(price: 100 .. 200)
+    query1 = ProductIndex.where(price: 100..200)
     query2 = query1.where(category: "category1")
 
     assert_includes query1.records, product1
@@ -82,7 +83,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     ProductIndex.import [expected1, expected2, rejected]
 
-    records = ProductIndex.where(price: 100 .. 200).records
+    records = ProductIndex.where(price: 100..200).records
 
     assert_includes records, expected1
     assert_includes records, expected2
@@ -108,7 +109,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     ProductIndex.import [product1, product2, product3]
 
-    query1 = ProductIndex.where_not(price: 250 .. 350)
+    query1 = ProductIndex.where_not(price: 250..350)
     query2 = query1.where_not(category: "category2")
 
     assert_includes query1.records, product1
@@ -141,7 +142,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     ProductIndex.import [expected, rejected1, rejected2]
 
-    records = ProductIndex.where_not(price: 200 .. 300).records
+    records = ProductIndex.where_not(price: 200..300).records
 
     assert_includes records, expected
     refute_includes records, rejected1
@@ -167,7 +168,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     ProductIndex.import [product1, product2, product3]
 
-    query1 = ProductIndex.filter(range: { price: { gte: 100, lte: 200 }})
+    query1 = ProductIndex.filter(range: { price: { gte: 100, lte: 200 } })
     query2 = query1.filter(term: { category: "category1" })
 
     assert_includes query1.records, product1
@@ -268,8 +269,11 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     refute_includes query2.records, product2
     refute_includes query2.records, product3
 
-    assert_equal Hash["category1" => 2, "category2" => 1], query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
-    assert_equal Hash["category1" => 2, "category2" => 1], query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
   end
 
   def test_post_where
@@ -279,7 +283,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     ProductIndex.import [product1, product2, product3]
 
-    query1 = ProductIndex.aggregate(:category).post_where(price: 100 .. 200)
+    query1 = ProductIndex.aggregate(:category).post_where(price: 100..200)
     query2 = query1.post_where(category: "category1")
 
     assert_includes query1.records, product1
@@ -290,8 +294,11 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     refute_includes query2.records, product2
     refute_includes query2.records, product3
 
-    assert_equal Hash["category1" => 2, "category2" => 1], query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
-    assert_equal Hash["category1" => 2, "category2" => 1], query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
   end
 
   def test_post_where_with_array
@@ -307,7 +314,8 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     assert_includes query.records, expected2
     refute_includes query.records, rejected
 
-    assert_equal Hash["category1" => 2, "category2" => 1], query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
   end
 
   def test_post_where_with_range
@@ -317,13 +325,14 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     ProductIndex.import [expected1, expected2, rejected]
 
-    query = ProductIndex.aggregate(:category).post_where(price: 100 .. 200)
+    query = ProductIndex.aggregate(:category).post_where(price: 100..200)
 
     assert_includes query.records, expected1
     assert_includes query.records, expected2
     refute_includes query.records, rejected
 
-    assert_equal Hash["category1" => 2, "category2" => 1], query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
   end
 
   def test_post_where_not
@@ -333,7 +342,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     ProductIndex.import [product1, product2, product3]
 
-    query1 = ProductIndex.aggregate(:category).post_where_not(price: 250 .. 350)
+    query1 = ProductIndex.aggregate(:category).post_where_not(price: 250..350)
     query2 = query1.post_where_not(category: "category2")
 
     assert_includes query1.records, product1
@@ -344,8 +353,11 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     refute_includes query2.records, product2
     refute_includes query2.records, product3
 
-    assert_equal Hash["category1" => 2, "category2" => 1], query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
-    assert_equal Hash["category1" => 2, "category2" => 1], query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
   end
 
   def test_post_where_not_with_array
@@ -361,7 +373,8 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     refute_includes query.records, rejected1
     refute_includes query.records, rejected2
 
-    assert_equal Hash["category1" => 2, "category2" => 1], query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
   end
 
   def test_post_where_not_with_range
@@ -371,13 +384,14 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     ProductIndex.import [expected, rejected1, rejected2]
 
-    query = ProductIndex.aggregate(:category).post_where_not(price: 200 .. 300)
+    query = ProductIndex.aggregate(:category).post_where_not(price: 200..300)
 
     assert_includes query.records, expected
     refute_includes query.records, rejected1
     refute_includes query.records, rejected2
 
-    assert_equal Hash["category1" => 2, "category2" => 1], query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
   end
 
   def test_post_filter
@@ -387,7 +401,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     ProductIndex.import [product1, product2, product3]
 
-    query1 = ProductIndex.aggregate(:category).post_filter(range: { price: { gte: 100, lte: 200 }})
+    query1 = ProductIndex.aggregate(:category).post_filter(range: { price: { gte: 100, lte: 200 } })
     query2 = query1.post_filter(term: { category: "category1" })
 
     assert_includes query1.records, product1
@@ -398,8 +412,11 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     refute_includes query2.records, product2
     refute_includes query2.records, product3
 
-    assert_equal Hash["category1" => 2, "category2" => 1], query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
-    assert_equal Hash["category1" => 2, "category2" => 1], query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
   end
 
   def test_post_range
@@ -420,8 +437,11 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     assert_includes query2.records, product2
     refute_includes query2.records, product3
 
-    assert_equal Hash["category1" => 2, "category2" => 1], query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
-    assert_equal Hash["category1" => 2, "category2" => 1], query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
   end
 
   def test_post_exists
@@ -442,8 +462,11 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     refute_includes query2.records, product2
     refute_includes query2.records, product3
 
-    assert_equal Hash["category1" => 2, "category2" => 1], query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
-    assert_equal Hash["category1" => 2, "category2" => 1], query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
   end
 
   def test_post_exists_not
@@ -464,8 +487,11 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     refute_includes query2.records, product2
     refute_includes query2.records, product3
 
-    assert_equal Hash["category1" => 2, "category2" => 1], query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
-    assert_equal Hash["category1" => 2, "category2" => 1], query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
   end
 
   def test_aggregate
@@ -473,7 +499,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     ProductIndex.import create_list(:product, 2, category: "category2", price: 20)
     ProductIndex.import create_list(:product, 1, category: "category3", price: 30)
 
-    query = ProductIndex.aggregate(:category, size: 2).aggregate(price_sum: { sum: { field: "price" }})
+    query = ProductIndex.aggregate(:category, size: 2).aggregate(price_sum: { sum: { field: "price" } })
 
     category_aggregations = query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
     price_aggregation = query.aggregations(:price_sum).value
@@ -487,7 +513,8 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     ProductIndex.import create_list(:product, 2, category: "category2")
     ProductIndex.import create_list(:product, 1, category: "category3")
 
-    aggregations = ProductIndex.aggregate(category: { terms: { field: :category }}).aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    query = ProductIndex.aggregate(category: { terms: { field: :category } })
+    aggregations = query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
 
     assert_equal Hash["category1" => 3, "category2" => 2, "category3" => 1], aggregations
   end
@@ -498,7 +525,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     ProductIndex.import create_list(:product, 1, category: "category3", price: 25)
 
     query = ProductIndex.aggregate(:category) do |aggregation|
-      aggregation.aggregate(price_sum: { sum: { field: "price" }})
+      aggregation.aggregate(price_sum: { sum: { field: "price" } })
     end
 
     category_aggregations = query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
@@ -689,7 +716,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     assert_equal [product1, product3].to_set, ProductIndex.search("Title1 OR Title3").records.to_set
     assert_equal [product1, product3].to_set, ProductIndex.search("Title1 Title3", default_operator: :OR).records.to_set
     assert_equal [product1], ProductIndex.search("Title1 OR Title2").search("Title1 OR Title3").records
-    assert_equal [product1], ProductIndex.search("Title1 OR Title3").where(price: 5 .. 15).records
+    assert_equal [product1], ProductIndex.search("Title1 OR Title3").where(price: 5..15).records
   end
 
   def test_unscope
@@ -725,7 +752,10 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     assert_equal ["Title2 <em>highlight</em>"], results[1].highlight.title
     assert_equal ["Description2 <em>highlight</em>"], results[1].highlight.description
 
-    results = ProductIndex.sort(:id).highlight(:title, require_field_match: true).highlight(:description, require_field_match: true).search("title:highlight").results
+    query = ProductIndex.sort(:id).search("title:highlight")
+    query = query.highlight(:title, require_field_match: true).highlight(:description, require_field_match: true)
+
+    results = query.results
 
     assert_equal ["Title1 <em>highlight</em>"], results[0].highlight.title
     assert_nil results[0].highlight.description
@@ -739,7 +769,8 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     ProductIndex.import product
 
-    assert_equal "description", ProductIndex.suggest(:suggestion, text: "Desciption", term: { field: "description" }).suggestions(:suggestion).first["text"]
+    assert_equal "description",
+      ProductIndex.suggest(:suggestion, text: "Desciption", term: { field: "description" }).suggestions(:suggestion).first["text"]
   end
 
   def test_find_in_batches
@@ -752,7 +783,8 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     ProductIndex.import [expected1, expected2, expected3, rejected]
 
-    assert_equal [[expected1, expected2], [expected3]], ProductIndex.where(title: "expected").sort(:rank).find_in_batches(batch_size: 2).to_a
+    assert_equal [[expected1, expected2], [expected3]],
+      ProductIndex.where(title: "expected").sort(:rank).find_in_batches(batch_size: 2).to_a
   end
 
   def test_find_results_in_batches
@@ -765,7 +797,9 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     ProductIndex.import [expected1, expected2, expected3, rejected]
 
-    assert_equal [[expected1.id, expected2.id], [expected3.id]], ProductIndex.where(title: "expected").sort(:rank).find_results_in_batches(batch_size: 2).map { |batch| batch.map(&:id) }
+    actual = ProductIndex.where(title: "expected").sort(:rank).find_results_in_batches(batch_size: 2).map { |batch| batch.map(&:id) }
+
+    assert_equal [[expected1.id, expected2.id], [expected3.id]], actual
   end
 
   def test_find_each
@@ -799,7 +833,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     assert_not_nil query.instance_variable_get(:@response)
 
-    refute query.fresh === query
+    refute_equal query.fresh.object_id, query.object_id
     assert_nil query.fresh.instance_variable_get(:@response)
   end
 

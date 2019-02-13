@@ -1,5 +1,5 @@
 
-require File.expand_path("../../test_helper", __FILE__)
+require File.expand_path("../test_helper", __dir__)
 
 class SearchFlip::HTTPClientTest < SearchFlip::TestCase
   [:get, :put, :delete, :post, :head].each do |method|

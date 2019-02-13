@@ -214,10 +214,13 @@ module SearchFlip
         SearchFlip::Criteria.new(target: self)
       end
 
-      def_delegators :criteria, :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where, :post_where_not, :post_filter, :post_range,
-        :post_exists, :post_exists_not, :aggregate, :scroll, :source, :includes, :eager_load, :preload, :sort, :resort, :order, :reorder, :offset, :limit, :paginate,
-        :page, :per, :search, :highlight, :suggest, :custom, :find_in_batches, :find_results_in_batches, :find_each, :failsafe, :total_entries, :total_count, :timeout,
-        :terminate_after, :records, :should, :should_not, :must, :must_not
+      def_delegators :criteria, :profile, :where, :where_not, :filter, :range, :match_all, :exists,
+        :exists_not, :post_where, :post_where_not, :post_range, :post_exists, :post_exists_not,
+        :post_filter, :post_must, :post_must_not, :post_should, :aggregate, :scroll, :source,
+        :includes, :eager_load, :preload, :sort, :resort, :order, :reorder, :offset, :limit, :paginate,
+        :page, :per, :search, :highlight, :suggest, :custom, :find_in_batches, :find_results_in_batches,
+        :find_each, :failsafe, :total_entries, :total_count, :timeout, :terminate_after, :records,
+        :should, :should_not, :must, :must_not
 
       # Override to specify the type name used within ElasticSearch. Recap,
       # this gem uses an individual index for each index class, because
@@ -416,13 +419,13 @@ module SearchFlip
       #   raised. Please note that this only applies to the bulk response, not to
       #   the request in general, such that connection errors, etc will still
       #   raise.
-      # @param _index_options [Hash] Provides custom index options for eg
+      # @param additional_index_options [Hash] Provides custom index options for eg
       #   routing, versioning, etc
 
-      def index(scope, options = {}, _index_options = {})
+      def index(scope, options = {}, additional_index_options = {})
         bulk options do |indexer|
           each_record(scope, index_scope: true) do |object|
-            indexer.index record_id(object), serialize(object), index_options(object).merge(_index_options)
+            indexer.index record_id(object), serialize(object), index_options(object).merge(additional_index_options)
           end
         end
 
@@ -437,10 +440,10 @@ module SearchFlip
       # @see #index See #index for more details regarding available
       #   params and return values
 
-      def create(scope, options = {}, _index_options = {})
+      def create(scope, options = {}, additional_index_options = {})
         bulk options do |indexer|
           each_record(scope, index_scope: true) do |object|
-            indexer.create record_id(object), serialize(object), index_options(object).merge(_index_options)
+            indexer.create record_id(object), serialize(object), index_options(object).merge(additional_index_options)
           end
         end
 
@@ -455,10 +458,10 @@ module SearchFlip
       # @see #index See #index for more details regarding available
       #   params and return values
 
-      def update(scope, options = {}, _index_options = {})
+      def update(scope, options = {}, additional_index_options = {})
         bulk options do |indexer|
           each_record(scope, index_scope: true) do |object|
-            indexer.update record_id(object), { doc: serialize(object) }, index_options(object).merge(_index_options)
+            indexer.update record_id(object), { doc: serialize(object) }, index_options(object).merge(additional_index_options)
           end
         end
 
@@ -471,10 +474,10 @@ module SearchFlip
       # @see #index See #index for more details regarding available
       #   params and return values
 
-      def delete(scope, options = {}, _index_options = {})
+      def delete(scope, options = {}, additional_index_options = {})
         bulk options do |indexer|
           each_record(scope) do |object|
-            indexer.delete record_id(object), index_options(object).merge(_index_options)
+            indexer.delete record_id(object), index_options(object).merge(additional_index_options)
           end
         end
 
@@ -505,7 +508,7 @@ module SearchFlip
       #   raised. Please note that this only applies to the bulk response, not to
       #   the request in general, such that connection errors, etc will still
       #   raise.
- 
+
       def bulk(options = {})
         SearchFlip::Bulk.new("#{type_url}/_bulk", SearchFlip::Config[:bulk_limit], options) do |indexer|
           yield indexer
@@ -543,4 +546,3 @@ module SearchFlip
     end
   end
 end
-

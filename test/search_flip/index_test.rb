@@ -1,12 +1,14 @@
 
-require File.expand_path("../../test_helper", __FILE__)
+require File.expand_path("../test_helper", __dir__)
 
 class SearchFlip::IndexTest < SearchFlip::TestCase
-  should_delegate_methods :profile, :where, :where_not, :filter, :range, :match_all, :exists, :exists_not, :post_where,
-    :post_where_not, :post_filter, :post_range, :post_exists, :post_exists_not, :aggregate, :scroll, :source, :includes,
-    :eager_load, :preload, :sort, :resort, :order, :reorder, :offset, :limit, :paginate, :page, :per, :search,
-    :find_in_batches, :highlight, :suggest, :custom, :find_each, :failsafe, :total_entries, :total_count, :terminate_after,
-    :timeout, :should, :should_not, :must, :must_not, to: :criteria, subject: ProductIndex
+  should_delegate_methods :profile, :where, :where_not, :filter, :range, :match_all, :exists,
+    :exists_not, :post_where, :post_where_not, :post_filter, :post_must, :post_must_not,
+    :post_should, :post_range, :post_exists, :post_exists_not, :aggregate, :scroll, :source,
+    :includes, :eager_load, :preload, :sort, :resort, :order, :reorder, :offset, :limit,
+    :paginate, :page, :per, :search, :find_in_batches, :highlight, :suggest, :custom, :find_each,
+    :failsafe, :total_entries, :total_count, :terminate_after, :timeout, :should, :should_not,
+    :must, :must_not, to: :criteria, subject: ProductIndex
 
   def test_serialize_exception
     klass = Class.new do
@@ -171,7 +173,9 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
       ProductIndex.import products
     end
 
-    assert_equal [3, 3], products.map { |product| ProductIndex.get(product.id)["_version"] }
+    actual = products.map { |product| ProductIndex.get(product.id)["_version"] }
+
+    assert_equal [3, 3], actual
   end
 
   def test_index_array
@@ -292,13 +296,17 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
         ProductIndex.create products, {}, routing: "r1"
       end
 
-      assert_equal "r1", ProductIndex.get(products.first.id, routing: "r1")["_routing"]
+      actual = ProductIndex.get(products.first.id, routing: "r1")["_routing"]
+
+      assert_equal "r1", actual
     else
       assert_difference "ProductIndex.total_entries", 2 do
         ProductIndex.create products, {}, version: 2, version_type: "external"
       end
 
-      assert_equal [2, 2], products.map { |product| ProductIndex.get(product.id)["_version"] }
+      actual = products.map { |product| ProductIndex.get(product.id)["_version"] }
+
+      assert_equal [2, 2], actual
     end
   end
 
@@ -312,7 +320,9 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
         ProductIndex.create products
       end
 
-      assert_equal ["r1", "r1"], products.map { |product| ProductIndex.get(product.id, routing: "r1")["_routing"] }
+      actual = products.map { |product| ProductIndex.get(product.id, routing: "r1")["_routing"] }
+
+      assert_equal ["r1", "r1"], actual
     else
       ProductIndex.stubs(:index_options).returns(version: 2, version_type: "external")
 
@@ -320,7 +330,9 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
         ProductIndex.create products
       end
 
-      assert_equal [2, 2], products.map { |product| ProductIndex.get(product.id)["_version"] }
+      actual = products.map { |product| ProductIndex.get(product.id)["_version"] }
+
+      assert_equal [2, 2], actual
     end
   end
 

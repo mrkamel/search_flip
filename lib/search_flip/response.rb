@@ -153,7 +153,7 @@ module SearchFlip
       return nil if current_page >= total_pages
       return 1 if current_page < 1
 
-      return current_page + 1
+      current_page + 1
     end
 
     # Returns the results, ie hits, wrapped in a SearchFlip::Result object

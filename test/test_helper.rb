@@ -23,7 +23,7 @@ ActiveRecord::Base.connection.create_table :products do |t|
   t.float :price
   t.string :category
   t.integer :version, default: 1
-  t.integer :rank, :default => 0
+  t.integer :rank, default: 0
   t.integer :user_id
   t.timestamps null: false
 end
@@ -180,7 +180,7 @@ class SearchFlip::TestCase < MiniTest::Test
 
       assert target.respond_to?(as), "#{to} doesn't respond to #{as}"
 
-      params = subject.method(method).arity.abs.times.map { |i| "param-#{i}" }
+      params = Array.new(subject.method(method).arity.abs) { |i| "param-#{i}" }
 
       mock_target = mock
       mock_target.expects(as).with(*params)
@@ -198,7 +198,7 @@ class SearchFlip::TestCase < MiniTest::Test
   end
 
   def assert_difference(expressions, difference = 1, &block)
-    callables = Array(expressions).map { |e| lambda { eval(e, block.binding) } }
+    callables = Array(expressions).map { |e| -> { eval(e, block.binding) } }
 
     before = callables.map(&:call)
 

@@ -113,7 +113,10 @@ module SearchFlip
     end
 
     def upload
-      response = SearchFlip::HTTPClient.headers(accept: "application/json", content_type: "application/x-ndjson").put(url, body: @payload, params: ignore_errors ? {} : { filter_path: "errors" })
+      response =
+        SearchFlip::HTTPClient
+          .headers(accept: "application/json", content_type: "application/x-ndjson")
+          .put(url, body: @payload, params: ignore_errors ? {} : { filter_path: "errors" })
 
       return if options[:raise] == false
 
@@ -121,13 +124,13 @@ module SearchFlip
 
       return unless parsed_response["errors"]
 
-      raise(SearchFlip::Bulk::Error, response[0 .. 30]) unless ignore_errors
+      raise(SearchFlip::Bulk::Error, response[0..30]) unless ignore_errors
 
       parsed_response["items"].each do |item|
-        item.each do |_, _item|
-          status = _item["status"]
+        item.each do |_, element|
+          status = element["status"]
 
-          raise(SearchFlip::Bulk::Error, SearchFlip::JSON.generate(_item)) if !status.between?(200, 299) && !ignore_errors.include?(status)
+          raise(SearchFlip::Bulk::Error, SearchFlip::JSON.generate(element)) if !status.between?(200, 299) && !ignore_errors.include?(status)
         end
       end
     ensure

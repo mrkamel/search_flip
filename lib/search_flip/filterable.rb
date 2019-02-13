@@ -31,7 +31,9 @@ module SearchFlip
 
     def search(q, options = {})
       fresh.tap do |criteria|
-        criteria.search_values = (search_values || []) + [query_string: { query: q, :default_operator => :AND }.merge(options)] if q.to_s.strip.length > 0
+        if q.to_s.strip.length > 0
+          criteria.search_values = (search_values || []) + [query_string: { query: q, default_operator: :AND }.merge(options)]
+        end
       end
     end
 

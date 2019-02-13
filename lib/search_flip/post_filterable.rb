@@ -45,7 +45,9 @@ module SearchFlip
       raise(SearchFlip::NotSupportedError) if SearchFlip.version.to_i < 2
 
       fresh.tap do |criteria|
-        criteria.post_search_values = (post_search_values || []) + [query_string: { query: q, :default_operator => :AND }.merge(options)] if q.to_s.strip.length > 0
+        if q.to_s.strip.length > 0
+          criteria.post_search_values = (post_search_values || []) + [query_string: { query: q, default_operator: :AND }.merge(options)]
+        end
       end
     end
 
@@ -105,7 +107,7 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_where_not(hash)
-      hash.inject(fresh) do |memo, (key,value)|
+      hash.inject(fresh) do |memo, (key, value)|
         if value.is_a?(Array)
           memo.post_must_not terms: { key => value }
         elsif value.is_a?(Range)

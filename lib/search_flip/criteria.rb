@@ -38,7 +38,7 @@ module SearchFlip
       other = other.criteria
 
       fresh.tap do |criteria|
-        criteria.profile_value = other.profile_value if other.profile_value != nil
+        criteria.profile_value = other.profile_value unless other.profile_value.nil?
         criteria.source_value = (criteria.source_value || []) + other.source_value if other.source_value
         criteria.sort_values = (criteria.sort_values || []) + other.sort_values if other.sort_values
         criteria.highlight_values = (criteria.highlight_values || {}).merge(other.highlight_values) if other.highlight_values
@@ -48,7 +48,7 @@ module SearchFlip
         criteria.includes_values = (criteria.includes_values || []) + other.includes_values if other.includes_values
         criteria.preload_values = (criteria.preload_values || []) + other.preload_values if other.preload_values
         criteria.eager_load_values = (criteria.eager_load_values || []) + other.eager_load_values if other.eager_load_values
-        criteria.failsafe_value = other.failsafe_value if other.failsafe_value != nil
+        criteria.failsafe_value = other.failsafe_value unless other.failsafe_value.nil?
         criteria.scroll_args = other.scroll_args if other.scroll_args
         criteria.custom_value = (criteria.custom_value || {}).merge(other.custom_value) if other.custom_value
         criteria.search_values = (criteria.search_values || []) + other.search_values if other.search_values
@@ -62,8 +62,8 @@ module SearchFlip
         criteria.post_should_values = (criteria.post_should_values || []) + other.post_should_values if other.post_should_values
         criteria.post_filter_values = (criteria.post_filter_vales || []) + other.post_filter_values if other.post_filter_values
         criteria.aggregation_values = (criteria.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values
-        criteria.terminate_after_value = other.terminate_after_value if other.terminate_after_value != nil
-        criteria.timeout_value = other.timeout_value if other.timeout_value != nil
+        criteria.terminate_after_value = other.terminate_after_value unless other.terminate_after_value.nil?
+        criteria.timeout_value = other.timeout_value unless other.timeout_value.nil?
       end
     end
 
@@ -74,11 +74,13 @@ module SearchFlip
     # @example
     #   ProductIndex.timeout("3s").search("hello world")
     #
+    # @param value [String] The timeout value
+    #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def timeout(n)
+    def timeout(value)
       fresh.tap do |criteria|
-        criteria.timeout_value = n
+        criteria.timeout_value = value
       end
     end
 
@@ -88,11 +90,13 @@ module SearchFlip
     # @example
     #   ProductIndex.terminate_after(10_000).search("hello world")
     #
+    # @param value [Fixnum] The number of records to terminate after
+    #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def terminate_after(n)
+    def terminate_after(value)
       fresh.tap do |criteria|
-        criteria.terminate_after_value = n
+        criteria.terminate_after_value = value
       end
     end
 
@@ -141,7 +145,7 @@ module SearchFlip
 
     def initialize(attributes = {})
       attributes.each do |key, value|
-        self.send "#{key}=", value
+        send "#{key}=", value
       end
     end
 
@@ -157,28 +161,29 @@ module SearchFlip
       if must_values || search_values || must_not_values || should_values || filter_values
         if SearchFlip.version.to_i >= 2
           res[:query] = {
-            bool: {}.
-              merge(must_values || search_values ? { must: (must_values || []) + (search_values || [])} : {}).
-              merge(must_not_values ? { must_not: must_not_values } : {}).
-              merge(should_values ? { should: should_values } : {}).
-              merge(filter_values ? { filter: filter_values } : {})
+            bool: {}
+              .merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {})
+              .merge(must_not_values ? { must_not: must_not_values } : {})
+              .merge(should_values ? { should: should_values } : {})
+              .merge(filter_values ? { filter: filter_values } : {})
           }
         else
           filters = (filter_values || []) + (must_not_values || []).map { |must_not_value| { not: must_not_value } }
 
-          queries = {}.
-            merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {}).
-            merge(should_values ? { should: should_values } : {})
+          queries = {}
+            .merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {})
+            .merge(should_values ? { should: should_values } : {})
 
-          if filters.size > 0
-            res[:query] = {
-              filtered: {}.
-                merge(queries.size > 0 ? { query: { bool: queries } } : {}).
-                merge(filter: filters.size > 1 ? { and: filters } : filters.first)
-            }
-          else
-            res[:query] = { bool: queries }
-          end
+          res[:query] =
+            if filters.size > 0
+              {
+                filtered: {}
+                  .merge(queries.size > 0 ? { query: { bool: queries } } : {})
+                  .merge(filter: filters.size > 1 ? { and: filters } : filters.first)
+              }
+            else
+              { bool: queries }
+            end
         end
       end
 
@@ -194,18 +199,18 @@ module SearchFlip
       if post_must_values || post_search_values || post_must_not_values || post_should_values || post_filter_values
         if SearchFlip.version.to_i >= 2
           res[:post_filter] = {
-            bool: {}.
-              merge(post_must_values || post_search_values ? { must: (post_must_values || []) + (post_search_values || []) } : {}).
-              merge(post_must_not_values ? { must_not: post_must_not_values } : {}).
-              merge(post_should_values ? { should: post_should_values } : {}).
-              merge(post_filter_values ? { filter: post_filter_values } : {})
+            bool: {}
+              .merge(post_must_values || post_search_values ? { must: (post_must_values || []) + (post_search_values || []) } : {})
+              .merge(post_must_not_values ? { must_not: post_must_not_values } : {})
+              .merge(post_should_values ? { should: post_should_values } : {})
+              .merge(post_filter_values ? { filter: post_filter_values } : {})
           }
         else
           post_filters = (post_filter_values || []) + (post_must_not_values || []).map { |post_must_not_value| { not: post_must_not_value } }
 
-          post_queries = {}.
-            merge(post_must_values || post_search_values ? { must: (post_must_values || []) + (post_search_values || []) } : {}).
-            merge(post_should_values ? { should: post_should_values } : {})
+          post_queries = {}
+            .merge(post_must_values || post_search_values ? { must: (post_must_values || []) + (post_search_values || []) } : {})
+            .merge(post_should_values ? { should: post_should_values } : {})
 
           post_filters_and_queries = post_filters + (post_queries.size > 0 ? [bool: post_queries] : [])
 
@@ -245,13 +250,14 @@ module SearchFlip
       fresh.tap do |criteria|
         criteria.highlight_values = (criteria.highlight_values || {}).merge(options)
 
-        hash = if fields.is_a?(Hash)
-          fields
-        elsif fields.is_a?(Array)
-          fields.each_with_object({}) { |field, h| h[field] = {} }
-        else
-          { fields => {} }
-        end
+        hash =
+          if fields.is_a?(Hash)
+            fields
+          elsif fields.is_a?(Array)
+            fields.each_with_object({}) { |field, h| h[field] = {} }
+          else
+            { fields => {} }
+          end
 
         criteria.highlight_values[:fields] = (criteria.highlight_values[:fields] || {}).merge(hash)
       end
@@ -331,14 +337,14 @@ module SearchFlip
     #   CommentIndex.where(public: false).delete
 
     def delete
-      _request = request.dup
-      _request.delete(:from)
-      _request.delete(:size)
+      dupped_request = request.dup
+      dupped_request.delete(:from)
+      dupped_request.delete(:size)
 
       if SearchFlip.version.to_i >= 5
-        SearchFlip::HTTPClient.post("#{target.type_url}/_delete_by_query", json: _request)
+        SearchFlip::HTTPClient.post("#{target.type_url}/_delete_by_query", json: dupped_request)
       else
-        SearchFlip::HTTPClient.delete("#{target.type_url}/_query", json: _request)
+        SearchFlip::HTTPClient.delete("#{target.type_url}/_query", json: dupped_request)
       end
 
       target.refresh if SearchFlip::Config[:auto_refresh]
@@ -504,14 +510,14 @@ module SearchFlip
     # @example
     #   CommentIndex.offset(100)
     #
-    # @param n [Fixnum] The offset value, ie the number of results that are
+    # @param value [Fixnum] The offset value, ie the number of results that are
     #   skipped in the result set
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def offset(n)
+    def offset(value)
       fresh.tap do |criteria|
-        criteria.offset_value = n.to_i
+        criteria.offset_value = value.to_i
       end
     end
 
@@ -529,14 +535,14 @@ module SearchFlip
     # @example
     #   CommentIndex.limit(100)
     #
-    # @param n [Fixnum] The limit value, ie the max number of results that
+    # @param value [Fixnum] The limit value, ie the max number of results that
     #   should be returned
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def limit(n)
+    def limit(value)
       fresh.tap do |criteria|
-        criteria.limit_value = n.to_i
+        criteria.limit_value = value.to_i
       end
     end
 
@@ -567,12 +573,12 @@ module SearchFlip
       offset((page - 1) * per_page).limit(per_page)
     end
 
-    def page(n)
-      paginate(page: n)
+    def page(value)
+      paginate(page: value)
     end
 
-    def per(n)
-      paginate(page: offset_value_with_default / limit_value_with_default + 1, per_page: n)
+    def per(value)
+      paginate(page: offset_value_with_default / limit_value_with_default + 1, per_page: value)
     end
 
     # Fetches the records specified by the criteria in batches using the
@@ -671,12 +677,21 @@ module SearchFlip
         http_response =
           if scroll_args && scroll_args[:id]
             if SearchFlip.version.to_i >= 2
-              http_request.post("#{base_url}/_search/scroll", json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] })
+              http_request.post(
+                "#{base_url}/_search/scroll",
+                json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] }
+              )
             else
-              http_request.headers(content_type: "text/plain").post("#{base_url}/_search/scroll", params: { scroll: scroll_args[:timeout] }, body: scroll_args[:id])
+              http_request
+                .headers(content_type: "text/plain")
+                .post("#{base_url}/_search/scroll", params: { scroll: scroll_args[:timeout] }, body: scroll_args[:id])
             end
           elsif scroll_args
-            http_request.post("#{target.type_url(base_url: base_url)}/_search", params: { scroll: scroll_args[:timeout] }, json: request)
+            http_request.post(
+              "#{target.type_url(base_url: base_url)}/_search",
+              params: { scroll: scroll_args[:timeout] },
+              json: request
+            )
           else
             http_request.post("#{target.type_url(base_url: base_url)}/_search", json: request)
           end
@@ -731,8 +746,8 @@ module SearchFlip
       end
     end
 
-    def respond_to?(name, *args)
-      super || target.respond_to?(name, *args)
+    def respond_to_missing?(name, *args)
+      target.respond_to?(name, *args)
     end
 
     def method_missing(name, *args, &block)
@@ -743,8 +758,10 @@ module SearchFlip
       end
     end
 
-    def_delegators :response, :total_entries, :total_count, :current_page, :previous_page, :prev_page, :next_page, :first_page?, :last_page?, :out_of_range?, :total_pages,
-      :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions, :scope, :results, :records, :scroll_id, :raw_response
+    def_delegators :response, :total_entries, :total_count, :current_page, :previous_page,
+      :prev_page, :next_page, :first_page?, :last_page?, :out_of_range?, :total_pages,
+      :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions,
+      :scope, :results, :records, :scroll_id, :raw_response
 
     private
 
@@ -764,4 +781,3 @@ module SearchFlip
     end
   end
 end
-

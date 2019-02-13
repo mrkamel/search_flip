@@ -1,0 +1,107 @@
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/UnneededPercentQ:
+  Enabled: false
+
+Style/BracesAroundHashParameters:
+  Enabled: false
+
+Style/PercentLiteralDelimiters:
+  Enabled: false
+
+Style/SpecialGlobalVars:
+  Enabled: false
+
+Security/Eval:
+  Enabled: false
+
+Style/WordArray:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Style/TrivialAccessors:
+  Enabled: false
+
+Style/Alias:
+  Enabled: false
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+Metrics/ClassLength:
+  Enabled: false
+
+Naming/UncommunicativeMethodParamName:
+  Enabled: false
+
+Style/SymbolArray:
+  Enabled: false
+
+Layout/RescueEnsureAlignment:
+  Enabled: false
+
+Layout/LeadingBlankLines:
+  Enabled: false
+
+Metrics/LineLength:
+  Max: 150
+
+Metrics/MethodLength:
+  Max: 60
+
+Metrics/ModuleLength:
+  Enabled: false
+
+Style/ZeroLengthPredicate:
+  Enabled: false
+
+Layout/TrailingBlankLines:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/BlockLength:
+  Max: 30
+
+Metrics/BlockNesting:
+  Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false
+
+Naming/AccessorMethodName:
+  Enabled: false
+
+Naming/MemoizedInstanceVariableName:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/Documentation:
+  Enabled: false
+
+Naming/ConstantName:
+  Enabled: false
+
+Style/MutableConstant:
+  Enabled: false
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+Layout/AlignParameters:
+  EnforcedStyle: with_fixed_indentation
+
+Lint/UnusedMethodArgument:
+  Enabled: false

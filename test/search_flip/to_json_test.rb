@@ -1,5 +1,5 @@
 
-require File.expand_path("../../test_helper", __FILE__)
+require File.expand_path("../test_helper", __dir__)
 require "search_flip/to_json"
 
 class SearchFlip::ToJsonTest < SearchFlip::TestCase

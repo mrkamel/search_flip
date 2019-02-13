@@ -1,5 +1,5 @@
 
-require File.expand_path("../../test_helper", __FILE__)
+require File.expand_path("../test_helper", __dir__)
 
 class SearchFlip::ResponseTest < SearchFlip::TestCase
   def test_total_entries
@@ -124,10 +124,11 @@ class SearchFlip::ResponseTest < SearchFlip::TestCase
     ProductIndex.import [product1, product2, product3]
 
     query = ProductIndex.aggregate(:category) do |aggregation|
-      aggregation.aggregate(price_sum: { sum: { field: "price" }})
+      aggregation.aggregate(price_sum: { sum: { field: "price" } })
     end
 
-    assert_equal Hash["category1" => 2, "category2" => 1], query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+    assert_equal Hash["category1" => 2, "category2" => 1],
+      query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
 
     assert_equal 40, query.aggregations(:category)["category1"].price_sum.value
     assert_equal 20, query.aggregations(:category)["category2"].price_sum.value
