@@ -42,7 +42,7 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_search(q, options = {})
-      raise(SearchFlip::NotSupportedError) if SearchFlip.version.to_i < 2
+      raise(SearchFlip::NotSupportedError) if SearchFlip.version(base_url: target.base_url).to_i < 2
 
       fresh.tap do |criteria|
         if q.to_s.strip.length > 0

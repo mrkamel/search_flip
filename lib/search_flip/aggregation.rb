@@ -8,6 +8,12 @@ module SearchFlip
     include SearchFlip::Filterable
     include SearchFlip::Aggregatable
 
+    attr_reader :target
+
+    def initialize(target:)
+      @target = target
+    end
+
     # @api private
     #
     # Converts the aggregation to a hash format that can be used in the request.
@@ -19,7 +25,7 @@ module SearchFlip
       res[:aggregations] = aggregation_values if aggregation_values
 
       if must_values || search_values || must_not_values || should_values || filter_values
-        if SearchFlip.version.to_i >= 2
+        if SearchFlip.version(base_url: target.base_url).to_i >= 2
           res[:filter] = {
             bool: {}
               .merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {})
