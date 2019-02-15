@@ -75,19 +75,63 @@ module SearchFlip
   # SearchFlip::ResponseError in case any errors occur.
   #
   # @example
-  #   SearchFlip.aliases(actions: [
+  #   SearchFlip.update_aliases(actions: [
   #     { remove: { index: "test1", alias: "alias1" }},
   #     { add: { index: "test2", alias: "alias1" }}
   #   ])
   #
   # @param payload [Hash] The raw request payload
   #
-  # @return [SearchFlip::Response] The raw response
+  # @return [Hash] The raw response
 
-  def self.aliases(payload)
+  def self.update_aliases(payload)
     SearchFlip::HTTPClient
       .headers(accept: "application/json", content_type: "application/json")
       .post("#{SearchFlip::Config[:base_url]}/_aliases", body: SearchFlip::JSON.generate(payload))
+      .parse
+  end
+
+  def self.aliases(payload)
+    warn "[DEPRECATION] `SearchFlip.aliases` is deprecated. Please use `SearchFlip.update_aliases` instead."
+
+    update_aliases(payload)
+  end
+
+  # Fetches information about the specified index aliases. Raises
+  # SearchFlip::ResponseError in case any errors occur.
+  #
+  # @example
+  #   SearchFlip.get_aliases(alias_name: "some_alias")
+  #   SearchFlip.get_aliases(index_name: "index1,index2")
+  #
+  # @param alias_name [String] The alias or comma separated list of alias names
+  # @param index_name [String] The index or comma separated list of index names
+  #
+  # @return [Hash] The raw response
+
+  def self.get_aliases(index_name: "*", alias_name: "*")
+    SearchFlip::HTTPClient
+      .headers(accept: "application/json", content_type: "application/json")
+      .get("#{SearchFlip::Config[:base_url]}/#{index_name}/_alias/#{alias_name}")
+      .parse
+  end
+
+  # Returns whether or not the associated ElasticSearch alias already
+  # exists.
+  #
+  # @example
+  #   SearchFlip.alias_exists?("some_alias")
+  #
+  # @return [Boolean] Whether or not the alias exists
+
+  def self.alias_exists?(alias_name)
+    get_aliases(alias_name: alias_name)
+
+    true
+  rescue SearchFlip::ResponseError => e
+    return false if e.code == 404
+
+    raise e
   end
 end
 

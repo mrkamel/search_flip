@@ -105,3 +105,6 @@ Layout/AlignParameters:
 
 Lint/UnusedMethodArgument:
   Enabled: false
+
+Layout/IndentArray:
+  EnforcedStyle: consistent
