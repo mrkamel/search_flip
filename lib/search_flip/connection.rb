@@ -99,7 +99,9 @@ module SearchFlip
     # @return [Boolean] Whether or not the alias exists
 
     def alias_exists?(alias_name)
-      get_aliases(alias_name: alias_name)
+      SearchFlip::HTTPClient
+        .headers(accept: "application/json", content_type: "application/json")
+        .get("#{base_url}/_alias/#{alias_name}")
 
       true
     rescue SearchFlip::ResponseError => e
