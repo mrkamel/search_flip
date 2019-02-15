@@ -107,29 +107,6 @@ module SearchFlip
 
       raise e
     end
-
-    # Returns the full ElasticSearch type URL, ie base URL, index name with
-    # prefix and type name.
-    #
-    # @param index_name [String] The index name
-    # @param type_name [String] The type name
-    #
-    # @return [String] The ElasticSearch type URL
-
-    def type_url(index_name, type_name)
-      "#{index_url index_name}/#{type_name}"
-    end
-
-    # Returns the ElasticSearch index URL, ie base URL and index name with
-    # prefix.
-    #
-    # @param index_name [String] The index name
-    #
-    # @return [String] The ElasticSearch index URL
-
-    def index_url(index_name)
-      "#{base_url}/#{index_name}"
-    end
   end
 end
 
