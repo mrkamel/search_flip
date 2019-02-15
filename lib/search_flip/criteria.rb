@@ -159,7 +159,7 @@ module SearchFlip
       res = {}
 
       if must_values || search_values || must_not_values || should_values || filter_values
-        if SearchFlip.version(base_url: target.base_url).to_i >= 2
+        if target.connection.version.to_i >= 2
           res[:query] = {
             bool: {}
               .merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {})
@@ -197,7 +197,7 @@ module SearchFlip
       res[:aggregations] = aggregation_values if aggregation_values
 
       if post_must_values || post_search_values || post_must_not_values || post_should_values || post_filter_values
-        if SearchFlip.version(base_url: target.base_url).to_i >= 2
+        if target.connection.version.to_i >= 2
           res[:post_filter] = {
             bool: {}
               .merge(post_must_values || post_search_values ? { must: (post_must_values || []) + (post_search_values || []) } : {})
@@ -341,7 +341,7 @@ module SearchFlip
       dupped_request.delete(:from)
       dupped_request.delete(:size)
 
-      if SearchFlip.version(base_url: target.base_url).to_i >= 5
+      if target.connection.version.to_i >= 5
         SearchFlip::HTTPClient.post("#{target.type_url}/_delete_by_query", json: dupped_request)
       else
         SearchFlip::HTTPClient.delete("#{target.type_url}/_query", json: dupped_request)
@@ -662,38 +662,38 @@ module SearchFlip
     # response errors will be rescued if you specify the criteria to be
     # #failsafe, such that an empty response is returned instead.
     #
-    # @param base_url An optional alternative base_url to send the request
-    #   to for e.g. proxying
+    # @param connection An optional alternative connection to used to send the
+    #   request to for e.g. proxying
     #
     # @example
     #   response = CommentIndex.search("hello world").execute
     #
     # @return [SearchFlip::Response] The response object
 
-    def execute(base_url: target.base_url)
+    def execute(connection: target.connection)
       @response ||= begin
         http_request = SearchFlip::HTTPClient.headers(accept: "application/json")
 
         http_response =
           if scroll_args && scroll_args[:id]
-            if SearchFlip.version(base_url: target.base_url).to_i >= 2
+            if target.connection.version.to_i >= 2
               http_request.post(
-                "#{base_url}/_search/scroll",
+                "#{connection.base_url}/_search/scroll",
                 json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] }
               )
             else
               http_request
                 .headers(content_type: "text/plain")
-                .post("#{base_url}/_search/scroll", params: { scroll: scroll_args[:timeout] }, body: scroll_args[:id])
+                .post("#{connection.base_url}/_search/scroll", params: { scroll: scroll_args[:timeout] }, body: scroll_args[:id])
             end
           elsif scroll_args
             http_request.post(
-              "#{target.type_url(base_url: base_url)}/_search",
+              "#{target.type_url(connection: connection)}/_search",
               params: { scroll: scroll_args[:timeout] },
               json: request
             )
           else
-            http_request.post("#{target.type_url(base_url: base_url)}/_search", json: request)
+            http_request.post("#{target.type_url(connection: connection)}/_search", json: request)
           end
 
         SearchFlip::Response.new(self, http_response.parse)

@@ -97,10 +97,6 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
     end
   end
 
-  def test_base_url
-    assert_equal "http://127.0.0.1:9200", ProductIndex.base_url
-  end
-
   def test_index_url
     assert_equal "http://127.0.0.1:9200/products", ProductIndex.index_url
 
@@ -291,7 +287,7 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
 
     products = create_list(:product, 2)
 
-    if SearchFlip.version.to_i >= 5
+    if ProductIndex.connection.version.to_i >= 5
       assert_difference "ProductIndex.total_entries", 2 do
         ProductIndex.create products, {}, routing: "r1"
       end
@@ -313,7 +309,7 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
   def test_create_with_class_options
     products = create_list(:product, 2)
 
-    if SearchFlip.version.to_i >= 5
+    if ProductIndex.connection.version.to_i >= 5
       ProductIndex.stubs(:index_options).returns(routing: "r1")
 
       assert_difference "ProductIndex.total_entries", 2 do

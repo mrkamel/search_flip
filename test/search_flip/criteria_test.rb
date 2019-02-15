@@ -211,6 +211,15 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     assert_includes records, expected2
   end
 
+  def test_execute
+    connection = SearchFlip::Connection.new(base_url: "http://localhost:1234")
+
+    stub_request(:post, "http://localhost:1234/products/products/_search")
+      .to_return(status: 200, body: "{}", headers: { content_type: "application/json" })
+
+    assert_equal ProductIndex.match_all.execute(connection: connection).raw_response, {}
+  end
+
   def test_exists
     product1 = create(:product, title: "title1", description: "description1")
     product2 = create(:product, title: "title2", description: nil)
@@ -250,7 +259,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
   end
 
   def test_post_search
-    return if SearchFlip.version.to_i < 2
+    return if ProductIndex.connection.version.to_i < 2
 
     product1 = create(:product, title: "title1", category: "category1")
     product2 = create(:product, title: "title2", category: "category2")
@@ -536,7 +545,7 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
   end
 
   def test_profile
-    return if SearchFlip.version.to_i < 2
+    return if ProductIndex.connection.version.to_i < 2
 
     assert_not_nil ProductIndex.profile(true).raw_response["profile"]
   end

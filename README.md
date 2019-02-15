@@ -501,6 +501,24 @@ CommentIndex.terminate_after(10).execute
 
 For further details and a full list of methods, check out the reference docs.
 
+## Using multiple Elasticsearch clusters
+
+To use multiple Elasticsearch clusters, specify a connection within your
+indices:
+
+```ruby
+class MyIndex
+  include SearchFlip::Index
+
+  def self.connection
+    @connection ||= SearchFlip::Connection.new(base_url: "http://elasticsearch.host:9200")
+  end
+end
+```
+
+This allows to use different clusters per index e.g. when migrating indices to
+new versions of Elasticsearch.
+
 ## Non-ActiveRecord models
 
 SearchFlip ships with built-in support for ActiveRecord models, but using

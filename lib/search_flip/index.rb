@@ -522,8 +522,8 @@ module SearchFlip
       #
       # @return [String] The ElasticSearch type URL
 
-      def type_url(base_url: self.base_url)
-        "#{index_url(base_url: base_url)}/#{type_name}"
+      def type_url(connection: current_connection)
+        "#{index_url(connection: connection)}/#{type_name}"
       end
 
       # Returns the ElasticSearch index URL, ie base URL and index name with
@@ -531,18 +531,20 @@ module SearchFlip
       #
       # @return [String] The ElasticSearch index URL
 
-      def index_url(base_url: self.base_url)
-        "#{base_url}/#{index_name_with_prefix}"
+      def index_url(connection: current_connection)
+        "#{connection.base_url}/#{index_name_with_prefix}"
       end
 
-      # Returns the ElasticSearch base URL, ie protcol and host with port.
-      # Override to specify an index specific ElasticSearch cluster.
+      # Returns the SearchFlip::Connection for the index.
+      # Override to specify a custom connection.
       #
-      # @return [String] The ElasticSearch base URL
+      # @return [SearchFlip::Connection] The connection
 
-      def base_url
-        SearchFlip::Config[:base_url]
+      def connection
+        @connection ||= SearchFlip::Connection.new(base_url: SearchFlip::Config[:base_url])
       end
+
+      alias_method :current_connection, :connection
     end
   end
 end

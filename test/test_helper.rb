@@ -99,7 +99,7 @@ class ProductIndex
   include SearchFlip::Index
 
   def self.mapping
-    if SearchFlip.version.to_i >= 5
+    if ProductIndex.connection.version.to_i >= 5
       {
         products: {
           properties: {
