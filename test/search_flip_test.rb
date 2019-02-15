@@ -11,6 +11,8 @@ class SearchFlipTest < SearchFlip::TestCase
     assert_equal 2, responses.size
     assert_equal 1, responses[0].total_entries
     assert_equal 1, responses[1].total_entries
+
+    assert SearchFlip.msearch([ProductIndex.match_all], base_url: ProductIndex.base_url)
   end
 
   def test_update_aliases
@@ -38,6 +40,8 @@ class SearchFlipTest < SearchFlip::TestCase
     assert_equal SearchFlip.get_aliases(index_name: "comments,products").keys.sort, ["comments", "products"]
     assert_equal SearchFlip.get_aliases(alias_name: "alias1,alias2").keys.sort, ["comments", "products"]
     assert_equal SearchFlip.get_aliases(alias_name: "alias1,alias2")["products"]["aliases"].keys, ["alias2"]
+
+    assert SearchFlip.get_aliases(alias_name: "alias1", base_url: SearchFlip::Config[:base_url])
   ensure
     SearchFlip.update_aliases(actions: [
       { remove: { index: "comments", alias: "alias1" } },
@@ -52,6 +56,7 @@ class SearchFlipTest < SearchFlip::TestCase
     SearchFlip.update_aliases(actions: [add: { index: "products", alias: "some_alias" }])
 
     assert SearchFlip.alias_exists?(:some_alias)
+    assert SearchFlip.alias_exists?(:some_alias, base_url: SearchFlip::Config[:base_url])
   ensure
     SearchFlip.update_aliases(actions: [remove: { index: "products", alias: "some_alias" }])
   end

@@ -47,10 +47,11 @@ module SearchFlip
   #
   # @param criterias [Array<SearchFlip::Criteria>] An array of search
   #   queries to execute in parallel
+  # @param base_url [String] The Elasticsearch base url
   #
   # @return [Array<SearchFlip::Response>] An array of responses
 
-  def self.msearch(criterias)
+  def self.msearch(criterias, base_url: SearchFlip::Config[:base_url])
     payload = criterias.flat_map do |criteria|
       [
         SearchFlip::JSON.generate(index: criteria.target.index_name_with_prefix, type: criteria.target.type_name),
@@ -64,7 +65,7 @@ module SearchFlip
     raw_response =
       SearchFlip::HTTPClient
         .headers(accept: "application/json", content_type: "application/x-ndjson")
-        .post("#{SearchFlip::Config[:base_url]}/_msearch", body: payload)
+        .post("#{base_url}/_msearch", body: payload)
 
     raw_response.parse["responses"].map.with_index do |response, index|
       SearchFlip::Response.new(criterias[index], response)
@@ -81,13 +82,14 @@ module SearchFlip
   #   ])
   #
   # @param payload [Hash] The raw request payload
+  # @param base_url [String] The Elasticsearch base url
   #
   # @return [Hash] The raw response
 
-  def self.update_aliases(payload)
+  def self.update_aliases(payload, base_url: SearchFlip::Config[:base_url])
     SearchFlip::HTTPClient
       .headers(accept: "application/json", content_type: "application/json")
-      .post("#{SearchFlip::Config[:base_url]}/_aliases", body: SearchFlip::JSON.generate(payload))
+      .post("#{base_url}/_aliases", body: SearchFlip::JSON.generate(payload))
       .parse
   end
 
@@ -106,13 +108,14 @@ module SearchFlip
   #
   # @param alias_name [String] The alias or comma separated list of alias names
   # @param index_name [String] The index or comma separated list of index names
+  # @param base_url [String] The Elasticsearch base url
   #
   # @return [Hash] The raw response
 
-  def self.get_aliases(index_name: "*", alias_name: "*")
+  def self.get_aliases(index_name: "*", alias_name: "*", base_url: SearchFlip::Config[:base_url])
     SearchFlip::HTTPClient
       .headers(accept: "application/json", content_type: "application/json")
-      .get("#{SearchFlip::Config[:base_url]}/#{index_name}/_alias/#{alias_name}")
+      .get("#{base_url}/#{index_name}/_alias/#{alias_name}")
       .parse
   end
 
@@ -124,8 +127,8 @@ module SearchFlip
   #
   # @return [Boolean] Whether or not the alias exists
 
-  def self.alias_exists?(alias_name)
-    get_aliases(alias_name: alias_name)
+  def self.alias_exists?(alias_name, base_url: SearchFlip::Config[:base_url])
+    get_aliases(alias_name: alias_name, base_url: base_url)
 
     true
   rescue SearchFlip::ResponseError => e
