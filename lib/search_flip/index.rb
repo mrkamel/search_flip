@@ -520,18 +520,22 @@ module SearchFlip
       # Returns the full ElasticSearch type URL, ie base URL, index name with
       # prefix and type name.
       #
+      # @param connection [SearchFlip::Connection] The connection to use
+      #
       # @return [String] The ElasticSearch type URL
 
-      def type_url(connection: current_connection)
+      def type_url(connection: self.connection)
         "#{index_url(connection: connection)}/#{type_name}"
       end
 
       # Returns the ElasticSearch index URL, ie base URL and index name with
       # prefix.
       #
+      # @param connection [SearchFlip::Connection] The connection to use
+      #
       # @return [String] The ElasticSearch index URL
 
-      def index_url(connection: current_connection)
+      def index_url(connection: self.connection)
         "#{connection.base_url}/#{index_name_with_prefix}"
       end
 
@@ -543,8 +547,6 @@ module SearchFlip
       def connection
         @connection ||= SearchFlip::Connection.new(base_url: SearchFlip::Config[:base_url])
       end
-
-      alias_method :current_connection, :connection
     end
   end
 end

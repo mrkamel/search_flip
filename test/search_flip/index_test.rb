@@ -374,5 +374,9 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
       end
     end
   end
+
+  def test_connection
+    assert_equal ProductIndex.connection.base_url, "http://127.0.0.1:9200"
+  end
 end
 
