@@ -50,6 +50,17 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
     TestIndex.delete_index if TestIndex.index_exists?
   end
 
+  def test_create_index_with_mapping
+    mapping = { "test" => { "properties" => { "id" => { "type" => "long" } } } }
+
+    TestIndex.stubs(:mapping).returns(mapping)
+
+    assert TestIndex.create_index(include_mapping: true)
+    assert TestIndex.index_exists?
+
+    assert_equal TestIndex.get_mapping["test"]["mappings"], mapping
+  end
+
   def test_update_index_settings
     assert TestIndex.create_index
 

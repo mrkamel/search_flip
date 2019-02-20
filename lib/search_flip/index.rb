@@ -301,8 +301,11 @@ module SearchFlip
       # specified. Raises SearchFlip::ResponseError in case any errors
       # occur.
 
-      def create_index
-        SearchFlip::HTTPClient.put(index_url, json: index_settings)
+      def create_index(include_mapping: false)
+        json = index_settings
+        json = json.merge(mappings: mapping) if include_mapping
+
+        SearchFlip::HTTPClient.put(index_url, json: json)
 
         true
       end
