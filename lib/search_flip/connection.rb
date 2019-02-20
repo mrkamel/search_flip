@@ -10,7 +10,7 @@ module SearchFlip
     # Queries and returns the ElasticSearch version used.
     #
     # @example
-    #   SearchFlip.version # => e.g. 2.4.1
+    #   connection.version # => e.g. 2.4.1
     #
     # @return [String] The ElasticSearch version
 
@@ -23,7 +23,7 @@ module SearchFlip
     # errors occur.
     #
     # @example
-    #   SearchFlip.msearch [ProductIndex.match_all, CommentIndex.match_all]
+    #   connection.msearch [ProductIndex.match_all, CommentIndex.match_all]
     #
     # @param criterias [Array<SearchFlip::Criteria>] An array of search
     #   queries to execute in parallel
@@ -55,7 +55,7 @@ module SearchFlip
     # SearchFlip::ResponseError in case any errors occur.
     #
     # @example
-    #   SearchFlip.update_aliases(actions: [
+    #   connection.update_aliases(actions: [
     #     { remove: { index: "test1", alias: "alias1" }},
     #     { add: { index: "test2", alias: "alias1" }}
     #   ])
@@ -75,8 +75,8 @@ module SearchFlip
     # SearchFlip::ResponseError in case any errors occur.
     #
     # @example
-    #   SearchFlip.get_aliases(alias_name: "some_alias")
-    #   SearchFlip.get_aliases(index_name: "index1,index2")
+    #   connection.get_aliases(alias_name: "some_alias")
+    #   connection.get_aliases(index_name: "index1,index2")
     #
     # @param alias_name [String] The alias or comma separated list of alias names
     # @param index_name [String] The index or comma separated list of index names
@@ -84,17 +84,19 @@ module SearchFlip
     # @return [Hash] The raw response
 
     def get_aliases(index_name: "*", alias_name: "*")
-      SearchFlip::HTTPClient
+      res = SearchFlip::HTTPClient
         .headers(accept: "application/json", content_type: "application/json")
         .get("#{base_url}/#{index_name}/_alias/#{alias_name}")
         .parse
+
+      Hashie::Mash.new(res)
     end
 
     # Returns whether or not the associated ElasticSearch alias already
     # exists.
     #
     # @example
-    #   SearchFlip.alias_exists?("some_alias")
+    #   connection.alias_exists?("some_alias")
     #
     # @return [Boolean] Whether or not the alias exists
 
@@ -108,6 +110,21 @@ module SearchFlip
       return false if e.code == 404
 
       raise e
+    end
+
+    # Fetches information about the specified indices. Raises
+    # SearchFlip::ResponseError in case any errors occur.
+    #
+    # @example
+    #   connection.get_indices('prefix*')
+    #
+    # @return [Array] The raw response
+
+    def get_indices(name = "*")
+      SearchFlip::HTTPClient
+        .headers(accept: "application/json", content_type: "application/json")
+        .get("#{base_url}/_cat/indices/#{name}")
+        .parse
     end
   end
 end

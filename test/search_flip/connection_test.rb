@@ -59,5 +59,12 @@ class SearchFlip::ConnectionTest < SearchFlip::TestCase
   ensure
     connection.update_aliases(actions: [remove: { index: "products", alias: "some_alias" }])
   end
+
+  def test_get_indices
+    connection = SearchFlip::Connection.new
+
+    assert_equal connection.get_indices.map { |index| index["index"] }.sort, ["comments", "products"]
+    assert_equal connection.get_indices("com*").map { |index| index["index"] }.sort, ["comments"]
+  end
 end
 
