@@ -59,6 +59,8 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
     assert TestIndex.index_exists?
 
     assert_equal TestIndex.get_mapping["test"]["mappings"], mapping
+  ensure
+    TestIndex.delete_index if TestIndex.index_exists?
   end
 
   def test_update_index_settings
