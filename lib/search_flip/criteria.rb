@@ -676,7 +676,7 @@ module SearchFlip
 
         http_response =
           if scroll_args && scroll_args[:id]
-            if target.connection.version.to_i >= 2
+            if connection.version.to_i >= 2
               http_request.post(
                 "#{connection.base_url}/_search/scroll",
                 json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] }
