@@ -62,6 +62,13 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
     refute_includes query2.records, product3
   end
 
+  def test_with_settings
+    stub_request(:post, "http://127.0.0.1:9200/new_user_index/products/_search")
+      .to_return(status: 200, body: "{}", headers: { content_type: "application/json" })
+
+    ProductIndex.where(id: 1).with_settings(index_name: "new_user_index").execute
+  end
+
   def test_where_with_array
     expected1 = create(:product, title: "expected1")
     expected2 = create(:product, title: "expected2")
@@ -209,15 +216,6 @@ class SearchFlip::CriteriaTest < SearchFlip::TestCase
 
     assert_includes records, expected1
     assert_includes records, expected2
-  end
-
-  def test_execute
-    connection = SearchFlip::Connection.new(base_url: "http://localhost:1234")
-
-    stub_request(:post, "http://localhost:1234/products/products/_search")
-      .to_return(status: 200, body: "{}", headers: { content_type: "application/json" })
-
-    assert_equal ProductIndex.match_all.execute(connection: connection).raw_response, {}
   end
 
   def test_exists

@@ -149,6 +149,21 @@ module SearchFlip
       end
     end
 
+    # Allows to set query specific settings like e.g. connection
+    # and index name. Checkout SearchFlip::Index.with_settings
+    # for more details.
+    #
+    # @example
+    #   UserIndex.where("...").with_settings(connection: ProxyConnection)
+    #
+    # @return [SearchFlip::Criteria] Simply returns self
+
+    def with_settings(*args)
+      fresh.tap do |criteria|
+        criteria.target = target.with_settings(*args)
+      end
+    end
+
     # Generates the request object from the attributes specified via chaining,
     # like eg offset, limit, query, filters, aggregations, etc and returns a
     # Hash that later gets serialized as JSON.
@@ -662,15 +677,12 @@ module SearchFlip
     # response errors will be rescued if you specify the criteria to be
     # #failsafe, such that an empty response is returned instead.
     #
-    # @param connection An optional alternative connection to used to send the
-    #   request to for e.g. proxying
-    #
     # @example
     #   response = CommentIndex.search("hello world").execute
     #
     # @return [SearchFlip::Response] The response object
 
-    def execute(connection: target.connection)
+    def execute
       @response ||= begin
         http_request = SearchFlip::HTTPClient.headers(accept: "application/json")
 
@@ -678,22 +690,22 @@ module SearchFlip
           if scroll_args && scroll_args[:id]
             if connection.version.to_i >= 2
               http_request.post(
-                "#{connection.base_url}/_search/scroll",
+                "#{target.connection.base_url}/_search/scroll",
                 json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] }
               )
             else
               http_request
                 .headers(content_type: "text/plain")
-                .post("#{connection.base_url}/_search/scroll", params: { scroll: scroll_args[:timeout] }, body: scroll_args[:id])
+                .post("#{target.connection.base_url}/_search/scroll", params: { scroll: scroll_args[:timeout] }, body: scroll_args[:id])
             end
           elsif scroll_args
             http_request.post(
-              "#{target.type_url(connection: connection)}/_search",
+              "#{target.type_url}/_search",
               params: { scroll: scroll_args[:timeout] },
               json: request
             )
           else
-            http_request.post("#{target.type_url(connection: connection)}/_search", json: request)
+            http_request.post("#{target.type_url}/_search", json: request)
           end
 
         SearchFlip::Response.new(self, http_response.parse)

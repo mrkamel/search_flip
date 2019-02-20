@@ -68,6 +68,28 @@ module SearchFlip
         {}
       end
 
+      # Creates a new anonymous class inheriting from the current index with
+      # a custom index name or connection. This is e.g. useful when working
+      # with aliases or proxies.
+      #
+      # @example Working with aliases
+      #   new_index = UserIndex.with_settings(index_name: 'new_user_index')
+      #   new_index.create_index
+      #   new_index.import User.all
+      #   new_index.connection.update_aliases("...")
+      #
+      # @example Working with proxies
+      #   query = UserIndex.with_settings(connection: ProxyConnection).where("...")
+      #
+      # @return [Class] An anonymous class
+
+      def with_settings(index_name: nil, connection: nil)
+        Class.new(self).tap do |klass|
+          klass.define_singleton_method(:index_name) { index_name } if index_name
+          klass.define_singleton_method(:connection) { connection } if connection
+        end
+      end
+
       # @abstract
       #
       # Override this method to generate a hash representation of a record,
@@ -527,8 +549,8 @@ module SearchFlip
       #
       # @return [String] The ElasticSearch type URL
 
-      def type_url(connection: self.connection)
-        "#{index_url(connection: connection)}/#{type_name}"
+      def type_url
+        "#{index_url}/#{type_name}"
       end
 
       # Returns the ElasticSearch index URL, ie base URL and index name with
@@ -538,7 +560,7 @@ module SearchFlip
       #
       # @return [String] The ElasticSearch index URL
 
-      def index_url(connection: self.connection)
+      def index_url
         "#{connection.base_url}/#{index_name_with_prefix}"
       end
 
