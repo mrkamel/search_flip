@@ -24,7 +24,7 @@ CommentIndex.range(:created_at, gt: Date.today - 1.week, lt: Date.today).where(s
 
 ## Updating from previous SearchFlip versions
 
-Checkout [UPDATING.md](./UPDATING.md) for details instructions.
+Checkout [UPDATING.md](./UPDATING.md) for detailed instructions.
 
 ## Comparison with other gems
 

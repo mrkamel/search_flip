@@ -69,7 +69,7 @@ MyIndex.connection.update_aliases(actions: [
   # ...
 ])
 
-# or 
+# or
 
 connection = SearchFlip::Connection.new(base_url: "...")
 connection.update_aliases(actions: [
