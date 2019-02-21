@@ -3,15 +3,16 @@
 
 ## v2.0.0
 
-* **BREAKING**: Migration steps
-  * Change `SearchFlip.version` to `SearchFlip::Connection#version`
-  * Change `SearchFlip.msearch` to `SearchFlip::Connection#msearch`
-  * Change `SearchFlip.aliases` to `SearchFlip::Connection#update_aliases`
-  * Change `SearchFlip::Criteria#execute(base_url: '...')` to `SearchFlip::Criteria#execute(connection: SearchFlip::Connection.new(base_url: '...'))`
 * Added `SearchFlip::Connection`
-* Added `SearchFlip::Connection#update_aliases`
+* [BREAKING] Changed `SearchFlip::Index.base_url` to `SearchFlip::Index.connection`
+* [BREAKING] Changed `SearchFlip.version` to `SearchFlip::Connection#version`
+* [BREAKING] Changed `SearchFlip.aliases` to `SearchFlip::Connection#update_aliases`
+* [BREAKING] Changed `SearchFlip.msearch` to `SearchFlip::Connection#msearch`
+* [BREAKING] Removed `base_url` param from `SearchFlip::Critiera#execute`
 * Added `SearchFlip::Connection#get_aliases`
+* Added `SearchFlip::Connection#get_indices`
 * Added `SearchFlip::Connection#alias_exists?`
+* Added `SearchFlip::Index#with_settings` and `SearchFlip::Criteria#with_settings`
 
 ## v1.1.0
 

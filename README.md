@@ -22,6 +22,10 @@ end
 CommentIndex.range(:created_at, gt: Date.today - 1.week, lt: Date.today).where(state: ["approved", "pending"])
 ```
 
+## Updating from previous SearchFlip versions
+
+Checkout [UPDATING.md](./UPDATING.md) for details instructions.
+
 ## Comparison with other gems
 
 There are great ruby gems to work with Elasticsearch like e.g. searchkick and

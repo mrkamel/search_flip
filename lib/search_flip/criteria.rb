@@ -149,9 +149,10 @@ module SearchFlip
       end
     end
 
-    # Allows to set query specific settings like e.g. connection
-    # and index name. Checkout SearchFlip::Index.with_settings
-    # for more details.
+    # Allows to set query specific settings like e.g. connection and index
+    # name. Please note, however, that this should only be used for special
+    # cases and the subsequent query can not be serialized. Checkout
+    # SearchFlip::Index.with_settings for more details.
     #
     # @example
     #   UserIndex.where("...").with_settings(connection: ProxyConnection)

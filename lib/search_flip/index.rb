@@ -68,9 +68,13 @@ module SearchFlip
         {}
       end
 
-      # Creates a new anonymous class inheriting from the current index with
-      # a custom index name or connection. This is e.g. useful when working
+      # Creates an anonymous class inheriting from the current index with a
+      # custom index name and/or connection. This is e.g. useful when working
       # with aliases or proxies.
+      #
+      # @example Basic usage
+      #   UserIndex.with_settings(index_name: 'new_user_index')
+      #   # => #<Class:0x...>
       #
       # @example Working with aliases
       #   new_index = UserIndex.with_settings(index_name: 'new_user_index')
@@ -81,6 +85,8 @@ module SearchFlip
       # @example Working with proxies
       #   query = UserIndex.with_settings(connection: ProxyConnection).where("...")
       #
+      # @param index_name [String] A custom index_name
+      # @param connection [SearchFlip::Connection] A custom connection
       # @return [Class] An anonymous class
 
       def with_settings(index_name: nil, connection: nil)
