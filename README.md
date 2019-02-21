@@ -254,6 +254,41 @@ CommentIndex.match_all.find_each do |record|
 end
 ```
 
+## Working with Elasticsearch Aliases
+
+You can use and manage Elasticsearch Aliases like the following:
+
+```ruby
+class UserIndex
+  include SearchFlip::Index
+
+  def self.index_name
+    alias_name
+  end
+
+  def self.alias_name
+    "users"
+  end
+end
+```
+
+Then, create an index, import the records and add the alias like:
+
+```ruby
+new_user_index = UserIndex.with_settings(index_name: "users-#{SecureRandom.hex}")
+new_user_index.create_index
+new_user_index.import User.all
+new_user.connection.update_aliases(actions: [
+  add: { index: new_user_index.index_name, alias: new_user_index.alias_name }
+])
+```
+
+If the alias already exists, you of course have to remove it as well first
+within `update_aliases`.
+
+Please note that `with_settings(index_name: '...')` returns an anonymous, i.e.
+temporary, class inherting from UserIndex and overwriting `index_name`.
+
 ## Advanced Usage
 
 SearchFlip supports even more advanced usages, like e.g. post filters, filtered
