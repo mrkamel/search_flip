@@ -119,7 +119,7 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
     TestIndex.delete_index if TestIndex.index_exists?
   end
 
-  def test_delete_index
+  def test_delete_index_delegates_to_connection
     TestIndex.connection.expects(:delete_index).with("test")
     TestIndex.delete_index
   end
