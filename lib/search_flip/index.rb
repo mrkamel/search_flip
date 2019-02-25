@@ -306,13 +306,7 @@ module SearchFlip
       # @return [Boolean] Whether or not the index exists
 
       def index_exists?
-        SearchFlip::HTTPClient.headers(accept: "application/json").head(index_url)
-
-        true
-      rescue SearchFlip::ResponseError => e
-        return false if e.code == 404
-
-        raise e
+        connection.index_exists?(index_name_with_prefix)
       end
 
       # Fetches the index settings from ElasticSearch. Sends a GET request to
@@ -322,39 +316,38 @@ module SearchFlip
       # @return [Hash] The index settings
 
       def get_index_settings
-        SearchFlip::HTTPClient.headers(accept: "application/json").get("#{index_url}/_settings").parse
+        connection.get_index_settings(index_name_with_prefix)
       end
 
       # Creates the index within ElasticSearch and applies index settings, if
       # specified. Raises SearchFlip::ResponseError in case any errors
       # occur.
+      #
+      # @param include_mapping [Boolean] Whether or not to include the mapping
+      # @return [Boolean] Returns true or false
 
       def create_index(include_mapping: false)
         json = index_settings
         json = json.merge(mappings: mapping) if include_mapping
 
-        SearchFlip::HTTPClient.put(index_url, json: json)
-
-        true
+        connection.create_index(index_name_with_prefix, json)
       end
 
       # Updates the index settings within ElasticSearch according to the index
       # settings specified. Raises SearchFlip::ResponseError in case any
       # errors occur.
+      #
+      # @return [Boolean] Returns true or false
 
       def update_index_settings
-        SearchFlip::HTTPClient.put("#{index_url}/_settings", json: index_settings)
-
-        true
+        connection.update_index_settings(index_name_with_prefix, index_settings)
       end
 
       # Deletes the index from ElasticSearch. Raises SearchFlip::ResponseError
       # in case any errors occur.
 
       def delete_index
-        SearchFlip::HTTPClient.delete(index_url)
-
-        true
+        connection.delete_index(index_name_with_prefix)
       end
 
       # Specifies a type mapping. Override to specify a custom mapping.
@@ -382,9 +375,7 @@ module SearchFlip
       # errors occur.
 
       def update_mapping
-        SearchFlip::HTTPClient.put("#{type_url}/_mapping", json: mapping)
-
-        true
+        connection.update_mapping(index_name_with_prefix, type_name, mapping)
       end
 
       # Retrieves the current type mapping from ElasticSearch. Raises
@@ -393,13 +384,15 @@ module SearchFlip
       # @return [Hash] The current type mapping
 
       def get_mapping
-        SearchFlip::HTTPClient.headers(accept: "application/json").get("#{type_url}/_mapping").parse
+        connection.get_mapping(index_name_with_prefix, type_name)
       end
 
       # Retrieves the document specified by id from ElasticSearch. Raises
       # SearchFlip::ResponseError specific exceptions in case any errors
       # occur.
       #
+      # @param id [String, Fixnum] The id to get
+      # @param params [Hash] Optional params for the request
       # @return [Hash] The specified document
 
       def get(id, params = {})
@@ -410,9 +403,7 @@ module SearchFlip
       # SearchFlip::ResponseError in case any errors occur.
 
       def refresh
-        SearchFlip::HTTPClient.post("#{index_url}/_refresh", json: {})
-
-        true
+        connection.refresh(index_name_with_prefix)
       end
 
       # Indexes the given record set, array of records or individual record.
@@ -551,23 +542,19 @@ module SearchFlip
       # Returns the full ElasticSearch type URL, ie base URL, index name with
       # prefix and type name.
       #
-      # @param connection [SearchFlip::Connection] The connection to use
-      #
       # @return [String] The ElasticSearch type URL
 
       def type_url
-        "#{index_url}/#{type_name}"
+        connection.type_url(index_name_with_prefix, type_name)
       end
 
       # Returns the ElasticSearch index URL, ie base URL and index name with
       # prefix.
       #
-      # @param connection [SearchFlip::Connection] The connection to use
-      #
       # @return [String] The ElasticSearch index URL
 
       def index_url
-        "#{connection.base_url}/#{index_name_with_prefix}"
+        connection.index_url(index_name_with_prefix)
       end
 
       # Returns the SearchFlip::Connection for the index.

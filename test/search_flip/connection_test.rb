@@ -66,5 +66,96 @@ class SearchFlip::ConnectionTest < SearchFlip::TestCase
     assert_equal connection.get_indices.map { |index| index["index"] }.sort, ["comments", "products"]
     assert_equal connection.get_indices("com*").map { |index| index["index"] }.sort, ["comments"]
   end
+
+  def test_create_index
+    connection = SearchFlip::Connection.new
+
+    assert connection.create_index("index_name")
+    assert connection.index_exists?("index_name")
+  ensure
+    connection.delete_index("index_name") if connection.index_exists?("index_name")
+  end
+
+  def test_create_index_with_index_payload
+    connection = SearchFlip::Connection.new
+
+    connection.create_index("index_name", settings: { number_of_shards: 3 })
+
+    assert_equal connection.get_index_settings("index_name")["index_name"]["settings"]["index"]["number_of_shards"], "3"
+  ensure
+    connection.delete_index("index_name") if connection.index_exists?("index_name")
+  end
+
+  def test_update_index_settings
+    connection = SearchFlip::Connection.new
+
+    connection.create_index("index_name")
+    connection.update_index_settings("index_name", settings: { number_of_replicas: 3 })
+
+    assert_equal "3", connection.get_index_settings("index_name")["index_name"]["settings"]["index"]["number_of_replicas"]
+  ensure
+    connection.delete_index("index_name") if connection.index_exists?("index_name")
+  end
+
+  def test_get_index_settings
+    connection = SearchFlip::Connection.new
+
+    connection.create_index("index_name", settings: { number_of_shards: 3 })
+
+    assert_equal connection.get_index_settings("index_name")["index_name"]["settings"]["index"]["number_of_shards"], "3"
+  ensure
+    connection.delete_index("index_name") if connection.index_exists?("index_name")
+  end
+
+  def test_update_mapping
+    connection = SearchFlip::Connection.new
+
+    mapping = { "type_name" => { "properties" => { "id" => { "type" => "long" } } } }
+
+    connection.create_index("index_name")
+    connection.update_mapping("index_name", "type_name", mapping)
+
+    assert_equal connection.get_mapping("index_name", "type_name"), "index_name" => { "mappings" => mapping }
+  ensure
+    connection.delete_index("index_name") if connection.index_exists?("index_name")
+  end
+
+  def test_delete_index
+    connection = SearchFlip::Connection.new
+
+    connection.create_index("index_name")
+    assert connection.index_exists?("index_name")
+
+    connection.delete_index("index_name")
+    refute connection.index_exists?("index_name")
+  ensure
+    connection.delete_index("index_name") if connection.index_exists?("index_name")
+  end
+
+  def test_refresh
+    connection = SearchFlip::Connection.new
+
+    connection.create_index("index1")
+    connection.create_index("index2")
+
+    assert connection.refresh
+    assert connection.refresh("index1")
+    assert connection.refresh(["index1", "index2"])
+  ensure
+    connection.delete_index("index1") if connection.index_exists?("index1")
+    connection.delete_index("index2") if connection.index_exists?("index2")
+  end
+
+  def test_index_url
+    connection = SearchFlip::Connection.new(base_url: "base_url")
+
+    assert_equal "base_url/index_name", connection.index_url("index_name")
+  end
+
+  def test_type_url
+    connection = SearchFlip::Connection.new(base_url: "base_url")
+
+    assert_equal "base_url/index_name/type_name", connection.type_url("index_name", "type_name")
+  end
 end
 

@@ -30,110 +30,166 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
     end
   end
 
-  def test_create_index
+  def test_create_index_works
     assert TestIndex.create_index
-    assert TestIndex.index_exists?
-
-    TestIndex.delete_index
-
-    refute TestIndex.index_exists?
+  ensure
+    TestIndex.delete_index if TestIndex.index_exists?
   end
 
-  def test_create_index_with_index_settings
+  def test_create_index_delegates_to_connection
+    TestIndex.connection.expects(:create_index).with("test", {})
+    TestIndex.create_index
+  end
+
+  def test_create_index_passes_index_settings_to_connection
+    TestIndex.stubs(:index_settings).returns(settings: { number_of_shards: 3 })
+    assert TestIndex.create_index
+
+    assert "3", TestIndex.get_index_settings["test"]["settings"]["index"]["number_of_replicas"]
+  ensure
+    TestIndex.delete_index if TestIndex.index_exists?
+  end
+
+  def test_create_index_passes_index_settings_delegates_to_connection
     TestIndex.stubs(:index_settings).returns(settings: { number_of_shards: 3 })
 
-    assert TestIndex.create_index
-    assert TestIndex.index_exists?
+    TestIndex.connection.expects(:create_index).with("test", settings: { number_of_shards: 3 })
+    TestIndex.create_index
+  end
 
-    assert_equal "3", TestIndex.get_index_settings["test"]["settings"]["index"]["number_of_shards"]
+  def test_create_index_passes_mapping_if_specified
+    TestIndex.stubs(:mapping).returns(test: { properties: { id: { type: "long" } } })
+    assert TestIndex.create_index
   ensure
     TestIndex.delete_index if TestIndex.index_exists?
   end
 
-  def test_create_index_with_mapping
-    mapping = { "test" => { "properties" => { "id" => { "type" => "long" } } } }
+  def test_create_index_passes_mapping_if_specified_delegates_to_connection
+    TestIndex.stubs(:mapping).returns(test: { properties: { id: { type: "long" } } })
 
-    TestIndex.stubs(:mapping).returns(mapping)
+    TestIndex.connection.expects(:create_index).with("test", mappings: { test: { properties: { id: { type: "long" } } } })
+    TestIndex.create_index(include_mapping: true)
+  end
 
-    assert TestIndex.create_index(include_mapping: true)
-    assert TestIndex.index_exists?
-
-    assert_equal TestIndex.get_mapping["test"]["mappings"], mapping
+  def test_update_index_settings_works
+    TestIndex.create_index
+    TestIndex.stubs(:index_settings).returns(settings: { number_of_replicas: 3 })
+    TestIndex.update_index_settings
   ensure
     TestIndex.delete_index if TestIndex.index_exists?
   end
 
-  def test_update_index_settings
-    assert TestIndex.create_index
+  def test_update_index_settings_delegates_to_connection
+    index_settings = { settings: { number_of_replicas: 3 } }
 
     TestIndex.stubs(:index_settings).returns(settings: { number_of_replicas: 3 })
 
-    assert TestIndex.update_index_settings
+    TestIndex.connection.expects(:update_index_settings).with("test", index_settings)
+    TestIndex.update_index_settings
+  end
 
-    assert_equal "3", TestIndex.get_index_settings["test"]["settings"]["index"]["number_of_replicas"]
+  def test_get_index_settings_works
+    TestIndex.create_index
+    assert TestIndex.get_index_settings
   ensure
     TestIndex.delete_index if TestIndex.index_exists?
   end
 
-  def test_get_index_settings
-    # Already tested
+  def test_get_index_settings_delegates_to_connection
+    TestIndex.connection.expects(:get_index_settings).with("test")
+    TestIndex.get_index_settings
   end
 
-  def test_index_exists?
-    # Already tested
+  def test_index_exists_works
+    TestIndex.create_index
+    assert TestIndex.index_exists?
+  ensure
+    TestIndex.delete_index if TestIndex.index_exists?
+  end
+
+  def test_index_exists_delegates_to_connection
+    TestIndex.connection.expects(:index_exists?).with("test")
+    TestIndex.index_exists?
+  end
+
+  def test_delete_index_works
+    TestIndex.create_index
+    assert TestIndex.delete_index
+  ensure
+    TestIndex.delete_index if TestIndex.index_exists?
   end
 
   def test_delete_index
-    # Already tested
-  end
-
-  def test_update_mapping
-    TestIndex.create_index
-    TestIndex.update_mapping
-
-    mapping = TestIndex.get_mapping
-
-    assert mapping["test"]["mappings"]["test"]["properties"]["test_field"]
-
+    TestIndex.connection.expects(:delete_index).with("test")
     TestIndex.delete_index
   end
 
-  def test_get_mapping
-    # Aready tested
+  def test_update_mapping_works
+    TestIndex.stubs(:mapping).returns(test: { properties: { id: { type: "long" } } })
+
+    TestIndex.create_index
+    TestIndex.update_mapping
+  ensure
+    TestIndex.delete_index if TestIndex.index_exists?
   end
 
-  def test_refresh
-    assert_difference "ProductIndex.total_entries" do
-      ProductIndex.import create(:product)
+  def test_update_mapping_delegates_to_connection
+    mapping = { test: { properties: { id: { type: "long" } } } }
 
-      assert ProductIndex.refresh
-    end
+    TestIndex.stubs(:mapping).returns(mapping)
+
+    TestIndex.connection.expects(:update_mapping).with("test", "test", mapping)
+    TestIndex.update_mapping
+  end
+
+  def test_get_mapping_works
+    TestIndex.create_index
+    TestIndex.update_mapping
+
+    assert TestIndex.get_mapping
+  ensure
+    TestIndex.delete_index if TestIndex.index_exists?
+  end
+
+  def test_get_mapping_delegates_to_connection
+    TestIndex.connection.expects(:get_mapping).with("test", "test")
+    TestIndex.get_mapping
+  end
+
+  def test_refresh_works
+    TestIndex.create_index
+    TestIndex.refresh
+  ensure
+    TestIndex.delete_index if TestIndex.index_exists?
+  end
+
+  def test_refresh_delegates_to_connection
+    TestIndex.connection.expects(:refresh).with("test")
+    TestIndex.refresh
   end
 
   def test_index_url
-    assert_equal "http://127.0.0.1:9200/products", ProductIndex.index_url
+    assert TestIndex.index_url
+  end
 
-    ProductIndex.stubs(:type_name).returns("products2")
-
-    assert_equal "http://127.0.0.1:9200/products2", ProductIndex.index_url
+  def test_index_url_delegates_to_connection
+    TestIndex.connection.expects(:index_url).with("test")
+    TestIndex.index_url
 
     SearchFlip::Config[:index_prefix] = "prefix-"
-
-    assert_equal "http://127.0.0.1:9200/prefix-products2", ProductIndex.index_url
-
-    ProductIndex.stubs(:index_name).returns("products3")
-
-    assert_equal "http://127.0.0.1:9200/prefix-products3", ProductIndex.index_url
-
+    TestIndex.connection.expects(:index_url).with("prefix-test")
+    TestIndex.index_url
+  ensure
     SearchFlip::Config[:index_prefix] = nil
   end
 
   def test_type_url
-    assert_equal "http://127.0.0.1:9200/products/products", ProductIndex.type_url
+    assert TestIndex.type_url
+  end
 
-    ProductIndex.stubs(:type_name).returns("products2")
-
-    assert_equal "http://127.0.0.1:9200/products2/products2", ProductIndex.type_url
+  def test_type_url_delegates_to_connection
+    TestIndex.connection.expects(:type_url).with("test", "test")
+    TestIndex.type_url
   end
 
   def test_import_object
@@ -389,7 +445,7 @@ class SearchFlip::IndexTest < SearchFlip::TestCase
   end
 
   def test_connection
-    assert_equal ProductIndex.connection.base_url, "http://127.0.0.1:9200"
+    assert_equal "http://127.0.0.1:9200", ProductIndex.connection.base_url
   end
 end
 

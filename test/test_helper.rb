@@ -238,5 +238,6 @@ class SearchFlip::TestCase < MiniTest::Test
   def setup
     ProductIndex.match_all.delete
     Product.delete_all
+    TestIndex.delete_index if TestIndex.index_exists?
   end
 end
