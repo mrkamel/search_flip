@@ -60,7 +60,7 @@ module SearchFlip
         criteria.post_must_values = (criteria.post_must_values || []) + other.post_must_values if other.post_must_values
         criteria.post_must_not_values = (criteria.post_must_not_values || []) + other.post_must_not_values if other.post_must_not_values
         criteria.post_should_values = (criteria.post_should_values || []) + other.post_should_values if other.post_should_values
-        criteria.post_filter_values = (criteria.post_filter_vales || []) + other.post_filter_values if other.post_filter_values
+        criteria.post_filter_values = (criteria.post_filter_values || []) + other.post_filter_values if other.post_filter_values
         criteria.aggregation_values = (criteria.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values
         criteria.terminate_after_value = other.terminate_after_value unless other.terminate_after_value.nil?
         criteria.timeout_value = other.timeout_value unless other.timeout_value.nil?
