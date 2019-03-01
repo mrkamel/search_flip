@@ -39,18 +39,18 @@ module SearchFlip
 
       fresh.tap do |criteria|
         criteria.profile_value = other.profile_value unless other.profile_value.nil?
-        criteria.source_value = (criteria.source_value || []) + other.source_value if other.source_value
-        criteria.sort_values = (criteria.sort_values || []) + other.sort_values if other.sort_values
-        criteria.highlight_values = (criteria.highlight_values || {}).merge(other.highlight_values) if other.highlight_values
-        criteria.suggest_values = (criteria.suggest_values || {}).merge(other.suggest_values) if other.suggest_values
+        criteria.failsafe_value = other.failsafe_value unless other.failsafe_value.nil?
+        criteria.terminate_after_value = other.terminate_after_value unless other.terminate_after_value.nil?
+        criteria.timeout_value = other.timeout_value unless other.timeout_value.nil?
         criteria.offset_value = other.offset_value if other.offset_value
         criteria.limit_value = other.limit_value if other.limit_value
+        criteria.scroll_args = other.scroll_args if other.scroll_args
+
+        criteria.source_value = (criteria.source_value || []) + other.source_value if other.source_value
+        criteria.sort_values = (criteria.sort_values || []) + other.sort_values if other.sort_values
         criteria.includes_values = (criteria.includes_values || []) + other.includes_values if other.includes_values
         criteria.preload_values = (criteria.preload_values || []) + other.preload_values if other.preload_values
         criteria.eager_load_values = (criteria.eager_load_values || []) + other.eager_load_values if other.eager_load_values
-        criteria.failsafe_value = other.failsafe_value unless other.failsafe_value.nil?
-        criteria.scroll_args = other.scroll_args if other.scroll_args
-        criteria.custom_value = (criteria.custom_value || {}).merge(other.custom_value) if other.custom_value
         criteria.search_values = (criteria.search_values || []) + other.search_values if other.search_values
         criteria.must_values = (criteria.must_values || []) + other.must_values if other.must_values
         criteria.must_not_values = (criteria.must_not_values || []) + other.must_not_values if other.must_not_values
@@ -61,9 +61,11 @@ module SearchFlip
         criteria.post_must_not_values = (criteria.post_must_not_values || []) + other.post_must_not_values if other.post_must_not_values
         criteria.post_should_values = (criteria.post_should_values || []) + other.post_should_values if other.post_should_values
         criteria.post_filter_values = (criteria.post_filter_values || []) + other.post_filter_values if other.post_filter_values
+
+        criteria.highlight_values = (criteria.highlight_values || {}).merge(other.highlight_values) if other.highlight_values
+        criteria.suggest_values = (criteria.suggest_values || {}).merge(other.suggest_values) if other.suggest_values
+        criteria.custom_value = (criteria.custom_value || {}).merge(other.custom_value) if other.custom_value
         criteria.aggregation_values = (criteria.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values
-        criteria.terminate_after_value = other.terminate_after_value unless other.terminate_after_value.nil?
-        criteria.timeout_value = other.timeout_value unless other.timeout_value.nil?
       end
     end
 

@@ -1,15 +1,22 @@
 
-require "minitest"
-require "minitest/autorun"
-require "webmock/minitest"
-require "mocha/minitest"
 require "search_flip"
+require "webmock/rspec"
 require "active_record"
 require "factory_bot"
 require "timecop"
 require "yaml"
 
 WebMock.allow_net_connect!
+
+RSpec.configure do |config|
+  config.include FactoryBot::Syntax::Methods
+
+  config.before do
+    TestIndex.delete_index if TestIndex.index_exists?
+    ProductIndex.match_all.delete
+    Product.delete_all
+  end
+end
 
 ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 
@@ -169,75 +176,3 @@ end
 
 TestIndex.delete_index if TestIndex.index_exists?
 
-class SearchFlip::TestCase < MiniTest::Test
-  include FactoryBot::Syntax::Methods
-
-  def self.should_delegate_method(method, to:, subject:, as: method)
-    define_method :"test_delegate_#{method}_to_#{to}" do
-      assert subject.respond_to?(method), "subject doesn't respond to #{method}"
-
-      target = subject.send(to)
-
-      assert target.respond_to?(as), "#{to} doesn't respond to #{as}"
-
-      params = Array.new(subject.method(method).arity.abs) { |i| "param-#{i}" }
-
-      mock_target = mock
-      mock_target.expects(as).with(*params)
-
-      subject.stubs(to).returns(mock_target)
-
-      subject.send(method, *params)
-    end
-  end
-
-  def self.should_delegate_methods(*methods, to:, subject:)
-    methods.each do |method|
-      should_delegate_method method, to: to, subject: subject
-    end
-  end
-
-  def assert_difference(expressions, difference = 1, &block)
-    callables = Array(expressions).map { |e| -> { eval(e, block.binding) } }
-
-    before = callables.map(&:call)
-
-    res = yield
-
-    Array(expressions).zip(callables).each_with_index do |(code, callable), i|
-      assert_equal before[i] + difference, callable.call, "#{code.inspect} didn't change by #{difference}"
-    end
-
-    res
-  end
-
-  def assert_no_difference(expressions, &block)
-    assert_difference(expressions, 0, &block)
-  end
-
-  def assert_not_nil(object)
-    assert !object.nil?, "shouldn't be nil"
-  end
-
-  def assert_present(object)
-    assert object.present?, "should be present"
-  end
-
-  def assert_blank(object)
-    assert object.blank?, "should be blank"
-  end
-
-  def refute_present(object)
-    refute object.present?, "shouldn't be present"
-  end
-
-  def refute_blank(object)
-    refute object.blank?, "shouldn't be blank"
-  end
-
-  def setup
-    ProductIndex.match_all.delete
-    Product.delete_all
-    TestIndex.delete_index if TestIndex.index_exists?
-  end
-end

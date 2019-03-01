@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "activerecord", ">= 3.0"
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "factory_bot"
+  spec.add_development_dependency "rspec"
   spec.add_development_dependency "minitest"
   spec.add_development_dependency "mocha"
   spec.add_development_dependency "rake"
