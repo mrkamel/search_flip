@@ -157,7 +157,7 @@ RSpec.describe SearchFlip::Aggregation do
         aggregation.range(:price, gte: 100, lte: 200).range(:title, gte: "title1", lte: "title3").aggregate(:category)
       end
 
-      aggregations= query.aggregations(:category).category.buckets.each_with_object({}) { |bucket, hash| hash[bucket[:key]] = bucket.doc_count }
+      aggregations = query.aggregations(:category).category.buckets.each_with_object({}) { |bucket, hash| hash[bucket[:key]] = bucket.doc_count }
 
       expect(aggregations).to eq("category1" => 2, "category2" => 1)
     end
@@ -238,13 +238,22 @@ RSpec.describe SearchFlip::Aggregation do
         end
       end
 
-      aggregations = query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      aggregations = query.aggregations(:category).each_with_object({}) do |(key, agg), hash|
+        hash[key] = agg.doc_count
+      end
+
       expect(aggregations).to eq("category1" => 3, "category2" => 3)
 
-      aggregations = query.aggregations(:category)["category1"].title.buckets.each_with_object({}) { |bucket, hash| hash[bucket[:key]] = bucket.doc_count }
+      aggregations = query.aggregations(:category)["category1"].title.buckets.each_with_object({}) do |bucket, hash|
+        hash[bucket[:key]] = bucket.doc_count
+      end
+
       expect(aggregations).to eq("title1" => 2, "title2" => 1)
 
-      aggregations = query.aggregations(:category)["category2"].title.buckets.each_with_object({}) { |bucket, hash| hash[bucket[:key]] = bucket.doc_count }
+      aggregations = query.aggregations(:category)["category2"].title.buckets.each_with_object({}) do |bucket, hash|
+        hash[bucket[:key]] = bucket.doc_count
+      end
+
       expect(aggregations).to eq("title1" => 1, "title2" => 2)
 
       expect(query.aggregations(:category)["category1"].title.buckets.detect { |bucket| bucket[:key] == "title1" }.price.value).to eq(30)

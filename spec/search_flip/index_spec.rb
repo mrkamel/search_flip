@@ -3,8 +3,8 @@ require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Index do
   describe "delegation" do
-    let(:subject) { ProductIndex }
-    let(:target) { :criteria }
+    let(:source) { ProductIndex }
+    let(:target_method) { :criteria }
 
     methods = [
       :profile, :where, :where_not, :filter, :range, :match_all, :exists,
@@ -19,14 +19,14 @@ RSpec.describe SearchFlip::Index do
 
     methods.each do |method|
       it "delegates #{method} to criteria" do
-        criteria = subject.send(target)
+        target = source.send(target_method)
 
-        allow(subject).to receive(target).and_return(criteria)
-        allow(criteria).to receive(method)
+        allow(target).to receive(target_method).and_return(target)
+        allow(target).to receive(method)
 
-        subject.send(method)
+        target.send(method)
 
-        expect(criteria).to have_received(method)
+        expect(target).to have_received(method)
       end
     end
   end
@@ -208,25 +208,25 @@ RSpec.describe SearchFlip::Index do
 
   describe ".import" do
     it "imports an object" do
-      expect { ProductIndex.import create(:product) }.to change { ProductIndex.total_count }.by(1)
+      expect { ProductIndex.import create(:product) }.to(change { ProductIndex.total_count }.by(1))
     end
 
     it "imports an array of objects" do
-      expect { ProductIndex.import [create(:product), create(:product)] }.to change { ProductIndex.total_count }.by(2)
+      expect { ProductIndex.import [create(:product), create(:product)] }.to(change { ProductIndex.total_count }.by(2))
     end
 
     it "imports a scope" do
       create_list :product, 2
 
-      expect { ProductIndex.import Product.all }.to change { ProductIndex.total_count }.by(2)
+      expect { ProductIndex.import Product.all }.to(change { ProductIndex.total_count }.by(2))
     end
 
     it "allows param options" do
       products = create_list(:product, 2)
 
-      expect { ProductIndex.import products, {}, version: 1, version_type: "external" }.to change { ProductIndex.total_count }.by(2)
-      expect { ProductIndex.import products, {}, version: 2, version_type: "external" }.not_to change { ProductIndex.total_count }
-      expect { ProductIndex.import products, { ignore_errors: [409] }, version: 2, version_type: "external" }.not_to change { ProductIndex.total_count }
+      expect { ProductIndex.import products, {}, version: 1, version_type: "external" }.to(change { ProductIndex.total_count }.by(2))
+      expect { ProductIndex.import products, {}, version: 2, version_type: "external" }.not_to(change { ProductIndex.total_count })
+      expect { ProductIndex.import products, { ignore_errors: [409] }, version: 2, version_type: "external" }.not_to(change { ProductIndex.total_count })
       expect { ProductIndex.import products, {}, version: 2, version_type: "external" }.to raise_error(SearchFlip::Bulk::Error)
     end
 
@@ -251,17 +251,17 @@ RSpec.describe SearchFlip::Index do
 
   describe ".index" do
     it "indexes an object" do
-      expect { ProductIndex.index create(:product) }.to change { ProductIndex.total_count }.by(1)
+      expect { ProductIndex.index create(:product) }.to(change { ProductIndex.total_count }.by(1))
     end
 
     it "indexes an array of objects" do
-      expect { ProductIndex.index [create(:product), create(:product)] }.to change { ProductIndex.total_count }.by(2)
+      expect { ProductIndex.index [create(:product), create(:product)] }.to(change { ProductIndex.total_count }.by(2))
     end
 
     it "indexes a scope" do
       create_list :product, 2
 
-      expect { ProductIndex.index Product.all }.to change { ProductIndex.total_count }.by(2)
+      expect { ProductIndex.index Product.all }.to(change { ProductIndex.total_count }.by(2))
     end
   end
 
@@ -269,38 +269,38 @@ RSpec.describe SearchFlip::Index do
     it "creates an object" do
       product = create(:product)
 
-      expect { ProductIndex.create product }.to change { ProductIndex.total_count }.by(1)
+      expect { ProductIndex.create product }.to(change { ProductIndex.total_count }.by(1))
       expect { ProductIndex.create product }.to raise_error(SearchFlip::Bulk::Error)
     end
 
     it "create an array of objects" do
       products = create_list(:product, 2)
 
-      expect { ProductIndex.create products }.to change { ProductIndex.total_count }.by(2)
+      expect { ProductIndex.create products }.to(change { ProductIndex.total_count }.by(2))
       expect { ProductIndex.create products }.to raise_error(SearchFlip::Bulk::Error)
     end
 
     it "creates a scope of objects" do
-      products = create_list(:product, 2)
+      create_list(:product, 2)
 
-      expect { ProductIndex.create Product.all }.to change { ProductIndex.total_count }.by(2)
+      expect { ProductIndex.create Product.all }.to(change { ProductIndex.total_count }.by(2))
       expect { ProductIndex.create Product.all }.to raise_error(SearchFlip::Bulk::Error)
     end
 
     it "allows respects param options" do
       products = create_list(:product, 2)
 
-      expect { ProductIndex.create products }.to change { ProductIndex.total_count }.by(2)
-      expect { ProductIndex.create products, ignore_errors: [409] }.not_to change { ProductIndex.total_count }
+      expect { ProductIndex.create products }.to(change { ProductIndex.total_count }.by(2))
+      expect { ProductIndex.create products, ignore_errors: [409] }.not_to(change { ProductIndex.total_count })
 
       products = create_list(:product, 2)
 
       if ProductIndex.connection.version.to_i >= 5
-        expect { ProductIndex.create products, {}, routing: "r1" }.to change { ProductIndex.total_count }.by(2)
+        expect { ProductIndex.create products, {}, routing: "r1" }.to(change { ProductIndex.total_count }.by(2))
 
         expect(ProductIndex.get(products.first.id, routing: "r1")["_routing"]).to eq("r1")
       else
-        expect { ProductIndex.create products, {}, version: 2, version_type: "external" }.to change { ProductIndex.total_count }.by(2)
+        expect { ProductIndex.create products, {}, version: 2, version_type: "external" }.to(change { ProductIndex.total_count }.by(2))
 
         expect(ProductIndex.get(products.first.id)["_version"]).to eq(2)
       end
@@ -312,13 +312,13 @@ RSpec.describe SearchFlip::Index do
       if ProductIndex.connection.version.to_i >= 5
         allow(ProductIndex).to receive(:index_options).and_return(routing: "r1")
 
-        expect { ProductIndex.create products }.to change { ProductIndex.total_count }.by(2)
+        expect { ProductIndex.create products }.to(change { ProductIndex.total_count }.by(2))
 
         expect(ProductIndex.get(products.first.id, routing: "r1")["_routing"]).to eq("r1")
       else
         allow(ProductIndex).to receive(:index_options).and_return(version: 2, version_type: "external")
 
-        expect { ProductIndex.create products }.to change { ProductIndex.total_count }.by(2)
+        expect { ProductIndex.create products }.to(change { ProductIndex.total_count }.by(2))
 
         expect(ProductIndex.get(products.first.id)["_version"]).to eq(2)
       end
@@ -331,7 +331,7 @@ RSpec.describe SearchFlip::Index do
 
       ProductIndex.import product
 
-      expect { ProductIndex.update product }.not_to change { ProductIndex.total_count }
+      expect { ProductIndex.update product }.not_to(change { ProductIndex.total_count })
     end
 
     it "updates an array of objects" do
@@ -339,7 +339,7 @@ RSpec.describe SearchFlip::Index do
 
       ProductIndex.import products
 
-      expect { ProductIndex.update products }.not_to change { ProductIndex.total_count }
+      expect { ProductIndex.update products }.not_to(change { ProductIndex.total_count })
     end
 
     it "updates a scope of objects" do
@@ -347,7 +347,7 @@ RSpec.describe SearchFlip::Index do
 
       ProductIndex.import products
 
-      expect { ProductIndex.update Product.all }.not_to change { ProductIndex.total_count }
+      expect { ProductIndex.update Product.all }.not_to(change { ProductIndex.total_count })
     end
   end
 
@@ -357,7 +357,7 @@ RSpec.describe SearchFlip::Index do
 
       ProductIndex.import product
 
-      expect { ProductIndex.delete product }.to change { ProductIndex.total_count }.by(-1)
+      expect { ProductIndex.delete product }.to(change { ProductIndex.total_count }.by(-1))
     end
 
     it "deletes an array of objects" do
@@ -365,7 +365,7 @@ RSpec.describe SearchFlip::Index do
 
       ProductIndex.import products
 
-      expect { ProductIndex.delete products }.to change { ProductIndex.total_count }.by(-2)
+      expect { ProductIndex.delete products }.to(change { ProductIndex.total_count }.by(-2))
     end
 
     it "deletes a scope of objects" do
@@ -373,7 +373,7 @@ RSpec.describe SearchFlip::Index do
 
       ProductIndex.import products
 
-      expect { ProductIndex.delete Product.all }.to change { ProductIndex.total_count }.by(-2)
+      expect { ProductIndex.delete Product.all }.to(change { ProductIndex.total_count }.by(-2))
     end
   end
 
@@ -420,7 +420,7 @@ RSpec.describe SearchFlip::Index do
         end
       end
 
-      expect(&bulk).to change { ProductIndex.total_count }.by(2)
+      expect(&bulk).to(change { ProductIndex.total_count }.by(2))
     end
 
     it "respects options" do
@@ -445,7 +445,7 @@ RSpec.describe SearchFlip::Index do
         end
       end
 
-      expect(&bulk).not_to change { ProductIndex.total_count }
+      expect(&bulk).not_to(change { ProductIndex.total_count })
     end
   end
 

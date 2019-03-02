@@ -3,8 +3,8 @@ require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Criteria do
   describe "delegation" do
-    let(:subject) { SearchFlip::Criteria.new(target: ProductIndex) }
-    let(:target) { :response }
+    let(:source) { SearchFlip::Criteria.new(target: ProductIndex) }
+    let(:target_method) { :response }
 
     methods = [
       :total_entries, :current_page, :previous_page, :prev_page, :next_page,
@@ -15,14 +15,14 @@ RSpec.describe SearchFlip::Criteria do
 
     methods.each do |method|
       it "delegates #{method} to response" do
-        response = subject.send(target)
+        target = source.send(target_method)
 
-        allow(subject).to receive(target).and_return(response)
-        allow(response).to receive(method)
+        allow(source).to receive(target_method).and_return(target)
+        allow(target).to receive(method)
 
-        subject.send(method)
+        source.send(method)
 
-        expect(response).to have_received(method)
+        expect(target).to have_received(method)
       end
     end
   end
@@ -640,7 +640,7 @@ RSpec.describe SearchFlip::Criteria do
   end
 
   describe "#scroll" do
-    it "scrolls over the full result set "do
+    it "scrolls over the full result set" do
       products = create_list(:product, 15)
 
       ProductIndex.import products
@@ -844,7 +844,7 @@ RSpec.describe SearchFlip::Criteria do
   end
 
   describe "#unscope" do
-    it "it removes the specified constraints and is chainable" do
+    it "removes the specified constraints and is chainable" do
       product1 = create(:product, title: "Title1", description: "Description1", price: 10)
       product2 = create(:product, title: "Title2", description: "Description2", price: 20)
       product3 = create(:product, title: "Title3", description: "Description2", price: 30)

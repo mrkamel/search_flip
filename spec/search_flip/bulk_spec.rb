@@ -1,7 +1,7 @@
 
 require File.expand_path("../spec_helper", __dir__)
 
-RSpec.describe SearchFlip::Index do
+RSpec.describe SearchFlip::Bulk do
   describe "#bulk" do
     it "uses bulk mode" do
       product1, product2 = create_list(:product, 2)
@@ -60,6 +60,3 @@ RSpec.describe SearchFlip::Index do
     end
   end
 end
-
-
-

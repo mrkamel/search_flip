@@ -47,10 +47,10 @@ Layout/LeadingBlankLines:
   Enabled: false
 
 Metrics/LineLength:
-  Max: 150
+  Enabled: false
 
 Metrics/MethodLength:
-  Max: 60
+  Enabled: false
 
 Metrics/ModuleLength:
   Enabled: false
@@ -71,7 +71,7 @@ Metrics/CyclomaticComplexity:
   Enabled: false
 
 Metrics/BlockLength:
-  Max: 30
+  Enabled: false
 
 Metrics/BlockNesting:
   Enabled: false
@@ -108,3 +108,12 @@ Lint/UnusedMethodArgument:
 
 Layout/IndentArray:
   EnforcedStyle: consistent
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+Style/RedundantBegin:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
