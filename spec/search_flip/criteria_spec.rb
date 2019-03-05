@@ -939,7 +939,7 @@ RSpec.describe SearchFlip::Criteria do
   end
 
   describe "#find_each" do
-    it "iterates the results" do
+    it "iterates the records" do
       expected1 = create(:product, title: "expected", rank: 1)
       expected2 = create(:product, title: "expected", rank: 2)
       expected3 = create(:product, title: "expected", rank: 3)
@@ -952,6 +952,23 @@ RSpec.describe SearchFlip::Criteria do
       actual = ProductIndex.where(title: "expected").sort(:rank).find_each(batch_size: 2).to_a
 
       expect(actual).to eq([expected1, expected2, expected3])
+    end
+  end
+
+  describe "#find_each_result" do
+    it "iterates the results" do
+      expected1 = create(:product, title: "expected", rank: 1)
+      expected2 = create(:product, title: "expected", rank: 2)
+      expected3 = create(:product, title: "expected", rank: 3)
+      rejected = create(:product, title: "rejected")
+
+      create :product, title: "rejected"
+
+      ProductIndex.import [expected1, expected2, expected3, rejected]
+
+      actual = ProductIndex.where(title: "expected").sort(:rank).find_each_result(batch_size: 2).map(&:id)
+
+      expect(actual).to eq([expected1.id, expected2.id, expected3.id])
     end
   end
 

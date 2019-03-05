@@ -14,7 +14,7 @@ RSpec.describe SearchFlip::Index do
       :order, :reorder, :offset, :limit, :paginate, :page, :per, :search,
       :find_in_batches, :highlight, :suggest, :custom, :find_each, :failsafe,
       :total_entries, :total_count, :terminate_after, :timeout, :should, :should_not,
-      :must, :must_not
+      :must, :must_not, :find_each_result, :find_results_in_batches
     ]
 
     methods.each do |method|

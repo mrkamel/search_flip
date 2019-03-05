@@ -675,6 +675,32 @@ module SearchFlip
 
     alias_method :each, :find_each
 
+    # Fetches the results specified by the criteria in batches using the
+    # ElasticSearch scroll API and yields each result. The batch size and scroll
+    # API timeout can be specified. Checkout out the ElasticSearch docs for
+    # further details.
+    #
+    # @example
+    #   CommentIndex.search("hello world").find_each_result(batch_size: 100) do |result|
+    #     # ...
+    #   end
+    #
+    # @param options [Hash] The options to control the fetching of batches
+    # @option options batch_size [Fixnum] The number of records to fetch per
+    #   batch. Uses #limit to control the batch size.
+    # @option options timeout [String] The timeout per scroll request, ie how
+    #   long ElasticSearch will keep the request handle open.
+
+    def find_each_result(options = {})
+      return enum_for(:find_each_result, options) unless block_given?
+
+      find_results_in_batches options do |batch|
+        batch.each do |result|
+          yield result
+        end
+      end
+    end
+
     # Executes the search request for the current criteria, ie sends the
     # request to ElasticSearch and returns the response. Connection and
     # response errors will be rescued if you specify the criteria to be
