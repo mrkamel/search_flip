@@ -396,7 +396,7 @@ module SearchFlip
       # @return [Hash] The specified document
 
       def get(id, params = {})
-        SearchFlip::HTTPClient.headers(accept: "application/json").get("#{type_url}/#{id}", params: params).parse
+        connection.http_client.headers(accept: "application/json").get("#{type_url}/#{id}", params: params).parse
       end
 
       # Sends a index refresh request to ElasticSearch. Raises
@@ -532,7 +532,9 @@ module SearchFlip
       #   raise.
 
       def bulk(options = {})
-        SearchFlip::Bulk.new("#{type_url}/_bulk", SearchFlip::Config[:bulk_limit], options) do |indexer|
+        opts = { http_client: connection.http_client }.merge(options)
+
+        SearchFlip::Bulk.new("#{type_url}/_bulk", SearchFlip::Config[:bulk_limit], opts) do |indexer|
           yield indexer
         end
 

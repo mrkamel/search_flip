@@ -14,7 +14,7 @@ module SearchFlip
   class Bulk
     class Error < StandardError; end
 
-    attr_accessor :url, :count, :options, :ignore_errors
+    attr_accessor :url, :count, :options, :http_client, :ignore_errors
 
     # Builds and yields a new Bulk object, ie initiates the buffer, yields,
     # sends batches of records each time the buffer is full, and sends a final
@@ -40,11 +40,14 @@ module SearchFlip
     # @option options raise [Boolean] If you want the bulk requests to never
     #   raise any exceptions (fire and forget), you can pass false here.
     #   Default is true.
+    # @option options http_client [SearchFlip::HTTPClient] An optional http
+    #   client instance
 
     def initialize(url, count = 1_000, options = {})
       self.url = url
       self.count = count
       self.options = options
+      self.http_client = options[:http_client] || SearchFlip::HTTPClient.new
       self.ignore_errors = Array(options[:ignore_errors]).to_set if options[:ignore_errors]
 
       init
@@ -114,7 +117,7 @@ module SearchFlip
 
     def upload
       response =
-        SearchFlip::HTTPClient
+        http_client
           .headers(accept: "application/json", content_type: "application/x-ndjson")
           .put(url, body: @payload, params: ignore_errors ? {} : { filter_path: "errors" })
 

@@ -7,42 +7,43 @@ module SearchFlip
   # with ElasticSearch.
 
   class HTTPClient
-    class Request
-      attr_accessor :headers_hash
+    attr_accessor :request
 
-      def headers(hash = {})
-        dup.tap do |request|
-          request.headers_hash = (request.headers_hash || {}).merge(hash)
-        end
-      end
-
-      [:get, :post, :put, :delete, :head].each do |method|
-        define_method method do |*args|
-          execute(method, *args)
-        end
-      end
-
-      private
-
-      def execute(method, *args)
-        response = HTTP.headers(headers_hash || {}).send(method, *args)
-
-        raise SearchFlip::ResponseError.new(code: response.code, body: response.body.to_s) unless response.status.success?
-
-        response
-      rescue HTTP::ConnectionError => e
-        raise SearchFlip::ConnectionError, e.message
-      end
-    end
-
-    def self.request
-      Request.new
+    def initialize
+      self.request = HTTP
     end
 
     class << self
       extend Forwardable
 
-      def_delegators :request, :headers, :get, :post, :put, :delete, :head
+      def_delegators :new, :headers, :via, :basic_auth, :auth
+      def_delegators :new, :get, :post, :put, :delete, :head
+    end
+
+    [:headers, :via, :basic_auth, :auth].each do |method|
+      define_method method do |*args|
+        dup.tap do |client|
+          client.request = request.send(method, *args)
+        end
+      end
+    end
+
+    [:get, :post, :put, :delete, :head].each do |method|
+      define_method method do |*args|
+        execute(method, *args)
+      end
+    end
+
+    private
+
+    def execute(method, *args)
+      response = request.send(method, *args)
+
+      raise SearchFlip::ResponseError.new(code: response.code, body: response.body.to_s) unless response.status.success?
+
+      response
+    rescue HTTP::ConnectionError => e
+      raise SearchFlip::ConnectionError, e.message
     end
   end
 end

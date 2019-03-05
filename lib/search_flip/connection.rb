@@ -1,10 +1,19 @@
 
 module SearchFlip
   class Connection
-    attr_reader :base_url
+    attr_reader :base_url, :http_client
 
-    def initialize(base_url: SearchFlip::Config[:base_url])
+    # Creates a new connection.
+    #
+    # @example
+    #   SearchFlip::Connection.new(base_url: "http://elasticsearch.host:9200")
+    #
+    # @param base_url [String] The base url for the connection
+    # @param http_client [SearchFlip::HTTPClient] An optional http client instance
+
+    def initialize(base_url: SearchFlip::Config[:base_url], http_client: SearchFlip::HTTPClient.new)
       @base_url = base_url
+      @http_client = http_client
     end
 
     # Queries and returns the ElasticSearch version used.
@@ -15,7 +24,7 @@ module SearchFlip
     # @return [String] The ElasticSearch version
 
     def version
-      @version ||= SearchFlip::HTTPClient.get("#{base_url}/").parse["version"]["number"]
+      @version ||= http_client.headers(accept: "application/json").get("#{base_url}/").parse["version"]["number"]
     end
 
     # Uses the ElasticSearch Multi Search API to execute multiple search requests
@@ -42,7 +51,7 @@ module SearchFlip
       payload << "\n"
 
       raw_response =
-        SearchFlip::HTTPClient
+        http_client
           .headers(accept: "application/json", content_type: "application/x-ndjson")
           .post("#{base_url}/_msearch", body: payload)
 
@@ -65,7 +74,7 @@ module SearchFlip
     # @return [Hash] The raw response
 
     def update_aliases(payload)
-      SearchFlip::HTTPClient
+      http_client
         .headers(accept: "application/json", content_type: "application/json")
         .post("#{base_url}/_aliases", body: SearchFlip::JSON.generate(payload))
         .parse
@@ -84,10 +93,11 @@ module SearchFlip
     # @return [Hash] The raw response
 
     def get_aliases(index_name: "*", alias_name: "*")
-      res = SearchFlip::HTTPClient
-        .headers(accept: "application/json", content_type: "application/json")
-        .get("#{base_url}/#{index_name}/_alias/#{alias_name}")
-        .parse
+      res =
+        http_client
+          .headers(accept: "application/json", content_type: "application/json")
+          .get("#{base_url}/#{index_name}/_alias/#{alias_name}")
+          .parse
 
       Hashie::Mash.new(res)
     end
@@ -101,7 +111,7 @@ module SearchFlip
     # @return [Boolean] Whether or not the alias exists
 
     def alias_exists?(alias_name)
-      SearchFlip::HTTPClient
+      http_client
         .headers(accept: "application/json", content_type: "application/json")
         .get("#{base_url}/_alias/#{alias_name}")
 
@@ -121,7 +131,7 @@ module SearchFlip
     # @return [Array] The raw response
 
     def get_indices(name = "*")
-      SearchFlip::HTTPClient
+      http_client
         .headers(accept: "application/json", content_type: "application/json")
         .get("#{base_url}/_cat/indices/#{name}")
         .parse
@@ -136,7 +146,7 @@ module SearchFlip
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
     def create_index(index_name, index_settings = {})
-      SearchFlip::HTTPClient.put(index_url(index_name), json: index_settings)
+      http_client.put(index_url(index_name), json: index_settings)
 
       true
     end
@@ -150,7 +160,7 @@ module SearchFlip
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
     def update_index_settings(index_name, index_settings)
-      SearchFlip::HTTPClient.put("#{index_url(index_name)}/_settings", json: index_settings)
+      http_client.put("#{index_url(index_name)}/_settings", json: index_settings)
 
       true
     end
@@ -163,7 +173,7 @@ module SearchFlip
     # @return [Hash] The index settings
 
     def get_index_settings(index_name)
-      SearchFlip::HTTPClient.headers(accept: "application/json").get("#{index_url(index_name)}/_settings").parse
+      http_client.headers(accept: "application/json").get("#{index_url(index_name)}/_settings").parse
     end
 
     # Sends a refresh request to ElasticSearch. Raises
@@ -173,7 +183,7 @@ module SearchFlip
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
     def refresh(index_names = nil)
-      SearchFlip::HTTPClient.post("#{index_names ? index_url(Array(index_names).join(",")) : base_url}/_refresh", json: {})
+      http_client.post("#{index_names ? index_url(Array(index_names).join(",")) : base_url}/_refresh", json: {})
 
       true
     end
@@ -188,7 +198,7 @@ module SearchFlip
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
     def update_mapping(index_name, type_name, mapping)
-      SearchFlip::HTTPClient.put("#{type_url(index_name, type_name)}/_mapping", json: mapping)
+      http_client.put("#{type_url(index_name, type_name)}/_mapping", json: mapping)
 
       true
     end
@@ -201,7 +211,7 @@ module SearchFlip
     # @return [Hash] The current type mapping
 
     def get_mapping(index_name, type_name)
-      SearchFlip::HTTPClient.headers(accept: "application/json").get("#{type_url(index_name, type_name)}/_mapping").parse
+      http_client.headers(accept: "application/json").get("#{type_url(index_name, type_name)}/_mapping").parse
     end
 
     # Deletes the specified index from ElasticSearch. Raises
@@ -211,7 +221,7 @@ module SearchFlip
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
     def delete_index(index_name)
-      SearchFlip::HTTPClient.delete index_url(index_name)
+      http_client.delete index_url(index_name)
 
       true
     end
@@ -222,7 +232,7 @@ module SearchFlip
     # @return [Boolean] Whether or not the index exists
 
     def index_exists?(index_name)
-      SearchFlip::HTTPClient.headers(accept: "application/json").head(index_url(index_name))
+      http_client.headers(accept: "application/json").head(index_url(index_name))
 
       true
     rescue SearchFlip::ResponseError => e

@@ -6,6 +6,8 @@ require "factory_bot"
 require "timecop"
 require "yaml"
 
+require File.expand_path("delegate_matcher", __dir__)
+
 WebMock.allow_net_connect!
 
 RSpec.configure do |config|

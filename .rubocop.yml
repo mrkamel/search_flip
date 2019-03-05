@@ -115,5 +115,3 @@ Style/IfUnlessModifier:
 Style/RedundantBegin:
   Enabled: false
 
-RSpec/ExampleLength:
-  Enabled: false

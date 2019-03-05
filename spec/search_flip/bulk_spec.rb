@@ -58,5 +58,21 @@ RSpec.describe SearchFlip::Bulk do
 
       expect(&block).to raise_error(SearchFlip::Bulk::Error)
     end
+
+    it "uses the specified http_client" do
+      product = create(:product)
+
+      stub_request(:put, "#{ProductIndex.type_url}/_bulk?filter_path=errors")
+        .with(headers: { "X-Header" => "Value" })
+        .to_return(status: 500)
+
+      block = lambda do
+        ProductIndex.bulk http_client: ProductIndex.connection.http_client.headers("X-Header" => "Value") do |bulk|
+          bulk.index product.id, ProductIndex.serialize(product)
+        end
+      end
+
+      expect(&block).to raise_error(SearchFlip::ResponseError)
+    end
   end
 end

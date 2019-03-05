@@ -360,9 +360,9 @@ module SearchFlip
       dupped_request.delete(:size)
 
       if target.connection.version.to_i >= 5
-        SearchFlip::HTTPClient.post("#{target.type_url}/_delete_by_query", json: dupped_request)
+        target.connection.http_client.post("#{target.type_url}/_delete_by_query", json: dupped_request)
       else
-        SearchFlip::HTTPClient.delete("#{target.type_url}/_query", json: dupped_request)
+        target.connection.http_client.delete("#{target.type_url}/_query", json: dupped_request)
       end
 
       target.refresh if SearchFlip::Config[:auto_refresh]
@@ -713,7 +713,7 @@ module SearchFlip
 
     def execute
       @response ||= begin
-        http_request = SearchFlip::HTTPClient.headers(accept: "application/json")
+        http_request = target.connection.http_client.headers(accept: "application/json")
 
         http_response =
           if scroll_args && scroll_args[:id]

@@ -3,8 +3,7 @@ require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Criteria do
   describe "delegation" do
-    let(:source) { SearchFlip::Criteria.new(target: ProductIndex) }
-    let(:target_method) { :response }
+    subject { SearchFlip::Criteria.new(target: ProductIndex) }
 
     methods = [
       :total_entries, :current_page, :previous_page, :prev_page, :next_page,
@@ -14,16 +13,7 @@ RSpec.describe SearchFlip::Criteria do
     ]
 
     methods.each do |method|
-      it "delegates #{method} to response" do
-        target = source.send(target_method)
-
-        allow(source).to receive(target_method).and_return(target)
-        allow(target).to receive(method)
-
-        source.send(method)
-
-        expect(target).to have_received(method)
-      end
+      it { should delegate(method).to(:response) }
     end
   end
 
