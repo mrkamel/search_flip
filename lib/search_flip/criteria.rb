@@ -177,7 +177,7 @@ module SearchFlip
       res = {}
 
       if must_values || search_values || must_not_values || should_values || filter_values
-        if target.connection.version.to_i >= 2
+        if connection.version.to_i >= 2
           res[:query] = {
             bool: {}
               .merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {})
@@ -215,7 +215,7 @@ module SearchFlip
       res[:aggregations] = aggregation_values if aggregation_values
 
       if post_must_values || post_search_values || post_must_not_values || post_should_values || post_filter_values
-        if target.connection.version.to_i >= 2
+        if connection.version.to_i >= 2
           res[:post_filter] = {
             bool: {}
               .merge(post_must_values || post_search_values ? { must: (post_must_values || []) + (post_search_values || []) } : {})
@@ -359,10 +359,10 @@ module SearchFlip
       dupped_request.delete(:from)
       dupped_request.delete(:size)
 
-      if target.connection.version.to_i >= 5
-        target.connection.http_client.post("#{target.type_url}/_delete_by_query", json: dupped_request)
+      if connection.version.to_i >= 5
+        connection.http_client.post("#{target.type_url}/_delete_by_query", json: dupped_request)
       else
-        target.connection.http_client.delete("#{target.type_url}/_query", json: dupped_request)
+        connection.http_client.delete("#{target.type_url}/_query", json: dupped_request)
       end
 
       target.refresh if SearchFlip::Config[:auto_refresh]
@@ -713,19 +713,19 @@ module SearchFlip
 
     def execute
       @response ||= begin
-        http_request = target.connection.http_client.headers(accept: "application/json")
+        http_request = connection.http_client.headers(accept: "application/json")
 
         http_response =
           if scroll_args && scroll_args[:id]
-            if target.connection.version.to_i >= 2
+            if connection.version.to_i >= 2
               http_request.post(
-                "#{target.connection.base_url}/_search/scroll",
+                "#{connection.base_url}/_search/scroll",
                 json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] }
               )
             else
               http_request
                 .headers(content_type: "text/plain")
-                .post("#{target.connection.base_url}/_search/scroll", params: { scroll: scroll_args[:timeout] }, body: scroll_args[:id])
+                .post("#{connection.base_url}/_search/scroll", params: { scroll: scroll_args[:timeout] }, body: scroll_args[:id])
             end
           elsif scroll_args
             http_request.post(
@@ -803,6 +803,8 @@ module SearchFlip
       :prev_page, :next_page, :first_page?, :last_page?, :out_of_range?, :total_pages,
       :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions,
       :scope, :results, :records, :scroll_id, :raw_response
+
+    def_delegators :target, :connection
 
     private
 

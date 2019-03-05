@@ -15,6 +15,8 @@ RSpec.describe SearchFlip::Criteria do
     methods.each do |method|
       it { should delegate(method).to(:response) }
     end
+
+    it { should delegate(:connection).to(:target) }
   end
 
   describe "#merge" do
