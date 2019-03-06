@@ -3,7 +3,7 @@
 
 ## Update 1.x to 2.x
 
-* [BREAKING] Changed `SearchFlip::Index.base_url` to `SearchFlip::Index.connection`
+### [BREAKING] Changed `SearchFlip::Index.base_url` to `SearchFlip::Index.connection`
 
 1.x:
 
@@ -33,7 +33,7 @@ class MyIndex
 end
 ```
 
-* [BREAKING] Changed `SearchFlip.version` to `SearchFlip::Connection#version`
+### [BREAKING] Changed `SearchFlip.version` to `SearchFlip::Connection#version`
 
 1.x:
 
@@ -52,7 +52,7 @@ connection = SearchFlip::Connection.new(base_url: "...")
 connection.version
 ```
 
-* [BREAKING] Changed `SearchFlip.aliases` to `SearchFlip::Connection#update_aliases`
+### [BREAKING] Changed `SearchFlip.aliases` to `SearchFlip::Connection#update_aliases`
 
 1.x:
 
@@ -77,7 +77,7 @@ connection.update_aliases(actions: [
 ])
 ```
 
-* [BREAKING] Changed `SearchFlip.msearch` to `SearchFlip::Connection#msearch`
+### [BREAKING] Changed `SearchFlip.msearch` to `SearchFlip::Connection#msearch`
 
 1.x:
 
@@ -96,7 +96,7 @@ connection = SearchFlip::Connection.new(base_url: "...")
 connection.msearch(queries)
 ```
 
-* [BREAKING] Removed `base_url` param from `SearchFlip::Critiera#execute`
+### [BREAKING] Removed `base_url` param from `SearchFlip::Critiera#execute`
 
 1.x:
 
