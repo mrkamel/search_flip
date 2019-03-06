@@ -19,6 +19,12 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
+  spec.post_install_message = <<~MESSAGE
+    Thanks for using search_flip!
+    Check out https://github.com/mrkamel/search_flip/blob/master/UPDATING.md
+    when upgrading from 1.x to 2.x
+  MESSAGE
+
   spec.add_development_dependency "activerecord", ">= 3.0"
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "factory_bot"

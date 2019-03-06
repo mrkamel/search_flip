@@ -1,5 +1,5 @@
 
 module SearchFlip
-  VERSION = "2.0.0.beta2"
+  VERSION = "2.0.0.beta3"
 end
 
