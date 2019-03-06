@@ -857,30 +857,30 @@ RSpec.describe SearchFlip::Criteria do
 
       results = ProductIndex.sort(:id).highlight([:title, :description]).search("title:highlight description:highlight").results
 
-      expect(results[0].highlight.title).to eq(["Title1 <em>highlight</em>"])
-      expect(results[0].highlight.description).to eq(["Description1 <em>highlight</em>"])
+      expect(results[0]._hit.highlight.title).to eq(["Title1 <em>highlight</em>"])
+      expect(results[0]._hit.highlight.description).to eq(["Description1 <em>highlight</em>"])
 
-      expect(results[1].highlight.title).to eq(["Title2 <em>highlight</em>"])
-      expect(results[1].highlight.description).to eq(["Description2 <em>highlight</em>"])
+      expect(results[1]._hit.highlight.title).to eq(["Title2 <em>highlight</em>"])
+      expect(results[1]._hit.highlight.description).to eq(["Description2 <em>highlight</em>"])
 
       results = ProductIndex.sort(:id).highlight([:title, :description], require_field_match: false).search("highlight").results
 
-      expect(results[0].highlight.title).to eq(["Title1 <em>highlight</em>"])
-      expect(results[0].highlight.description).to eq(["Description1 <em>highlight</em>"])
+      expect(results[0]._hit.highlight.title).to eq(["Title1 <em>highlight</em>"])
+      expect(results[0]._hit.highlight.description).to eq(["Description1 <em>highlight</em>"])
 
-      expect(results[1].highlight.title).to eq(["Title2 <em>highlight</em>"])
-      expect(results[1].highlight.description).to eq(["Description2 <em>highlight</em>"])
+      expect(results[1]._hit.highlight.title).to eq(["Title2 <em>highlight</em>"])
+      expect(results[1]._hit.highlight.description).to eq(["Description2 <em>highlight</em>"])
 
       query = ProductIndex.sort(:id).search("title:highlight")
       query = query.highlight(:title, require_field_match: true).highlight(:description, require_field_match: true)
 
       results = query.results
 
-      expect(results[0].highlight.title).to eq(["Title1 <em>highlight</em>"])
-      expect(results[0].highlight.description).to be_nil
+      expect(results[0]._hit.highlight.title).to eq(["Title1 <em>highlight</em>"])
+      expect(results[0]._hit.highlight.description).to be_nil
 
-      expect(results[1].highlight.title).to eq(["Title2 <em>highlight</em>"])
-      expect(results[1].highlight.description).to be_nil
+      expect(results[1]._hit.highlight.title).to eq(["Title2 <em>highlight</em>"])
+      expect(results[1]._hit.highlight.description).to be_nil
     end
   end
 

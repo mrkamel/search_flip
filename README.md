@@ -373,7 +373,7 @@ CommentIndex.highlight(title: { type: "fvh" })
 
 ```ruby
 query = CommentIndex.highlight(:title).search("hello")
-query.results[0].highlight.title # => "<em>hello</em> world"
+query.results[0]._hit.highlight.title # => "<em>hello</em> world"
 ```
 
 ### Advanced Criteria Methods
@@ -557,6 +557,27 @@ end
 
 This allows to use different clusters per index e.g. when migrating indices to
 new versions of Elasticsearch.
+
+## Routing and other index-time options
+
+Override `index_options` in case you want to use routing or pass other
+index-time options:
+
+```ruby
+class CommentIndex
+  include SearchFlip::Index
+
+  def self.index_options(comment)
+    {
+      routing: comment.user_id,
+      version: comment.version,
+      version_type: "external_gte"
+    }
+  end
+end
+```
+
+These options will be passed whenever records get indexed, deleted, etc.
 
 ## Non-ActiveRecord models
 

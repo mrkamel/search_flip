@@ -111,3 +111,19 @@ connection = SearchFlip::Connection.new(base_url: "...")
 MyIndex.where(id: 1).with_settings(connection: connection).execute
 ```
 
+* [BREAKING] Move hit data within results in `_hit` namespace
+
+1.x:
+
+```ruby
+query = CommentIndex.highlight(:title).search("hello")
+query.results[0].highlight.title # => "<em>hello</em> world"
+```
+
+2.x:
+
+```ruby
+query = CommentIndex.highlight(:title).search("hello")
+query.results[0]._hit.highlight.title # => "<em>hello</em> world"
+```
+
