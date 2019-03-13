@@ -88,6 +88,10 @@ class CommentIndex
     "comments"
   end
 
+  def self.index_name
+    "comments"
+  end
+
   def self.model
     Comment
   end
@@ -136,6 +140,10 @@ class ProductIndex
     "products"
   end
 
+  def self.index_name
+    "products"
+  end
+
   def self.model
     Product
   end
@@ -172,6 +180,10 @@ class TestIndex
   end
 
   def self.type_name
+    "test"
+  end
+
+  def self.index_name
     "test"
   end
 end

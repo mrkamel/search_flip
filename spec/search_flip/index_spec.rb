@@ -42,6 +42,16 @@ RSpec.describe SearchFlip::Index do
     end
   end
 
+  describe ".type_name" do
+    it "raises a SearchFlip::MethodNotImplemented by default" do
+      klass = Class.new do
+        include SearchFlip::Index
+      end
+
+      expect { klass.index_name }.to raise_error(SearchFlip::MethodNotImplemented)
+    end
+  end
+
   describe ".create_index" do
     it "delegates to connection" do
       allow(TestIndex.connection).to receive(:create_index).and_call_original

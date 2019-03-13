@@ -127,3 +127,35 @@ query = CommentIndex.highlight(:title).search("hello")
 query.results[0]._hit.highlight.title # => "<em>hello</em> world"
 ```
 
+* **[BREAKING]** `index_name` no longer defaults to `type_name`
+
+1.x:
+
+```ruby
+class CommentIndex
+  include SearchFlip::Index
+
+  def self.type_name
+    "comments"
+  end
+
+  # CommentIndex.index_name defaults to CommentIndex.type_name
+end
+```
+
+2.x:
+
+```ruby
+class CommentIndex
+  include SearchFlip::Index
+
+  def self.type_name
+    "comments"
+  end
+
+  def self.index_name
+    "comments"
+  end
+end
+```
+

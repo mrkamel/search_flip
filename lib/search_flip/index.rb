@@ -271,7 +271,7 @@ module SearchFlip
       # @return [String] The base name of the index, ie without prefix
 
       def index_name
-        type_name
+        raise SearchFlip::MethodNotImplemented, "You must implement #{name}::index_name"
       end
 
       # @api private
