@@ -122,7 +122,7 @@ module SearchFlip
 
       fresh.tap do |criteria|
         criteria.search_values = nil if scopes.include?(:search)
-        criteria.post_search_values = nil if scopes.include?(:search)
+        criteria.post_search_values = nil if scopes.include?(:post_search)
         criteria.sort_values = nil if scopes.include?(:sort)
         criteria.hightlight_values = nil if scopes.include?(:highlight)
         criteria.suggest_values = nil if scopes.include?(:suggest)

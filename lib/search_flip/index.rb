@@ -87,6 +87,7 @@ module SearchFlip
       #
       # @param index_name [String] A custom index_name
       # @param connection [SearchFlip::Connection] A custom connection
+      #
       # @return [Class] An anonymous class
 
       def with_settings(index_name: nil, connection: nil)
@@ -113,6 +114,7 @@ module SearchFlip
       #   end
       #
       # @param record The record that gets serialized
+      #
       # @return [Hash] The hash-representation of the record
 
       def serialize(record)
@@ -178,6 +180,7 @@ module SearchFlip
       #   end
       #
       # @param record The record to get the primary key for
+      #
       # @return [String, Fixnum] The record's primary key
 
       def record_id(record)
@@ -189,6 +192,7 @@ module SearchFlip
       # keys and/or ORMs.
       #
       # @param ids [Array] The array of ids to fetch the records for
+      #
       # @return The record set or an array of records
 
       def fetch_records(ids)
@@ -324,6 +328,7 @@ module SearchFlip
       # occur.
       #
       # @param include_mapping [Boolean] Whether or not to include the mapping
+      #
       # @return [Boolean] Returns true or false
 
       def create_index(include_mapping: false)
@@ -393,6 +398,7 @@ module SearchFlip
       #
       # @param id [String, Fixnum] The id to get
       # @param params [Hash] Optional params for the request
+      #
       # @return [Hash] The specified document
 
       def get(id, params = {})

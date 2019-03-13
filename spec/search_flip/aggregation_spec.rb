@@ -262,4 +262,122 @@ RSpec.describe SearchFlip::Aggregation do
       expect(query.aggregations(:category)["category2"].title.buckets.detect { |bucket| bucket[:key] == "title2" }.price.value).to eq(60)
     end
   end
+
+  describe "#merge" do
+    it "merges a criteria into the aggregation" do
+      product1 = create(:product, price: 100, category: "category1")
+      product2 = create(:product, price: 150, category: "category1")
+      product3 = create(:product, price: 200, category: "category2")
+      product4 = create(:product, price: 300, category: "category1")
+
+      ProductIndex.import [product1, product2, product3, product4]
+
+      query = ProductIndex.aggregate(categories: {}) do |agg|
+        agg.merge(ProductIndex.where(price: 100..200)).aggregate(:category)
+      end
+
+      result = query.aggregations(:categories).category.buckets.each_with_object({}) do |bucket, hash|
+        hash[bucket["key"]] = bucket.doc_count
+      end
+
+      expect(result).to eq("category1" => 2, "category2" => 1)
+    end
+
+    describe "unsupported methods" do
+      unsupported_methods = [
+        :profile_value, :failsafe_value, :terminate_after_value, :timeout_value, :offset_value, :limit_value,
+        :scroll_args, :highlight_values, :suggest_values, :custom_value, :source_value, :sort_values,
+        :includes_values, :preload_values, :eager_load_values, :post_search_values, :post_must_values,
+        :post_must_not_values, :post_should_values, :post_filter_values
+      ]
+
+      unsupported_methods.each do |unsupported_method|
+        it "raises a NotSupportedError #{unsupported_method}" do
+          block = lambda do
+            TestIndex.aggregate(field: {}) do |agg|
+              criteria = SearchFlip::Criteria.new(target: TestIndex)
+              criteria.send("#{unsupported_method}=", "value")
+
+              agg.merge(criteria)
+            end
+          end
+
+          expect(&block).to raise_error(SearchFlip::NotSupportedError)
+        end
+      end
+    end
+
+    describe "array concatenations" do
+      methods = [:search_values, :must_values, :must_not_values, :should_values, :filter_values]
+
+      methods.each do |method|
+        it "concatenates the values for #{method}" do
+          aggregation = SearchFlip::Aggregation.new(target: TestIndex)
+          aggregation.send("#{method}=", ["value1"])
+
+          criteria = SearchFlip::Criteria.new(target: TestIndex)
+          criteria.send("#{method}=", ["value2"])
+
+          result = aggregation.merge(criteria)
+
+          expect(result.send(method)).to eq(["value1", "value2"])
+        end
+      end
+    end
+
+    describe "hash merges" do
+      methods = [:aggregation_values]
+
+      methods.each do |method|
+        it "merges the values for #{method}" do
+          aggregation = SearchFlip::Aggregation.new(target: TestIndex)
+          aggregation.send("#{method}=", key1: "value1")
+
+          criteria = SearchFlip::Criteria.new(target: TestIndex)
+          criteria.send("#{method}=", key2: "value2")
+
+          result = aggregation.merge(criteria)
+
+          expect(result.send(method)).to eq(key1: "value1", key2: "value2")
+        end
+      end
+    end
+  end
+
+  describe "#respond_to?" do
+    it "checks whether or not the index class responds to the method" do
+      temp_index = Class.new(ProductIndex)
+      aggregation = SearchFlip::Aggregation.new(target: temp_index)
+
+      expect(aggregation.respond_to?(:test_scope)).to eq(false)
+
+      temp_index.scope(:test_scope) { match_all }
+
+      expect(aggregation.respond_to?(:test_scope)).to eq(true)
+    end
+  end
+
+  describe "#method_missing" do
+    it "delegates to the index class" do
+      temp_index = Class.new(ProductIndex)
+      temp_index.scope(:with_price_range) { |range| where(price: range) }
+
+      product1 = create(:product, price: 100, category: "category1")
+      product2 = create(:product, price: 150, category: "category1")
+      product3 = create(:product, price: 200, category: "category2")
+      product4 = create(:product, price: 300, category: "category1")
+
+      temp_index.import [product1, product2, product3, product4]
+
+      query = temp_index.aggregate(categories: {}) do |agg|
+        agg.merge(temp_index.with_price_range(100..200)).aggregate(:category)
+      end
+
+      result = query.aggregations(:categories).category.buckets.each_with_object({}) do |bucket, hash|
+        hash[bucket["key"]] = bucket.doc_count
+      end
+
+      expect(result).to eq("category1" => 2, "category2" => 1)
+    end
+  end
 end

@@ -137,12 +137,15 @@ module SearchFlip
         .parse
     end
 
+    alias_method :cat_indices, :get_indices
+
     # Creates the specified index within ElasticSearch and applies index
     # settings, if specified. Raises SearchFlip::ResponseError in case any
     # errors occur.
     #
     # @param index_name [String] The index name
     # @param index_settings [Hash] The index settings
+    #
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
     def create_index(index_name, index_settings = {})
@@ -157,6 +160,7 @@ module SearchFlip
     #
     # @param index_name [String] The index name to update the settings for
     # @param index_settings [Hash] The index settings
+    #
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
     def update_index_settings(index_name, index_settings)
@@ -170,6 +174,7 @@ module SearchFlip
     # SearchFlip::ResponseError in case any errors occur.
     #
     # @param index_name [String] The index name
+    #
     # @return [Hash] The index settings
 
     def get_index_settings(index_name)
@@ -195,6 +200,7 @@ module SearchFlip
     # @param index_name [String] The index name
     # @param type_name [String] The type name
     # @param mapping [Hash] The mapping
+    #
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
     def update_mapping(index_name, type_name, mapping)
@@ -208,6 +214,7 @@ module SearchFlip
     #
     # @param index_name [String] The index name
     # @param type_name [String] The type name
+    #
     # @return [Hash] The current type mapping
 
     def get_mapping(index_name, type_name)
@@ -218,6 +225,7 @@ module SearchFlip
     # SearchFlip::ResponseError in case any errors occur.
     #
     # @param index_name [String] The index name
+    #
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
     def delete_index(index_name)
@@ -229,6 +237,7 @@ module SearchFlip
     # Returns whether or not the specified index already exists.
     #
     # @param index_name [String] The index name
+    #
     # @return [Boolean] Whether or not the index exists
 
     def index_exists?(index_name)
@@ -246,6 +255,7 @@ module SearchFlip
     #
     # @param index_name [String] The index name
     # @param type_name [String] The type name
+    #
     # @return [String] The ElasticSearch type URL
 
     def type_url(index_name, type_name)
@@ -256,6 +266,7 @@ module SearchFlip
     # URL and index name with prefix.
     #
     # @param index_name [String] The index name
+    #
     # @return [String] The ElasticSearch index URL
 
     def index_url(index_name)

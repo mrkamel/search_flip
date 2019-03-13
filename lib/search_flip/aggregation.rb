@@ -51,6 +51,53 @@ module SearchFlip
 
     # @api private
     #
+    # Merges a criteria into the aggregation.
+    #
+    # @param other [SearchFlip::Criteria] The criteria to merge in
+    #
+    # @return [SearchFlip::Aggregation] A fresh aggregation including the merged criteria
+
+    def merge(other)
+      other = other.criteria
+
+      fresh.tap do |aggregation|
+        unsupported_methods = [
+          :profile_value, :failsafe_value, :terminate_after_value, :timeout_value, :offset_value, :limit_value,
+          :scroll_args, :highlight_values, :suggest_values, :custom_value, :source_value, :sort_values,
+          :includes_values, :preload_values, :eager_load_values, :post_search_values, :post_must_values,
+          :post_must_not_values, :post_should_values, :post_filter_values
+        ]
+
+        unsupported_methods.each do |unsupported_method|
+          unless other.send(unsupported_method).nil?
+            raise(SearchFlip::NotSupportedError, "Using #{unsupported_method} within aggregations is not supported")
+          end
+        end
+
+        aggregation.search_values = (aggregation.search_values || []) + other.search_values if other.search_values
+        aggregation.must_values = (aggregation.must_values || []) + other.must_values if other.must_values
+        aggregation.must_not_values = (aggregation.must_not_values || []) + other.must_not_values if other.must_not_values
+        aggregation.should_values = (aggregation.should_values || []) + other.should_values if other.should_values
+        aggregation.filter_values = (aggregation.filter_values || []) + other.filter_values if other.filter_values
+
+        aggregation.aggregation_values = (aggregation.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values
+      end
+    end
+
+    def respond_to_missing?(name, *args)
+      target.respond_to?(name, *args)
+    end
+
+    def method_missing(name, *args, &block)
+      if target.respond_to?(name)
+        merge(target.send(name, *args, &block))
+      else
+        super
+      end
+    end
+
+    # @api private
+    #
     # Simply dups the object for api compatability.
     #
     # @return [SearchFlip::Aggregation] The dupped object
