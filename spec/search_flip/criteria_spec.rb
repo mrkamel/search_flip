@@ -35,7 +35,7 @@ RSpec.describe SearchFlip::Criteria do
     describe "assignments" do
       methods = [
         :profile_value, :failsafe_value, :terminate_after_value, :timeout_value,
-        :offset_value, :limit_value, :scroll_args
+        :offset_value, :limit_value, :scroll_args, :source_value
       ]
 
       methods.each do |method|
@@ -53,10 +53,9 @@ RSpec.describe SearchFlip::Criteria do
 
     describe "array concatenations" do
       methods = [
-        :source_value, :sort_values, :includes_values, :preload_values, :eager_load_values,
-        :search_values, :must_values, :must_not_values, :should_values, :filter_values,
-        :post_search_values, :post_must_values, :post_must_not_values, :post_should_values,
-        :post_filter_values
+        :sort_values, :includes_values, :preload_values, :eager_load_values, :search_values,
+        :must_values, :must_not_values, :should_values, :filter_values, :post_search_values,
+        :post_must_values, :post_must_not_values, :post_should_values, :post_filter_values
       ]
 
       methods.each do |method|

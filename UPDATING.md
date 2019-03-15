@@ -159,3 +159,16 @@ class CommentIndex
 end
 ```
 
+* **[BREAKING]** Multiple calls to `source` no longer concatenate
+
+1.x:
+
+```ruby
+CommentIndex.source([:id]).source([:description]) # => CommentIndex.source([:id, :description])
+```
+
+2.x:
+
+```ruby
+CommentIndex.source([:id]).source([:description]) # => CommentIndex.source([:description])
+```

@@ -45,8 +45,8 @@ module SearchFlip
         criteria.offset_value = other.offset_value if other.offset_value
         criteria.limit_value = other.limit_value if other.limit_value
         criteria.scroll_args = other.scroll_args if other.scroll_args
+        criteria.source_value = other.source_value if other.source_value
 
-        criteria.source_value = (criteria.source_value || []) + other.source_value if other.source_value
         criteria.sort_values = (criteria.sort_values || []) + other.sort_values if other.sort_values
         criteria.includes_values = (criteria.includes_values || []) + other.includes_values if other.includes_values
         criteria.preload_values = (criteria.preload_values || []) + other.preload_values if other.preload_values
@@ -376,7 +376,8 @@ module SearchFlip
     # @example
     #   CommentIndex.source([:id, :message]).search("hello world")
     #
-    # @param value [Array] Array listing the field names of the source document
+    # @param value [Array, Hash, Boolean] Pass an array, hash or boolean to restrict
+    #   the returned source
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
