@@ -375,9 +375,10 @@ module SearchFlip
     #
     # @example
     #   CommentIndex.source([:id, :message]).search("hello world")
+    #   CommentIndex.source(exclude: "description")
+    #   CommentIndex.source(false)
     #
-    # @param value [Array, Hash, Boolean] Pass an array, hash or boolean to restrict
-    #   the returned source
+    # @param value Pass any allowed value to restrict the returned source
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
