@@ -74,5 +74,31 @@ RSpec.describe SearchFlip::Bulk do
 
       expect(&block).to raise_error(SearchFlip::ResponseError)
     end
+
+    it "handles overly long payloads" do
+      product = create(:product)
+
+      allow(product).to receive(:description).and_return("x" * 1024 * 1024 * 10)
+
+      block = lambda do
+        ProductIndex.bulk bulk_max_mb: 1_000 do |bulk|
+          100.times do
+            bulk.index product.id, ProductIndex.serialize(product)
+          end
+        end
+      end
+
+      expect(&block).to raise_error(SearchFlip::ResponseError)
+
+      block = lambda do
+        ProductIndex.bulk bulk_max_mb: 100 do |bulk|
+          100.times do
+            bulk.index product.id, ProductIndex.serialize(product)
+          end
+        end
+      end
+
+      expect(&block).not_to raise_error #(SearchFlip::ResponseError)
+    end
   end
 end

@@ -538,9 +538,13 @@ module SearchFlip
       #   raise.
 
       def bulk(options = {})
-        opts = { http_client: connection.http_client }.merge(options)
+        default_options = {
+          http_client: connection.http_client,
+          bulk_limit: connection.bulk_limit,
+          bulk_max_mb: connection.bulk_max_mb
+        }
 
-        SearchFlip::Bulk.new("#{type_url}/_bulk", SearchFlip::Config[:bulk_limit], opts) do |indexer|
+        SearchFlip::Bulk.new("#{type_url}/_bulk", default_options.merge(options)) do |indexer|
           yield indexer
         end
 

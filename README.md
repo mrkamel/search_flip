@@ -705,7 +705,7 @@ you can e.g. use docker-compose:
 ```
 $ cd search_flip
 $ sudo ES_IMAGE=elasticsearch:5.4 docker-compose up
-$ rake test
+$ rspec
 ```
 
 That's it.

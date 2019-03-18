@@ -1,19 +1,22 @@
 
 module SearchFlip
   class Connection
-    attr_reader :base_url, :http_client
+    attr_reader :base_url, :http_client, :bulk_limit, :bulk_max_mb
 
     # Creates a new connection.
     #
     # @example
     #   SearchFlip::Connection.new(base_url: "http://elasticsearch.host:9200")
     #
-    # @param base_url [String] The base url for the connection
-    # @param http_client [SearchFlip::HTTPClient] An optional http client instance
+    # @param options [Hash] A hash containing the config options
+    # @option options base_url [String] The base url for the connection
+    # @option options http_client [SearchFlip::HTTPClient] An optional http client instance
+    # @option options bulk_max_mb [Fixnum] An optional MB limit for bulk requests
 
-    def initialize(base_url: SearchFlip::Config[:base_url], http_client: SearchFlip::HTTPClient.new)
-      @base_url = base_url
-      @http_client = http_client
+    def initialize(options = {})
+      @base_url = options[:base_url] || SearchFlip::Config[:base_url]
+      @http_client = options[:http_client] || SearchFlip::HTTPClient.new
+      @bulk_limit = options[:bulk_limit] || SearchFlip::Config[:bulk_limit]
     end
 
     # Queries and returns the ElasticSearch version used.

@@ -14,7 +14,7 @@ module SearchFlip
   class Bulk
     class Error < StandardError; end
 
-    attr_accessor :url, :count, :options, :http_client, :ignore_errors
+    attr_reader :url, :options, :ignore_errors
 
     # Builds and yields a new Bulk object, ie initiates the buffer, yields,
     # sends batches of records each time the buffer is full, and sends a final
@@ -32,8 +32,9 @@ module SearchFlip
     #   end
     #
     # @param url [String] The endpoint to send bulk requests to
-    # @param count [Fixnum] The maximum number of documents per bulk request
     # @param options [Hash] Options for the bulk requests
+    # @option options batch_size [Fixnum] The maximum number of documents per bulk
+    #   request
     # @option options ignore_errors [Array, Fixnum] Errors that should be
     #   ignored. If you eg want to ignore errors resulting from conflicts,
     #   you can specify to ignore 409 here.
@@ -43,12 +44,16 @@ module SearchFlip
     # @option options http_client [SearchFlip::HTTPClient] An optional http
     #   client instance
 
-    def initialize(url, count = 1_000, options = {})
-      self.url = url
-      self.count = count
-      self.options = options
-      self.http_client = options[:http_client] || SearchFlip::HTTPClient.new
-      self.ignore_errors = Array(options[:ignore_errors]).to_set if options[:ignore_errors]
+    def initialize(url, options = {})
+      @url = url
+      @options = options
+      @http_client = options[:http_client] || SearchFlip::HTTPClient.new
+      @ignore_errors = Array(options[:ignore_errors]).to_set if options[:ignore_errors]
+
+      @bulk_limit = options[:bulk_limit] || SearchFlip::Config[:bulk_limit]
+      @bulk_max_mb = options[:bulk_max_mb] || SearchFlip::Config[:bulk_max_mb]
+
+      @bulk_max_bytes = @bulk_max_mb * 1024 * 1024
 
       init
 
@@ -117,7 +122,7 @@ module SearchFlip
 
     def upload
       response =
-        http_client
+        @http_client
           .headers(accept: "application/json", content_type: "application/x-ndjson")
           .put(url, body: @payload, params: ignore_errors ? {} : { filter_path: "errors" })
 
@@ -141,17 +146,21 @@ module SearchFlip
     end
 
     def perform(action, id, json = nil, options = {})
-      @payload << SearchFlip::JSON.generate(action => options.merge(_id: id))
-      @payload << "\n"
+      new_payload = SearchFlip::JSON.generate(action => options.merge(_id: id))
+      new_payload << "\n"
 
       if json
-        @payload << json
-        @payload << "\n"
+        new_payload << json
+        new_payload << "\n"
       end
+
+      upload if @num > 0 && @payload.bytesize + new_payload.bytesize >= @bulk_max_bytes
+
+      @payload << new_payload
 
       @num += 1
 
-      upload if @num >= count
+      upload if @num >= @bulk_limit || @payload.bytesize >= @bulk_max_bytes
     end
   end
 end
