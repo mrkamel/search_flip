@@ -82,7 +82,7 @@ RSpec.describe SearchFlip::Bulk do
 
       block = lambda do
         ProductIndex.bulk bulk_max_mb: 1_000 do |bulk|
-          100.times do
+          20.times do
             bulk.index product.id, ProductIndex.serialize(product)
           end
         end
@@ -92,7 +92,7 @@ RSpec.describe SearchFlip::Bulk do
 
       block = lambda do
         ProductIndex.bulk bulk_max_mb: 100 do |bulk|
-          100.times do
+          20.times do
             bulk.index product.id, ProductIndex.serialize(product)
           end
         end
