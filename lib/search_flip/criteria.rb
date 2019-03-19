@@ -20,7 +20,8 @@ module SearchFlip
     extend Forwardable
 
     attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values, :offset_value, :limit_value,
-      :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args, :custom_value, :terminate_after_value, :timeout_value
+      :includes_values, :eager_load_values, :preload_values, :failsafe_value, :scroll_args, :custom_value, :terminate_after_value, :timeout_value,
+      :preference_value, :search_type_value, :routing_value
 
     # Creates a new criteria while merging the attributes (constraints,
     # settings, etc) of the current criteria with the attributes of another one
@@ -46,6 +47,9 @@ module SearchFlip
         criteria.limit_value = other.limit_value if other.limit_value
         criteria.scroll_args = other.scroll_args if other.scroll_args
         criteria.source_value = other.source_value if other.source_value
+        criteria.preference_value = other.preference_value if other.preference_value
+        criteria.search_type_value = other.search_type_value if other.search_type_value
+        criteria.routing_value = other.routing_value if other.routing_value
 
         criteria.sort_values = (criteria.sort_values || []) + other.sort_values if other.sort_values
         criteria.includes_values = (criteria.includes_values || []) + other.includes_values if other.includes_values
@@ -66,6 +70,54 @@ module SearchFlip
         criteria.suggest_values = (criteria.suggest_values || {}).merge(other.suggest_values) if other.suggest_values
         criteria.custom_value = (criteria.custom_value || {}).merge(other.custom_value) if other.custom_value
         criteria.aggregation_values = (criteria.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values
+      end
+    end
+
+    # Specifies a preference value for the request. Check out the elasticsearch
+    # docs for further details.
+    #
+    # @example
+    #   CommentIndex.preference("_primary")
+    #
+    # @param value The preference value
+    #
+    # @return [SearchFlip::Criteria] A newly created extended criteria
+
+    def preference(value)
+      fresh.tap do |criteria|
+        criteria.preference_value = value
+      end
+    end
+
+    # Specifies the search type value for the request. Check out the elasticsearch
+    # docs for further details.
+    #
+    # @example
+    #   CommentIndex.search_type("dfs_query_then_fetch")
+    #
+    # @param value The search type value
+    #
+    # @return [SearchFlip::Criteria] A newly created extended criteria
+
+    def search_type(value)
+      fresh.tap do |criteria|
+        criteria.search_type_value = value
+      end
+    end
+
+    # Specifies the routing value for the request. Check out the elasticsearch
+    # docs for further details.
+    #
+    # @example
+    #   CommentIndex.routing("user_id")
+    #
+    # @param value The search type value
+    #
+    # @return [SearchFlip::Criteria] A newly created extended criteria
+
+    def routing(value)
+      fresh.tap do |criteria|
+        criteria.routing_value = value
       end
     end
 
@@ -360,9 +412,9 @@ module SearchFlip
       dupped_request.delete(:size)
 
       if connection.version.to_i >= 5
-        connection.http_client.post("#{target.type_url}/_delete_by_query", json: dupped_request)
+        connection.http_client.post("#{target.type_url}/_delete_by_query", params: request_params, json: dupped_request)
       else
-        connection.http_client.delete("#{target.type_url}/_query", json: dupped_request)
+        connection.http_client.delete("#{target.type_url}/_query", params: request_params, json: dupped_request)
       end
 
       target.refresh if SearchFlip::Config[:auto_refresh]
@@ -722,21 +774,22 @@ module SearchFlip
             if connection.version.to_i >= 2
               http_request.post(
                 "#{connection.base_url}/_search/scroll",
+                params: request_params,
                 json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] }
               )
             else
               http_request
                 .headers(content_type: "text/plain")
-                .post("#{connection.base_url}/_search/scroll", params: { scroll: scroll_args[:timeout] }, body: scroll_args[:id])
+                .post("#{connection.base_url}/_search/scroll", params: request_params.merge(scroll: scroll_args[:timeout]), body: scroll_args[:id])
             end
           elsif scroll_args
             http_request.post(
               "#{target.type_url}/_search",
-              params: { scroll: scroll_args[:timeout] },
+              params: request_params.merge(scroll: scroll_args[:timeout]),
               json: request
             )
           else
-            http_request.post("#{target.type_url}/_search", json: request)
+            http_request.post("#{target.type_url}/_search", params: request_params, json: request)
           end
 
         SearchFlip::Response.new(self, http_response.parse)
@@ -823,6 +876,14 @@ module SearchFlip
 
         criteria = criteria.scroll(id: criteria.scroll_id, timeout: timeout)
       end
+    end
+
+    def request_params
+      res = {}
+      res[:preference] = preference_value if preference_value
+      res[:search_type] = search_type_value if search_type_value
+      res[:routing] = routing_value if routing_value
+      res
     end
   end
 end

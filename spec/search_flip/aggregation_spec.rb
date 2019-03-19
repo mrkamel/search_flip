@@ -288,7 +288,8 @@ RSpec.describe SearchFlip::Aggregation do
         :profile_value, :failsafe_value, :terminate_after_value, :timeout_value, :offset_value, :limit_value,
         :scroll_args, :highlight_values, :suggest_values, :custom_value, :source_value, :sort_values,
         :includes_values, :preload_values, :eager_load_values, :post_search_values, :post_must_values,
-        :post_must_not_values, :post_should_values, :post_filter_values
+        :post_must_not_values, :post_should_values, :post_filter_values, :preference_value,
+        :search_type_value, :routing_value
       ]
 
       unsupported_methods.each do |unsupported_method|

@@ -35,7 +35,8 @@ RSpec.describe SearchFlip::Criteria do
     describe "assignments" do
       methods = [
         :profile_value, :failsafe_value, :terminate_after_value, :timeout_value,
-        :offset_value, :limit_value, :scroll_args, :source_value
+        :offset_value, :limit_value, :scroll_args, :source_value, :preference_value,
+        :search_type_value, :routing_value
       ]
 
       methods.each do |method|
@@ -1021,6 +1022,33 @@ RSpec.describe SearchFlip::Criteria do
       request = ProductIndex.custom(custom_key: "custom_value").request
 
       expect(request[:custom_key]).to eq("custom_value")
+    end
+  end
+
+  describe "#preference" do
+    it "sets the preference" do
+      stub_request(:post, "http://127.0.0.1:9200/products/products/_search?preference=value")
+        .to_return(status: 200, headers: { content_type: "application/json" }, body: "{}")
+
+      ProductIndex.preference("value").execute
+    end
+  end
+
+  describe "#search_type" do
+    it "sets the search_type" do
+      stub_request(:post, "http://127.0.0.1:9200/products/products/_search?search_type=value")
+        .to_return(status: 200, headers: { content_type: "application/json" }, body: "{}")
+
+      ProductIndex.search_type("value").execute
+    end
+  end
+
+  describe "#routing" do
+    it "sets the search_type" do
+      stub_request(:post, "http://127.0.0.1:9200/products/products/_search?routing=value")
+        .to_return(status: 200, headers: { content_type: "application/json" }, body: "{}")
+
+      ProductIndex.routing("value").execute
     end
   end
 end
