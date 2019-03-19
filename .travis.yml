@@ -13,5 +13,5 @@ before_install:
   - sleep 10
 install:
   - travis_retry bundle install
-script: rake test --trace
+script: rspec
 
