@@ -91,6 +91,7 @@ Available config options are:
   can be useful to separate the indices of e.g. testing and development environments.
 * `base_url` to tell search_flip how to connect to your cluster
 * `bulk_limit` a global limit for bulk requests
+* `bulk_max_mb` a global limit for the payload of bulk requests
 * `auto_refresh` tells search_flip to automatically refresh an index after
   import, index, delete, etc operations. This is e.g. usuful for testing, etc.
   Defaults to false.

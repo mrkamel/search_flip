@@ -448,6 +448,39 @@ RSpec.describe SearchFlip::Index do
 
       expect(&bulk).not_to(change { ProductIndex.total_count })
     end
+
+    it "passes default options" do
+      allow(SearchFlip::Bulk).to receive(:new)
+
+      ProductIndex.bulk do |indexer|
+        indexer.index 1, id: 1
+      end
+
+      connection = ProductIndex.connection
+
+      expect(SearchFlip::Bulk).to have_received(:new).with(
+        anything,
+        http_client: connection.http_client,
+        bulk_limit: connection.bulk_limit,
+        bulk_max_mb: connection.bulk_max_mb
+      )
+    end
+
+    it "passes custom options" do
+      allow(SearchFlip::Bulk).to receive(:new)
+
+      options = {
+        bulk_limit: "bulk limit",
+        bulk_max_mb: "bulk max mb",
+        http_client: "http client"
+      }
+
+      ProductIndex.bulk(options) do |indexer|
+        indexer.index 1, id: 1
+      end
+
+      expect(SearchFlip::Bulk).to have_received(:new).with(anything, options)
+    end
   end
 
   describe ".connection" do

@@ -1,5 +1,7 @@
 
 module SearchFlip
+  # @api private
+  #
   # The SearchFlip::Bulk class implements the bulk support, ie it collects
   # single requests and emits batches of requests.
   #
@@ -16,6 +18,8 @@ module SearchFlip
 
     attr_reader :url, :options, :ignore_errors
 
+    # @api private
+    #
     # Builds and yields a new Bulk object, ie initiates the buffer, yields,
     # sends batches of records each time the buffer is full, and sends a final
     # batch after the yielded code returns and there are still documents
@@ -33,8 +37,10 @@ module SearchFlip
     #
     # @param url [String] The endpoint to send bulk requests to
     # @param options [Hash] Options for the bulk requests
-    # @option options batch_size [Fixnum] The maximum number of documents per bulk
+    # @option options bulk_limit [Fixnum] The maximum number of documents per bulk
     #   request
+    # @option bulk_max_mb [Fixnum] The maximum payload size in megabytes per
+    #   bulk request
     # @option options ignore_errors [Array, Fixnum] Errors that should be
     #   ignored. If you eg want to ignore errors resulting from conflicts,
     #   you can specify to ignore 409 here.
@@ -62,6 +68,8 @@ module SearchFlip
       upload if @num > 0
     end
 
+    # @api private
+    #
     # Adds an index request to the bulk batch.
     #
     # @param id [Fixnum, String] The document/record id
@@ -73,6 +81,8 @@ module SearchFlip
       perform :index, id, SearchFlip::JSON.generate(object), options
     end
 
+    # @api private
+    #
     # Adds an index request to the bulk batch
     #
     # @see #index
@@ -81,6 +91,8 @@ module SearchFlip
       index(*args)
     end
 
+    # @api private
+    #
     # Adds a create request to the bulk batch.
     #
     # @param id [Fixnum, String] The document/record id
@@ -92,6 +104,8 @@ module SearchFlip
       perform :create, id, SearchFlip::JSON.generate(object), options
     end
 
+    # @api private
+    #
     # Adds a update request to the bulk batch.
     #
     # @param id [Fixnum, String] The document/record id
@@ -103,6 +117,8 @@ module SearchFlip
       perform :update, id, SearchFlip::JSON.generate(object), options
     end
 
+    # @api private
+    #
     # Adds a delete request to the bulk batch.
     #
     # @param id [Fixnum, String] The document/record id
