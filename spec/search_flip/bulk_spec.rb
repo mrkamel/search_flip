@@ -35,11 +35,7 @@ RSpec.describe SearchFlip::Bulk do
         end
       end
 
-      if ProductIndex.connection.version.to_i <= 2
-        expect(&block).to raise_error(SearchFlip::ConnectionError)
-      else
-        expect(&block).to raise_error(SearchFlip::Bulk::Error)
-      end
+      expect(&block).to raise_error(SearchFlip::Bulk::Error)
 
       ProductIndex.bulk(ignore_errors: [409]) do |bulk|
         bulk.create product1.id, ProductIndex.serialize(product1)
