@@ -98,7 +98,7 @@ RSpec.describe SearchFlip::Bulk do
         end
       end
 
-      expect(&block).not_to raise_error #(SearchFlip::ResponseError)
+      expect(&block).not_to raise_error
     end
   end
 end
