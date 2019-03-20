@@ -30,6 +30,17 @@ module SearchFlip
       @version ||= http_client.headers(accept: "application/json").get("#{base_url}/").parse["version"]["number"]
     end
 
+    # Queries and returns the ElasticSearch cluster health.
+    #
+    # @example
+    #   connection.cluster_health # => { "status" => "green", ... }
+    #
+    # @return [Hash] The raw response
+
+    def cluster_health
+      http_client.headers(accept: "application/json").get("#{base_url}/_cluster/health").parse
+    end
+
     # Uses the ElasticSearch Multi Search API to execute multiple search requests
     # within a single request. Raises SearchFlip::ResponseError in case any
     # errors occur.

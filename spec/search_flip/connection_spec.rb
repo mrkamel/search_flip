@@ -2,6 +2,18 @@
 require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Connection do
+  describe "#version" do
+    it "returns the version" do
+      expect(SearchFlip::Connection.new.version).to match(/\A[0-9.]+\z/)
+    end
+  end
+
+  describe "#cluster_health" do
+    it "returns the cluster health" do
+      expect(["red", "yellow", "green"]).to include(SearchFlip::Connection.new.cluster_health["status"])
+    end
+  end
+
   describe "#base_url" do
     it "returns the correct url" do
       expect(SearchFlip::Connection.new(base_url: "base url").base_url).to eq("base url")
@@ -115,17 +127,16 @@ RSpec.describe SearchFlip::Connection do
   describe "#close_index" do
     it "closes the specified index" do
       begin
-        index = TestIndex.with_settings(index_name: "index_name")
+        connection = SearchFlip::Connection.new
 
-        index.create_index
-        index.import create(:product)
-        index.open_index
+        connection.create_index("index_name")
+        sleep(0.1) while connection.cluster_health["status"] == "red"
 
-        index.connection.close_index("index_name")
+        connection.close_index("index_name")
 
-        expect(index.connection.get_indices("index_name").first["status"]).to eq("close")
+        expect(connection.get_indices("index_name").first["status"]).to eq("close")
       ensure
-        index.delete_index if index.index_exists?
+        connection.delete_index("index_name") if connection.index_exists?("index_name")
       end
     end
   end
@@ -133,17 +144,17 @@ RSpec.describe SearchFlip::Connection do
   describe "#open_index" do
     it "opens the specified index" do
       begin
-        index = TestIndex.with_settings(index_name: "index_name")
+        connection = SearchFlip::Connection.new
 
-        index.create_index
-        index.import create(:product)
-        index.close_index
+        connection.create_index("index_name")
+        sleep(0.1) while connection.cluster_health["status"] == "red"
+        connection.close_index("index_name")
 
-        index.connection.open_index("index_name")
+        connection.open_index("index_name")
 
-        expect(index.connection.get_indices("index_name").first["status"]).to eq("open")
+        expect(connection.get_indices("index_name").first["status"]).to eq("open")
       ensure
-        index.delete_index if index.index_exists?
+        connection.delete_index("index_name") if connection.index_exists?("index_name")
       end
     end
   end
