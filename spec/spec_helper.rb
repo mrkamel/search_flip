@@ -186,6 +186,10 @@ class TestIndex
   def self.index_name
     "test"
   end
+
+  def self.serialize(object)
+    { id: object.id }
+  end
 end
 
 TestIndex.delete_index if TestIndex.index_exists?

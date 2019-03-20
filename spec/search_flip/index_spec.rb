@@ -87,6 +87,7 @@ RSpec.describe SearchFlip::Index do
       allow(TestIndex.connection).to receive(:close_index).and_call_original
 
       TestIndex.create_index
+      TestIndex.import create(:product)
       TestIndex.close_index
 
       expect(TestIndex.connection).to have_received(:close_index).with("test")
