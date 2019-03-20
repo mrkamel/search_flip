@@ -115,14 +115,17 @@ RSpec.describe SearchFlip::Connection do
   describe "#close_index" do
     it "closes the specified index" do
       begin
-        connection = SearchFlip::Connection.new
-        connection.create_index("index_name")
-        connection.open_index("index_name")
-        connection.close_index("index_name")
+        index = TestIndex.with_settings(index_name: "index_name")
 
-        expect(connection.get_indices("index_name").first["status"]).to eq("close")
+        index.create_index
+        index.import create(:product)
+        index.open_index
+
+        index.connection.close_index("index_name")
+
+        expect(index.connection.get_indices("index_name").first["status"]).to eq("close")
       ensure
-        connection.delete_index("index_name") if connection.index_exists?("index_name")
+        index.delete_index if index.index_exists?
       end
     end
   end
@@ -130,14 +133,17 @@ RSpec.describe SearchFlip::Connection do
   describe "#open_index" do
     it "opens the specified index" do
       begin
-        connection = SearchFlip::Connection.new
-        connection.create_index("index_name")
-        connection.close_index("index_name")
-        connection.open_index("index_name")
+        index = TestIndex.with_settings(index_name: "index_name")
 
-        expect(connection.get_indices("index_name").first["status"]).to eq("open")
+        index.create_index
+        index.import create(:product)
+        index.close_index
+
+        index.connection.open_index("index_name")
+
+        expect(index.connection.get_indices("index_name").first["status"]).to eq("open")
       ensure
-        connection.delete_index("index_name") if connection.index_exists?("index_name")
+        index.delete_index if index.index_exists?
       end
     end
   end
