@@ -164,7 +164,8 @@ RSpec.describe SearchFlip::Connection do
       connection = SearchFlip::Connection.new
 
       tokens = connection.analyze(analyzer: "standard", text: "some text")["tokens"].map { |token| token["token"] }
-      expect(tokens).to eq(["analyzer", "standard", "text", "some", "text"])
+
+      expect(tokens).to include("some", "text")
     end
   end
 
