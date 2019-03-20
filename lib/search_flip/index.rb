@@ -443,6 +443,18 @@ module SearchFlip
         connection.http_client.headers(accept: "application/json").post("#{type_url}/_mget", json: request, params: params).parse
       end
 
+      # Sends an analyze request to ElasticSearch. Raises
+      # SearchFlip::ResponseError in case any errors occur.
+      #
+      # @example
+      #   CommentIndex.analyze(analyzer: "standard", text: "this is a test")
+      #
+      # @return [Hash] The raw response
+
+      def analyze(request, params = {})
+        connection.http_client.headers(accept: "application/json").post("#{index_url}/_analyze", json: request, params: params).parse
+      end
+
       # Sends a index refresh request to ElasticSearch. Raises
       # SearchFlip::ResponseError in case any errors occur.
 

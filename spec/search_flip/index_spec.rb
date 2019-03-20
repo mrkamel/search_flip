@@ -184,6 +184,15 @@ RSpec.describe SearchFlip::Index do
     end
   end
 
+  describe ".analyze" do
+    it "analyzes the provided request" do
+      ProductIndex.import create(:product)
+
+      tokens = ProductIndex.analyze(analyzer: "standard", text: "some text")["tokens"].map { |token| token["token"] }
+      expect(tokens).to eq(["analyzer", "standard", "text", "some", "text"])
+    end
+  end
+
   describe ".refresh" do
     it "delegates to connection" do
       TestIndex.create_index

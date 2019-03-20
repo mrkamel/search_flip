@@ -148,6 +148,15 @@ RSpec.describe SearchFlip::Connection do
     end
   end
 
+  describe ".analyze" do
+    it "analyzes the provided request" do
+      connection = SearchFlip::Connection.new
+
+      tokens = connection.analyze(analyzer: "standard", text: "some text")["tokens"].map { |token| token["token"] }
+      expect(tokens).to eq(["analyzer", "standard", "text", "some", "text"])
+    end
+  end
+
   describe "#update_index_settings" do
     it "updates the index settings" do
       begin

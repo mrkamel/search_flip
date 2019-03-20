@@ -83,6 +83,18 @@ module SearchFlip
         .parse
     end
 
+    # Sends an analyze request to ElasticSearch. Raises
+    # SearchFlip::ResponseError in case any errors occur.
+    #
+    # @example
+    #   connection.analyze(analyzer: "standard", text: "this is a test")
+    #
+    # @return [Hash] The raw response
+
+    def analyze(request, params = {})
+      http_client.headers(accept: "application/json").post("#{base_url}/_analyze", json: request, params: params).parse
+    end
+
     # Fetches information about the specified index aliases. Raises
     # SearchFlip::ResponseError in case any errors occur.
     #
