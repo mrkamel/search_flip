@@ -207,6 +207,8 @@ CommentIndex.create_index
 CommentIndex.index_exists?
 CommentIndex.delete_index
 CommentIndex.update_mapping
+CommentIndex.close_index
+CommentIndex.open_index
 ```
 
 index records (automatically uses the bulk API):

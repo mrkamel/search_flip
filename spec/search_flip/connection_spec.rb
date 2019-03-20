@@ -112,6 +112,36 @@ RSpec.describe SearchFlip::Connection do
     end
   end
 
+  describe "#close_index" do
+    it "closes the specified index" do
+      begin
+        connection = SearchFlip::Connection.new
+        connection.create_index("index_name")
+        connection.open_index("index_name")
+        connection.close_index("index_name")
+
+        expect(connection.get_indices("index_name").first["status"]).to eq("close")
+      ensure
+        connection.delete_index("index_name") if connection.index_exists?("index_name")
+      end
+    end
+  end
+
+  describe "#open_index" do
+    it "opens the specified index" do
+      begin
+        connection = SearchFlip::Connection.new
+        connection.create_index("index_name")
+        connection.close_index("index_name")
+        connection.open_index("index_name")
+
+        expect(connection.get_indices("index_name").first["status"]).to eq("open")
+      ensure
+        connection.delete_index("index_name") if connection.index_exists?("index_name")
+      end
+    end
+  end
+
   describe "#update_index_settings" do
     it "updates the index settings" do
       begin

@@ -338,6 +338,24 @@ module SearchFlip
         connection.create_index(index_name_with_prefix, json)
       end
 
+      # Closes the index within ElasticSearch. Raises SearchFlip::ResponseError
+      # in case any errors occur.
+      #
+      # @return [Boolean] Returns true or raises SearchFlip::ResponseError
+
+      def close_index
+        connection.close_index(index_name_with_prefix)
+      end
+
+      # Opens the index within ElasticSearch. Raises SearchFlip::ResponseError
+      # in case any errors occur.
+      #
+      # @return [Boolean] Returns true or raises SearchFlip::ResponseError
+
+      def open_index
+        connection.open_index(index_name_with_prefix)
+      end
+
       # Updates the index settings within ElasticSearch according to the index
       # settings specified. Raises SearchFlip::ResponseError in case any
       # errors occur.
@@ -396,6 +414,10 @@ module SearchFlip
       # SearchFlip::ResponseError specific exceptions in case any errors
       # occur.
       #
+      # @example
+      #   UserIndex.get(1)
+      #   UserIndex.get(1, routing: "key")
+      #
       # @param id [String, Fixnum] The id to get
       # @param params [Hash] Optional params for the request
       #
@@ -403,6 +425,22 @@ module SearchFlip
 
       def get(id, params = {})
         connection.http_client.headers(accept: "application/json").get("#{type_url}/#{id}", params: params).parse
+      end
+
+      # Retrieves the documents specified by ids from elasticsearch.
+      #
+      # @example
+      #   UserIndex.mget(ids: [1, 2, 3])
+      #   UserIndex.mget(docs: [{ _id: 1, routing: "key1" }, { _id: 2, routing: "key2" }])
+      #   UserIndex.mget({ ids: [1, 2, 3] }, stored_fields: "username,full_name")
+      #
+      # @param request [Hash] The raw request
+      # @param params [Hash] Optional params for the request
+      #
+      # @return [Hash] The raw response
+
+      def mget(request, params = {})
+        connection.http_client.headers(accept: "application/json").post("#{type_url}/_mget", json: request, params: params).parse
       end
 
       # Sends a index refresh request to ElasticSearch. Raises

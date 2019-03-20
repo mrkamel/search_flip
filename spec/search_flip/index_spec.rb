@@ -82,6 +82,28 @@ RSpec.describe SearchFlip::Index do
     end
   end
 
+  describe ".close_index" do
+    it "delegates to connection" do
+      allow(TestIndex.connection).to receive(:close_index).and_call_original
+
+      TestIndex.create_index
+      TestIndex.close_index
+
+      expect(TestIndex.connection).to have_received(:close_index).with("test")
+    end
+  end
+
+  describe ".open_index" do
+    it "delegates to connection" do
+      allow(TestIndex.connection).to receive(:open_index).and_call_original
+
+      TestIndex.create_index
+      TestIndex.open_index
+
+      expect(TestIndex.connection).to have_received(:open_index).with("test")
+    end
+  end
+
   describe ".index_exists?" do
     it "delegates to connection" do
       TestIndex.create_index
@@ -389,10 +411,30 @@ RSpec.describe SearchFlip::Index do
 
     it "passes params" do
       product = create(:product)
+
       ProductIndex.import product
 
       expect(ProductIndex.get(product.id).keys).to include("_source")
       expect(ProductIndex.get(product.id, _source: false).keys).not_to include("_source")
+    end
+  end
+
+  describe ".mget" do
+    it "retrieves the documents" do
+      product1, product2, product3 = create_list(:product, 3)
+
+      ProductIndex.import [product1, product2, product3]
+
+      expect(ProductIndex.mget(ids: [product1.id, product2.id])["docs"].map { |doc| doc["found"] }).to eq([true, true])
+    end
+
+    it "passes params" do
+      product = create(:product)
+
+      ProductIndex.import product
+
+      expect(ProductIndex.mget({ ids: [product.id] }, _source: false)["docs"].map { |doc| doc["found"] }).to eq([true])
+      expect(ProductIndex.mget({ ids: [product.id] }, _source: false)["docs"].first).not_to include("_source")
     end
   end
 

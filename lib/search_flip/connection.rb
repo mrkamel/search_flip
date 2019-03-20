@@ -157,6 +157,32 @@ module SearchFlip
       true
     end
 
+    # Closes the specified index within ElasticSearch. Raises
+    # SearchFlip::ResponseError in case any errors occur
+    #
+    # @param index_name [String] The index name
+    #
+    # @return [Boolean] Returns true or raises SearchFlip::ResponseError
+
+    def close_index(index_name)
+      http_client.post("#{index_url(index_name)}/_close")
+
+      true
+    end
+
+    # Opens the specified index within ElasticSearch. Raises
+    # SearchFlip::ResponseError in case any errors occur
+    #
+    # @param index_name [String] The index name
+    #
+    # @return [Boolean] Returns true or raises SearchFlip::ResponseError
+
+    def open_index(index_name)
+      http_client.post("#{index_url(index_name)}/_open")
+
+      true
+    end
+
     # Updates the index settings within ElasticSearch according to the index
     # settings specified. Raises SearchFlip::ResponseError in case any
     # errors occur.
