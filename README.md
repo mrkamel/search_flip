@@ -52,7 +52,7 @@ CommentIndex.where(available: true).search("hello world").sort(id: "desc").aggre
 ```
 
 Finally, SearchFlip comes with a minimal small set of dependencies (http-rb,
-hashie and oj).
+hashie and oj only).
 
 ## Reference Docs
 
