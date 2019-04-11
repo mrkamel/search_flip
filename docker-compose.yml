@@ -2,5 +2,7 @@ version: '2'
 services:
   elasticsearch:
     image: $ES_IMAGE
+    environment:
+      - discovery.type=single-node
     ports:
       - 9200:9200
