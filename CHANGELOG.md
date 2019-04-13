@@ -10,6 +10,7 @@
 * [BREAKING] Changed `SearchFlip.msearch` to `SearchFlip::Connection#msearch`
 * [BREAKING] Removed `base_url` param from `SearchFlip::Critiera#execute`
 * [BREAKING] `SearchFlip::Index.index_name` no longer defaults to `SearchFlip::Index.type_name`
+* [BREAKING] No longer include the type name in `SearchFlip::Index.mapping`
 * Added `SearchFlip::Connection#get_aliases`
 * Added `SearchFlip::Connection#get_indices`
 * Added `SearchFlip::Connection#alias_exists?`

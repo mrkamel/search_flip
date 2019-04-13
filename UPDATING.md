@@ -3,6 +3,46 @@
 
 ## Update 1.x to 2.x
 
+* **[BREAKING]** No longer include the mapping in `SearchFlip::Index.mapping`
+
+1.x:
+
+```ruby
+class MyIndex
+  include SearchFlip::Index
+
+  # ...
+
+  def self.mapping
+    {
+      type_name: {
+        properties: {
+          # ...
+        }
+      }
+    }
+  end
+end
+```
+
+2.x:
+
+```ruby
+class MyIndex
+  include SearchFlip::Index
+
+  # ...
+
+  def self.mapping
+    {
+      properties: {
+        # ...
+      }
+    }
+  end
+end
+```
+
 * **[BREAKING]** Changed `SearchFlip::Index.base_url` to `SearchFlip::Index.connection`
 
 1.x:

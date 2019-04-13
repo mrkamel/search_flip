@@ -368,28 +368,22 @@ module SearchFlip
         connection.delete_index(index_name_with_prefix)
       end
 
-      # Specifies a type mapping. Override to specify a custom mapping.
+      # Specifies a type mapping. Override to specify a custom mapping. Please
+      # note that you don't have to include the type name, even for
+      # Elasticsearch versions before 7, as SearchFlip automatically adds the
+      # type name if neccessary.
       #
       # @example
       #   def self.mapping
       #     {
-      #       comments: {
-      #         _all: {
-      #           enabled: false
-      #         },
-      #         properties: {
-      #           email: { type: "string", analyzer: "custom_analyzer" }
-      #         }
+      #       properties: {
+      #         email: { type: "string", analyzer: "custom_analyzer" }
       #       }
       #     }
       #   end
 
       def mapping
-        if include_type_name?
-          { type_name => {} }
-        else
-          {}
-        end
+        {}
       end
 
       # Updates the type mapping within ElasticSearch according to the mapping
@@ -397,15 +391,21 @@ module SearchFlip
       # errors occur.
 
       def update_mapping
-        connection.update_mapping(index_name_with_prefix, include_type_name? ? type_name : nil, mapping)
+        if include_type_name?
+          connection.update_mapping(index_name_with_prefix, type_name, type_name => mapping)
+        else
+          connection.update_mapping(index_name_with_prefix, mapping)
+        end
       end
 
       # Returns whether or not to include a type name. As types are deprecated
-      # in Elasticsearch 7, this method controls whether or not to use types
-      # for your index. Returns true by default.
+      # in Elasticsearch 7, this method controls whether or not to include the
+      # type name. By default, the method returns true for Elasticsearch
+      # versions before 7 or if the specified type name for the index is not
+      # equal to _doc.
 
       def include_type_name?
-        true
+        type_name != "_doc" || connection.version.to_i < 7
       end
 
       # Retrieves the current type mapping from ElasticSearch. Raises
@@ -414,7 +414,11 @@ module SearchFlip
       # @return [Hash] The current type mapping
 
       def get_mapping
-        connection.get_mapping(index_name_with_prefix, include_type_name? ? type_name : nil)
+        if include_type_name?
+          connection.get_mapping(index_name_with_prefix, type_name)
+        else
+          connection.get_mapping(index_name_with_prefix)
+        end
       end
 
       # Retrieves the document specified by id from ElasticSearch. Raises

@@ -114,25 +114,23 @@ class ProductIndex
   def self.mapping
     if ProductIndex.connection.version.to_i >= 5
       {
-        products: {
-          properties: {
-            category: {
-              type: "text",
-              fielddata: true
-            },
-            title: {
-              type: "text",
-              fielddata: true
-            },
-            description: {
-              type: "text",
-              fielddata: true
-            }
+        properties: {
+          category: {
+            type: "text",
+            fielddata: true
+          },
+          title: {
+            type: "text",
+            fielddata: true
+          },
+          description: {
+            type: "text",
+            fielddata: true
           }
         }
       }
     else
-      { products: {} }
+      { }
     end
   end
 
@@ -171,10 +169,8 @@ class TestIndex
 
   def self.mapping
     {
-      test: {
-        properties: {
-          test_field: { type: "date" }
-        }
+      properties: {
+        test_field: { type: "date" }
       }
     }
   end

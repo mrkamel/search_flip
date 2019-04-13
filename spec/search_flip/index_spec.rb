@@ -72,9 +72,21 @@ RSpec.describe SearchFlip::Index do
   end
 
   describe ".include_type_name?" do
-    it "returns true by default" do
+    it "returns true for Elasticsearch before version 7 and the default type name" do
       klass = Class.new do
         include SearchFlip::Index
+      end
+
+      expect(klass.include_type_name?).to eq(klass.connection.version.to_i < 7)
+    end
+
+    it "returns true if the type name is not equal to _doc" do
+      klass = Class.new do
+        include SearchFlip::Index
+
+        def self.type_name
+          "type_name"
+        end
       end
 
       expect(klass.include_type_name?).to eq(true)
@@ -173,7 +185,7 @@ RSpec.describe SearchFlip::Index do
 
           TestIndex.update_mapping
 
-          expect(TestIndex.connection).to have_received(:update_mapping).with("test", nil, mapping)
+          expect(TestIndex.connection).to have_received(:update_mapping).with("test", mapping)
         end
       end
     end
@@ -182,45 +194,29 @@ RSpec.describe SearchFlip::Index do
       it "delegates to connection" do
         TestIndex.create_index
 
-        mapping = { test: { properties: { id: { type: "long" } } } }
+        mapping = { properties: { id: { type: "long" } } }
 
         allow(TestIndex).to receive(:mapping).and_return(mapping)
         allow(TestIndex.connection).to receive(:update_mapping).and_call_original
 
         TestIndex.update_mapping
 
-        expect(TestIndex.connection).to have_received(:update_mapping).with("test", "test", mapping)
+        expect(TestIndex.connection).to have_received(:update_mapping).with("test", "test", "test" => mapping)
       end
     end
   end
 
   describe ".mapping" do
-    context "with type name" do
-      it "returns an empty mapping" do
-        klass = Class.new do
-          include SearchFlip::Index
+    it "returns an empty mapping" do
+      klass = Class.new do
+        include SearchFlip::Index
 
-          def self.include_type_name?
-            true
-          end
+        def self.include_type_name?
+          true
         end
-
-        expect(klass.mapping).to eq("_doc" => {})
       end
-    end
 
-    context "without type name" do
-      it "returns an empty mapping" do
-        klass = Class.new do
-          include SearchFlip::Index
-
-          def self.include_type_name?
-            false
-          end
-        end
-
-        expect(klass.mapping).to eq({})
-      end
+      expect(klass.mapping).to eq({})
     end
   end
 
@@ -238,7 +234,7 @@ RSpec.describe SearchFlip::Index do
 
           TestIndex.get_mapping
 
-          expect(TestIndex.connection).to have_received(:get_mapping).with("test", nil)
+          expect(TestIndex.connection).to have_received(:get_mapping).with("test")
         end
       end
     end

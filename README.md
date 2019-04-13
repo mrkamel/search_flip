@@ -160,10 +160,8 @@ class CommentIndex
 
   def self.mapping
     {
-      comments: {
-        properties: {
-          # ...
-        }
+      properties: {
+        # ...
       }
     }
   end
@@ -172,7 +170,11 @@ class CommentIndex
 end
 ```
 
-or index settings:
+Please note that you need to specify the mapping without a type name, even for
+Elasticsearch versions before 7, as SearchFlip will add the type name
+automatically if neccessary.
+
+To specify index settings:
 
 ```ruby
 def self.index_settings
