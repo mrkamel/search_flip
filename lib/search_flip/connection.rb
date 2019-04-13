@@ -260,7 +260,7 @@ module SearchFlip
 
     def update_mapping(index_name, type_name = nil, mapping)
       url = type_name ? type_url(index_name, type_name) : index_url(index_name)
-      params = type_name ? { include_type_name: true } : {}
+      params = version.to_f >= 6.7 && type_name ? { include_type_name: true } : {}
 
       http_client.put("#{url}/_mapping", params: params, json: mapping)
 
@@ -278,7 +278,7 @@ module SearchFlip
 
     def get_mapping(index_name, type_name = nil)
       url = type_name ? type_url(index_name, type_name) : index_url(index_name)
-      params = type_name ? { include_type_name: true } : {}
+      params = version.to_f >= 6.7 && type_name ? { include_type_name: true } : {}
 
       http_client.headers(accept: "application/json").get("#{url}/_mapping", params: params).parse
     end
