@@ -199,6 +199,23 @@ RSpec.describe SearchFlip::Connection do
   end
 
   describe "#update_mapping" do
+    if SearchFlip::Connection.new.version.to_i >= 7
+      it "updates the mapping of an index without type name" do
+        begin
+          connection = SearchFlip::Connection.new
+
+          mapping = { "properties" => { "id" => { "type" => "long" } } }
+
+          connection.create_index("index_name")
+          connection.update_mapping("index_name", mapping)
+
+          expect(connection.get_mapping("index_name")).to eq("index_name" => { "mappings" => mapping })
+        ensure
+          connection.delete_index("index_name") if connection.index_exists?("index_name")
+        end
+      end
+    end
+
     it "updates the mapping of an index" do
       begin
         connection = SearchFlip::Connection.new

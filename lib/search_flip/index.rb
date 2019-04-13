@@ -262,11 +262,11 @@ module SearchFlip
       # @return [String] The name used for the type within the index
 
       def type_name
-        raise SearchFlip::MethodNotImplemented, "You must implement #{name}::type_name"
+        "_doc"
       end
 
       # Returns the base name of the index within ElasticSearch, ie the index
-      # name without prefix. Equals #type_name by default.
+      # name without prefix.
       #
       # @return [String] The base name of the index, ie without prefix
 
@@ -327,15 +327,10 @@ module SearchFlip
       # specified. Raises SearchFlip::ResponseError in case any errors
       # occur.
       #
-      # @param include_mapping [Boolean] Whether or not to include the mapping
-      #
       # @return [Boolean] Returns true or false
 
-      def create_index(include_mapping: false)
-        json = index_settings
-        json = json.merge(mappings: mapping) if include_mapping
-
-        connection.create_index(index_name_with_prefix, json)
+      def create_index
+        connection.create_index(index_name_with_prefix, index_settings)
       end
 
       # Closes the index within ElasticSearch. Raises SearchFlip::ResponseError
@@ -390,7 +385,11 @@ module SearchFlip
       #   end
 
       def mapping
-        { type_name => {} }
+        if include_type_name?
+          { type_name => {} }
+        else
+          {}
+        end
       end
 
       # Updates the type mapping within ElasticSearch according to the mapping
@@ -398,7 +397,15 @@ module SearchFlip
       # errors occur.
 
       def update_mapping
-        connection.update_mapping(index_name_with_prefix, type_name, mapping)
+        connection.update_mapping(index_name_with_prefix, include_type_name? ? type_name : nil, mapping)
+      end
+
+      # Returns whether or not to include a type name. As types are deprecated
+      # in Elasticsearch 7, this method controls whether or not to use types
+      # for your index. Returns true by default.
+
+      def include_type_name?
+        true
       end
 
       # Retrieves the current type mapping from ElasticSearch. Raises
@@ -407,7 +414,7 @@ module SearchFlip
       # @return [Hash] The current type mapping
 
       def get_mapping
-        connection.get_mapping(index_name_with_prefix, type_name)
+        connection.get_mapping(index_name_with_prefix, include_type_name? ? type_name : nil)
       end
 
       # Retrieves the document specified by id from ElasticSearch. Raises

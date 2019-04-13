@@ -40,7 +40,7 @@ module SearchFlip
     # @return [Fixnum] The total number of results
 
     def total_entries
-      hits["total"]
+      hits["total"].is_a?(Hash) ? hits["total"]["value"] : hits["total"]
     end
 
     alias_method :total_count, :total_entries

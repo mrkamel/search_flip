@@ -109,14 +109,14 @@ class CommentIndex
 end
 ```
 
-Then tell the Index about the type name, the correspoding model and how to
+Then tell the Index about the index name, the correspoding model and how to
 serialize the model for indexing.
 
 ```ruby
 class CommentIndex
   include SearchFlip::Index
 
-  def self.type_name
+  def self.index_name
     "comments"
   end
 
@@ -152,25 +152,7 @@ end
 CommentIndex.import(Comment.all) # => CommentIndex.import(Comment.all.preload(:user))
 ```
 
-Please note, ElasticSearch allows to have multiple types per index. However,
-this forces to have the same mapping for fields having the same name even
-though the fields live in different types of the same index. Thus, this gem is
-using a different index for each type by default, but you can change that.
-Simply supply a custom `index_name`.
-
-```ruby
-class CommentIndex
-  # ...
-
-  def self.index_name
-    "custom_index_name"
-  end
-
-  # ...
-end
-```
-
-Optionally, specify a custom mapping:
+To specify a custom mapping:
 
 ```ruby
 class CommentIndex

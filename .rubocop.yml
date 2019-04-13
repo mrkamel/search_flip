@@ -115,3 +115,5 @@ Style/IfUnlessModifier:
 Style/RedundantBegin:
   Enabled: false
 
+Style/OptionalArguments:
+  Enabled: false

@@ -171,11 +171,12 @@ module SearchFlip
     #
     # @param index_name [String] The index name
     # @param index_settings [Hash] The index settings
+    # @param params [Hash] Optional url params
     #
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
-    def create_index(index_name, index_settings = {})
-      http_client.put(index_url(index_name), json: index_settings)
+    def create_index(index_name, index_settings = {}, params = {})
+      http_client.put(index_url(index_name), params: params, json: index_settings)
 
       true
     end
@@ -250,13 +251,18 @@ module SearchFlip
     # SearchFlip::ResponseError in case any errors occur.
     #
     # @param index_name [String] The index name
-    # @param type_name [String] The type name
+    # @param type_name [String] The type name. Starting with Elasticsearch 7,
+    #   the type name is optional.
     # @param mapping [Hash] The mapping
+    # @param params [Hash] Optional url parameters
     #
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
-    def update_mapping(index_name, type_name, mapping)
-      http_client.put("#{type_url(index_name, type_name)}/_mapping", json: mapping)
+    def update_mapping(index_name, type_name = nil, mapping)
+      url = type_name ? type_url(index_name, type_name) : index_url(index_name)
+      params = type_name ? { include_type_name: true } : {}
+
+      http_client.put("#{url}/_mapping", params: params, json: mapping)
 
       true
     end
@@ -265,12 +271,16 @@ module SearchFlip
     # ElasticSearch. Raises SearchFlip::ResponseError in case any errors occur.
     #
     # @param index_name [String] The index name
-    # @param type_name [String] The type name
+    # @param type_name [String] The type name. Starting with Elasticsearch 7,
+    #   the type name is optional.
     #
     # @return [Hash] The current type mapping
 
-    def get_mapping(index_name, type_name)
-      http_client.headers(accept: "application/json").get("#{type_url(index_name, type_name)}/_mapping").parse
+    def get_mapping(index_name, type_name = nil)
+      url = type_name ? type_url(index_name, type_name) : index_url(index_name)
+      params = type_name ? { include_type_name: true } : {}
+
+      http_client.headers(accept: "application/json").get("#{url}/_mapping", params: params).parse
     end
 
     # Deletes the specified index from ElasticSearch. Raises

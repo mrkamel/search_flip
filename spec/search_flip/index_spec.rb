@@ -33,16 +33,16 @@ RSpec.describe SearchFlip::Index do
   end
 
   describe ".type_name" do
-    it "raises a SearchFlip::MethodNotImplemented by default" do
+    it "returns _doc by default" do
       klass = Class.new do
         include SearchFlip::Index
       end
 
-      expect { klass.type_name }.to raise_error(SearchFlip::MethodNotImplemented)
+      expect(klass.type_name).to eq("_doc")
     end
   end
 
-  describe ".type_name" do
+  describe ".index_name" do
     it "raises a SearchFlip::MethodNotImplemented by default" do
       klass = Class.new do
         include SearchFlip::Index
@@ -61,24 +61,23 @@ RSpec.describe SearchFlip::Index do
       expect(TestIndex.connection).to have_received(:create_index).with("test", {})
     end
 
-    it "includes the mapping if specified" do
-      mapping = { test: { properties: { id: { type: "long" } } } }
-
-      allow(TestIndex).to receive(:mapping).and_return(mapping)
-      allow(TestIndex.connection).to receive(:create_index).and_call_original
-
-      TestIndex.create_index(include_mapping: true)
-
-      expect(TestIndex.connection).to have_received(:create_index).with("test", mappings: mapping)
-    end
-
     it "includes the index settings" do
-      allow(TestIndex).to receive(:index_settings).and_return(number_of_shards: 2)
+      allow(TestIndex).to receive(:index_settings).and_return(settings: { number_of_shards: 2 })
       allow(TestIndex.connection).to receive(:create_index).and_call_original
 
       TestIndex.create_index
 
-      expect(TestIndex.connection).to have_received(:create_index).with("test", number_of_shards: 2)
+      expect(TestIndex.connection).to have_received(:create_index).with("test", { settings: { number_of_shards: 2 } })
+    end
+  end
+
+  describe ".include_type_name?" do
+    it "returns true by default" do
+      klass = Class.new do
+        include SearchFlip::Index
+      end
+
+      expect(klass.include_type_name?).to eq(true)
     end
   end
 
@@ -160,30 +159,101 @@ RSpec.describe SearchFlip::Index do
   end
 
   describe ".update_mapping" do
-    it "delegates to connection" do
-      TestIndex.create_index
+    if TestIndex.connection.version.to_i >= 7
+      context "without type name" do
+        it "delegates to connection" do
+          TestIndex.create_index
 
-      mapping = { test: { properties: { id: { type: "long" } } } }
+          allow(TestIndex).to receive(:include_type_name?).and_return(false)
 
-      allow(TestIndex).to receive(:mapping).and_return(mapping)
-      allow(TestIndex.connection).to receive(:update_mapping).and_call_original
+          mapping = { properties: { id: { type: "long" } } }
 
-      TestIndex.update_mapping
+          allow(TestIndex).to receive(:mapping).and_return(mapping)
+          allow(TestIndex.connection).to receive(:update_mapping).and_call_original
 
-      expect(TestIndex.connection).to have_received(:update_mapping).with("test", "test", mapping)
+          TestIndex.update_mapping
+
+          expect(TestIndex.connection).to have_received(:update_mapping).with("test", nil, mapping)
+        end
+      end
+    end
+
+    context "with type name" do
+      it "delegates to connection" do
+        TestIndex.create_index
+
+        mapping = { test: { properties: { id: { type: "long" } } } }
+
+        allow(TestIndex).to receive(:mapping).and_return(mapping)
+        allow(TestIndex.connection).to receive(:update_mapping).and_call_original
+
+        TestIndex.update_mapping
+
+        expect(TestIndex.connection).to have_received(:update_mapping).with("test", "test", mapping)
+      end
+    end
+  end
+
+  describe ".mapping" do
+    context "with type name" do
+      it "returns an empty mapping" do
+        klass = Class.new do
+          include SearchFlip::Index
+
+          def self.include_type_name?
+            true
+          end
+        end
+
+        expect(klass.mapping).to eq("_doc" => {})
+      end
+    end
+
+    context "without type name" do
+      it "returns an empty mapping" do
+        klass = Class.new do
+          include SearchFlip::Index
+
+          def self.include_type_name?
+            false
+          end
+        end
+
+        expect(klass.mapping).to eq({})
+      end
     end
   end
 
   describe ".get_mapping" do
-    it "delegates to connection" do
-      TestIndex.create_index
-      TestIndex.update_mapping
+    if TestIndex.connection.version.to_i >= 7
+      context "without type name" do
+        it "delegates to connection" do
+          allow(TestIndex).to receive(:include_type_name?).and_return(false)
+          allow(TestIndex).to receive(:mapping).and_return({})
 
-      allow(TestIndex.connection).to receive(:get_mapping).and_call_original
+          TestIndex.create_index
+          TestIndex.update_mapping
 
-      TestIndex.get_mapping
+          allow(TestIndex.connection).to receive(:get_mapping).and_call_original
 
-      expect(TestIndex.connection).to have_received(:get_mapping).with("test", "test")
+          TestIndex.get_mapping
+
+          expect(TestIndex.connection).to have_received(:get_mapping).with("test", nil)
+        end
+      end
+    end
+
+    context "with type name" do
+      it "delegates to connection" do
+        TestIndex.create_index
+        TestIndex.update_mapping
+
+        allow(TestIndex.connection).to receive(:get_mapping).and_call_original
+
+        TestIndex.get_mapping
+
+        expect(TestIndex.connection).to have_received(:get_mapping).with("test", "test")
+      end
     end
   end
 
