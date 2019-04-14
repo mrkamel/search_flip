@@ -201,7 +201,7 @@ RSpec.describe SearchFlip::Index do
 
         TestIndex.update_mapping
 
-        expect(TestIndex.connection).to have_received(:update_mapping).with("test", "test", "test" => mapping)
+        expect(TestIndex.connection).to have_received(:update_mapping).with("test", { "test" => mapping }, type_name: "test")
       end
     end
   end
@@ -248,7 +248,7 @@ RSpec.describe SearchFlip::Index do
 
         TestIndex.get_mapping
 
-        expect(TestIndex.connection).to have_received(:get_mapping).with("test", "test")
+        expect(TestIndex.connection).to have_received(:get_mapping).with("test", type_name: "test")
       end
     end
   end

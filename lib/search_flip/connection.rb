@@ -251,16 +251,15 @@ module SearchFlip
     # SearchFlip::ResponseError in case any errors occur.
     #
     # @param index_name [String] The index name
+    # @param mapping [Hash] The mapping
     # @param type_name [String] The type name. Starting with Elasticsearch 7,
     #   the type name is optional.
-    # @param mapping [Hash] The mapping
-    # @param params [Hash] Optional url parameters
     #
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
-    def update_mapping(index_name, type_name = nil, mapping)
+    def update_mapping(index_name, mapping, type_name: nil)
       url = type_name ? type_url(index_name, type_name) : index_url(index_name)
-      params = version.to_f >= 6.7 && type_name ? { include_type_name: true } : {}
+      params = type_name && version.to_f >= 6.7 ? { include_type_name: true } : {}
 
       http_client.put("#{url}/_mapping", params: params, json: mapping)
 
@@ -276,9 +275,9 @@ module SearchFlip
     #
     # @return [Hash] The current type mapping
 
-    def get_mapping(index_name, type_name = nil)
+    def get_mapping(index_name, type_name: nil)
       url = type_name ? type_url(index_name, type_name) : index_url(index_name)
-      params = version.to_f >= 6.7 && type_name ? { include_type_name: true } : {}
+      params = type_name && version.to_f >= 6.7 ? { include_type_name: true } : {}
 
       http_client.headers(accept: "application/json").get("#{url}/_mapping", params: params).parse
     end

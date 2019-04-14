@@ -223,9 +223,9 @@ RSpec.describe SearchFlip::Connection do
         mapping = { "type_name" => { "properties" => { "id" => { "type" => "long" } } } }
 
         connection.create_index("index_name")
-        connection.update_mapping("index_name", "type_name", mapping)
+        connection.update_mapping("index_name", mapping, type_name: "type_name")
 
-        expect(connection.get_mapping("index_name", "type_name")).to eq("index_name" => { "mappings" => mapping })
+        expect(connection.get_mapping("index_name", type_name: "type_name")).to eq("index_name" => { "mappings" => mapping })
       ensure
         connection.delete_index("index_name") if connection.index_exists?("index_name")
       end

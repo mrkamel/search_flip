@@ -392,9 +392,22 @@ module SearchFlip
 
       def update_mapping
         if include_type_name?
-          connection.update_mapping(index_name_with_prefix, type_name, type_name => mapping)
+          connection.update_mapping(index_name_with_prefix, { type_name => mapping }, type_name: type_name)
         else
           connection.update_mapping(index_name_with_prefix, mapping)
+        end
+      end
+
+      # Retrieves the current type mapping from ElasticSearch. Raises
+      # SearchFlip::ResponseError in case any errors occur.
+      #
+      # @return [Hash] The current type mapping
+
+      def get_mapping
+        if include_type_name?
+          connection.get_mapping(index_name_with_prefix, type_name: type_name)
+        else
+          connection.get_mapping(index_name_with_prefix)
         end
       end
 
@@ -406,19 +419,6 @@ module SearchFlip
 
       def include_type_name?
         type_name != "_doc" || connection.version.to_i < 7
-      end
-
-      # Retrieves the current type mapping from ElasticSearch. Raises
-      # SearchFlip::ResponseError in case any errors occur.
-      #
-      # @return [Hash] The current type mapping
-
-      def get_mapping
-        if include_type_name?
-          connection.get_mapping(index_name_with_prefix, type_name)
-        else
-          connection.get_mapping(index_name_with_prefix)
-        end
       end
 
       # Retrieves the document specified by id from ElasticSearch. Raises
