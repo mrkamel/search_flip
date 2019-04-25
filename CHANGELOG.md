@@ -15,6 +15,14 @@
 * Added `SearchFlip::Connection#get_indices`
 * Added `SearchFlip::Connection#alias_exists?`
 * Added `SearchFlip::Index#with_settings` and `SearchFlip::Criteria#with_settings`
+* Added `SearchFlip::Aggregation#merge`
+* Added `bulk_max_mb` config and option
+* Added `SearchFlip::Index.analyze`
+* Added `SearchFlip::Criteria#preference`
+* Added `SearchFlip::Criteria#search_type`
+* Added `SearchFlip::Criteria#routing`
+* Added `SearchFlip::Index.open_index` and `SearchFlip::Index.close_index`
+* Added `SearchFlip::Index.mget`
 
 ## v1.1.0
 

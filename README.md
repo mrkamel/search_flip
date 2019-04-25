@@ -51,8 +51,8 @@ CommentIndex.where(available: true).search("hello world").sort(id: "desc").aggre
 
 ```
 
-Finally, SearchFlip comes with a minimal small set of dependencies (http-rb,
-hashie and oj only).
+Finally, SearchFlip comes with a minimal set of dependencies (http-rb, hashie
+and oj only).
 
 ## Reference Docs
 
@@ -92,10 +92,10 @@ Available config options are:
 
 * `index_prefix` to have a prefix added to your index names automatically. This
   can be useful to separate the indices of e.g. testing and development environments.
-* `base_url` to tell search_flip how to connect to your cluster
+* `base_url` to tell SearchFlip how to connect to your cluster
 * `bulk_limit` a global limit for bulk requests
 * `bulk_max_mb` a global limit for the payload of bulk requests
-* `auto_refresh` tells search_flip to automatically refresh an index after
+* `auto_refresh` tells SearchFlip to automatically refresh an index after
   import, index, delete, etc operations. This is e.g. usuful for testing, etc.
   Defaults to false.
 
@@ -131,6 +131,19 @@ class CommentIndex
       title: comment.title,
       message: comment.message
     }
+  end
+end
+```
+
+Optionally, you can specify a custom `type_name`, but note that starting with
+Elasticsearch 7, types are deprecated.
+
+```ruby
+class CommentIndex
+  # ...
+
+  def self.type_name
+    "comment"
   end
 end
 ```
@@ -237,8 +250,8 @@ CommentIndex.match_all.delete
 
 # or delete manually via the bulk API:
 
-CommentIndex.match_all.find_each do |record|
-  CommentIndex.bulk do |indexer|
+CommentIndex.bulk do |indexer|
+  CommentIndex.match_all.find_each do |record|
     indexer.delete record.id
   end
 end
