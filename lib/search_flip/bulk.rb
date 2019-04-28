@@ -54,7 +54,7 @@ module SearchFlip
       @url = url
       @options = options
       @http_client = options[:http_client] || SearchFlip::HTTPClient.new
-      @ignore_errors = Array(options[:ignore_errors]).to_set if options[:ignore_errors]
+      @ignore_errors = Array(options[:ignore_errors] || []).to_set
 
       @bulk_limit = options[:bulk_limit] || SearchFlip::Config[:bulk_limit]
       @bulk_max_mb = options[:bulk_max_mb] || SearchFlip::Config[:bulk_max_mb]
@@ -140,7 +140,7 @@ module SearchFlip
       response =
         @http_client
           .headers(accept: "application/json", content_type: "application/x-ndjson")
-          .put(url, body: @payload, params: ignore_errors ? {} : { filter_path: "errors" })
+          .put(url, body: @payload)
 
       return if options[:raise] == false
 
@@ -148,13 +148,14 @@ module SearchFlip
 
       return unless parsed_response["errors"]
 
-      raise(SearchFlip::Bulk::Error, response[0..30]) unless ignore_errors
-
       parsed_response["items"].each do |item|
         item.each do |_, element|
           status = element["status"]
 
-          raise(SearchFlip::Bulk::Error, SearchFlip::JSON.generate(element)) if !status.between?(200, 299) && !ignore_errors.include?(status)
+          next if status.between?(200, 299)
+          next if ignore_errors.include?(status)
+
+          raise SearchFlip::Bulk::Error, SearchFlip::JSON.generate(element)
         end
       end
     ensure
