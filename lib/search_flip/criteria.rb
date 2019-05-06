@@ -407,15 +407,15 @@ module SearchFlip
     #   CommentIndex.range(lt: Time.parse("2014-01-01")).delete
     #   CommentIndex.where(public: false).delete
 
-    def delete
+    def delete(params = {})
       dupped_request = request.dup
       dupped_request.delete(:from)
       dupped_request.delete(:size)
 
       if connection.version.to_i >= 5
-        connection.http_client.post("#{target.type_url}/_delete_by_query", params: request_params, json: dupped_request)
+        connection.http_client.post("#{target.type_url}/_delete_by_query", params: request_params.merge(params), json: dupped_request)
       else
-        connection.http_client.delete("#{target.type_url}/_query", params: request_params, json: dupped_request)
+        connection.http_client.delete("#{target.type_url}/_query", params: request_params.merge(params), json: dupped_request)
       end
 
       target.refresh if SearchFlip::Config[:auto_refresh]

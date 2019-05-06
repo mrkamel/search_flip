@@ -662,6 +662,14 @@ RSpec.describe SearchFlip::Criteria do
 
       expect { ProductIndex.where(id: [product1.id, product2.id]).delete }.to change { ProductIndex.total_count }.by(-2)
     end
+
+    it "accepts additional params" do
+      product = create(:product)
+
+      ProductIndex.import(product)
+
+      expect { ProductIndex.where(id: product.id).delete(conflicts: "proceed") }.to change { ProductIndex.total_count }.by(-1)
+    end
   end
 
   describe "#source" do
