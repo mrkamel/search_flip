@@ -17,6 +17,7 @@ module SearchFlip
       @base_url = options[:base_url] || SearchFlip::Config[:base_url]
       @http_client = options[:http_client] || SearchFlip::HTTPClient.new
       @bulk_limit = options[:bulk_limit] || SearchFlip::Config[:bulk_limit]
+      @version_mutex = Mutex.new
     end
 
     # Queries and returns the ElasticSearch version used.
@@ -27,7 +28,9 @@ module SearchFlip
     # @return [String] The ElasticSearch version
 
     def version
-      @version ||= http_client.headers(accept: "application/json").get("#{base_url}/").parse["version"]["number"]
+      @version_mutex.synchronize do
+        @version ||= http_client.headers(accept: "application/json").get("#{base_url}/").parse["version"]["number"]
+      end
     end
 
     # Queries and returns the ElasticSearch cluster health.

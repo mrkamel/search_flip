@@ -43,6 +43,7 @@ module SearchFlip
 
   module Index
     def self.included(base)
+      base.class_variable_set(:@@connection_mutex, Mutex.new)
       base.extend ClassMethods
     end
 
@@ -159,7 +160,7 @@ module SearchFlip
             yield record
           end
         else
-          (scope.respond_to?(:each) ? scope : Array(scope)).each do |record|
+          (scope.respond_to?(:each) && !scope.is_a?(SearchFlip::Result) ? scope : Array(scope)).each do |record|
             yield record
           end
         end
@@ -636,7 +637,9 @@ module SearchFlip
       # @return [SearchFlip::Connection] The connection
 
       def connection
-        @connection ||= SearchFlip::Connection.new(base_url: SearchFlip::Config[:base_url])
+        class_variable_get(:@@connection_mutex).synchronize do
+          @connection ||= SearchFlip::Connection.new(base_url: SearchFlip::Config[:base_url])
+        end
       end
     end
   end

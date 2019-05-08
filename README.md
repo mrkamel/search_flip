@@ -549,11 +549,13 @@ To use multiple Elasticsearch clusters, specify a connection within your
 indices:
 
 ```ruby
+MyConnection = SearchFlip::Connection.new(base_url: "http://elasticsearch.host:9200")
+
 class MyIndex
   include SearchFlip::Index
 
   def self.connection
-    @connection ||= SearchFlip::Connection.new(base_url: "http://elasticsearch.host:9200")
+    MyConnection
   end
 end
 ```
