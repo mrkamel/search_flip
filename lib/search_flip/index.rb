@@ -638,7 +638,7 @@ module SearchFlip
 
       def connection
         class_variable_get(:@@connection_mutex).synchronize do
-          @connection ||= SearchFlip::Connection.new(base_url: SearchFlip::Config[:base_url])
+          @@connection ||= SearchFlip::Connection.new(base_url: SearchFlip::Config[:base_url])
         end
       end
     end
