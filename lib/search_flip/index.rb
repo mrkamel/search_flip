@@ -42,8 +42,9 @@ module SearchFlip
   #   CommentIndex.range(:created_at, gt: Time.now - 7.days)
 
   module Index
+    ConnectionMutex = Mutex.new
+
     def self.included(base)
-      base.class_variable_set(:@@connection_mutex, Mutex.new)
       base.extend ClassMethods
     end
 
@@ -637,8 +638,8 @@ module SearchFlip
       # @return [SearchFlip::Connection] The connection
 
       def connection
-        class_variable_get(:@@connection_mutex).synchronize do
-          @@connection ||= SearchFlip::Connection.new(base_url: SearchFlip::Config[:base_url])
+        ConnectionMutex.synchronize do
+          @connection ||= SearchFlip::Connection.new(base_url: SearchFlip::Config[:base_url])
         end
       end
     end
