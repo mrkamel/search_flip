@@ -292,7 +292,7 @@ within `update_aliases`.
 Please note that `with_settings(index_name: '...')` returns an anonymous, i.e.
 temporary, class inherting from UserIndex and overwriting `index_name`.
 
-## Advanced Usage
+## Chainable Methods
 
 SearchFlip supports even more advanced usages, like e.g. post filters, filtered
 aggregations or nested aggregations via simple to use API methods.
@@ -303,8 +303,7 @@ SearchFlip provides powerful methods to query/filter Elasticsearch:
 
 * `where`
 
-Feels like ActiveRecord's `where` and performs a bool filter clause
-to the request:
+Feels like ActiveRecord's `where` and adds a bool filter clause to the request:
 
 ```ruby
 CommentIndex.where(reviewed: true)
@@ -648,6 +647,33 @@ CommentIndex.terminate_after(10).execute
 ```
 
 For further details and a full list of methods, check out the reference docs.
+
+* `custom`
+
+You can add a custom clause to the request via `custom`
+
+```ruby
+CommentIndex.custom(custom_clause: '...')
+```
+
+This can be useful for Elasticsearch features not yet supported by SearchFlip,
+custom plugin clauses, etc.
+
+### Custom Criteria Methods
+
+To add custom criteria methods, you can add class methods to your index class.
+
+```ruby
+class HotelIndex
+  # ...
+
+  def self.where_geo(lat:, lon:, distance:)
+    filter(geo_distance: { distance: distance, location: { lat: lat, lon: lon } })
+  end
+end
+
+HotelIndex.where_geo(lat: 53.57532, lon: 10.01534, distance: '50km')
+```
 
 ## Using multiple Elasticsearch clusters
 
