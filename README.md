@@ -297,9 +297,116 @@ temporary, class inherting from UserIndex and overwriting `index_name`.
 SearchFlip supports even more advanced usages, like e.g. post filters, filtered
 aggregations or nested aggregations via simple to use API methods.
 
-### Post filters
+### Query/Filter Criteria Methods
 
-All criteria methods (`#where`, `#where_not`, `#range`, etc.) are available
+SearchFlip provides powerful methods to query/filter Elasticsearch:
+
+* `where`
+
+Feels like ActiveRecord's `where` and performs a bool filter clause
+to the request:
+
+```ruby
+CommentIndex.where(reviewed: true)
+CommentIndex.where(likes: 0 .. 10_000)
+CommentIndex.where(state: ["approved", "rejected"])
+```
+
+* `where_not`
+
+Like `where`, but exluding the matching documents:
+
+```ruby
+CommentIndex.where_not(id: [1, 2, 3])
+```
+
+* `range`
+
+To add a range filter query:
+
+```ruby
+CommentIndex.range(:created_at, gt: Date.today - 1.week, lt: Date.today)
+```
+
+* `filter`
+
+Use `filter` to add raw filter queries:
+
+```ruby
+CommentIndex.filter(term: { state: "approved" })
+```
+
+* `should`
+
+Use `should` to add raw should queries:
+
+```ruby
+CommentIndex.should(term: { state: "approved" })
+```
+
+* `must`
+
+Use `must` to add raw must queries:
+
+```ruby
+CommentIndex.must(term: { state: "approved" })
+
+CommentIndex.must(
+  bool: {
+    should: [
+      { terms: { state: ["approved", "rejected"] }},
+      { term: { username: "mrkamel" }}
+    ]
+  }
+)
+```
+
+* `must_not`
+
+Like `must`, but excluding the matching documents:
+
+```ruby
+CommentIndex.must_not(term: { state: "approved" })
+```
+
+* `search`
+
+Adds a query string query, with AND as default filter:
+
+```ruby
+CommentIndex.search("harry potter")
+CommentIndex.search("state:approved")
+CommentIndex.search("username:a*")
+CommentIndex.search("state:approved OR state:rejected")
+```
+
+* `exists`
+
+Use `exists` to add an `exists` query:
+
+```ruby
+CommentIndex.exists(:state)
+```
+
+* `exists_not`
+
+Like `exists`, but excluding the matching documents:
+
+```ruby
+CommentIndex.exists_not(:state)
+```
+
+* `match_all`
+
+Simply matches all documents:
+
+```ruby
+CommentIndex.match_all
+```
+
+### Post Query/Filter Criteria Methods
+
+All query/filter criteria methods (`#where`, `#where_not`, `#range`, etc.) are available
 in post filter mode as well, ie. filters/queries applied after aggregations
 are calculated. Checkout the ElasticSearch docs for further info.
 
@@ -379,11 +486,10 @@ query = CommentIndex.highlight(:title).search("hello")
 query.results[0]._hit.highlight.title # => "<em>hello</em> world"
 ```
 
-### Advanced Criteria Methods
+### Other Criteria Methods
 
-There are even more methods to make your life easier, namely `source`,
-`scroll`, `profile`, `includes`, `preload`, `find_in_batches`, `find_each`,
-`find_results_in_batches`, `failsafe` and `unscope` to name just a few:
+There are so many chainable criteria methods to make your life easier.
+For a full list, checkout the reference docs.
 
 * `source`
 
@@ -714,4 +820,3 @@ $ rspec
 ```
 
 That's it.
-
