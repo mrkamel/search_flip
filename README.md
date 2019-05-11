@@ -370,13 +370,14 @@ CommentIndex.must_not(term: { state: "approved" })
 
 * `search`
 
-Adds a query string query, with AND as default filter:
+Adds a query string query, with AND as default operator:
 
 ```ruby
-CommentIndex.search("harry potter")
+CommentIndex.search("hello world")
 CommentIndex.search("state:approved")
 CommentIndex.search("username:a*")
 CommentIndex.search("state:approved OR state:rejected")
+CommentIndex.search("hello world", default_operator: "OR")
 ```
 
 * `exists`
@@ -429,9 +430,9 @@ query = OrderIndex.aggregate(:username, order: { revenue: "desc" }) do |aggregat
 end
 ```
 
-Generally, aggregation results returned by ElasticSearch are wrapped in a
-`SearchFlip::Result`, which wraps a `Hashie::Mash`such that you can access them
-via:
+Generally, aggregation results returned by ElasticSearch are returned as a
+`SearchFlip::Result`, which basically is `Hashie::Mash`such that you can access
+them via:
 
 ```ruby
 query.aggregations(:username)["mrkamel"].revenue.value
@@ -487,8 +488,8 @@ query.results[0]._hit.highlight.title # => "<em>hello</em> world"
 
 ### Other Criteria Methods
 
-There are so many chainable criteria methods to make your life easier.
-For a full list, checkout the reference docs.
+There are even more chainable criteria methods to make your life easier. For a
+full list, checkout the reference docs.
 
 * `source`
 
@@ -509,21 +510,6 @@ you can either use `#paginate` or `#page` in combination with `#per`:
 ```ruby
 CommentIndex.paginate(page: 3, per_page: 50)
 CommentIndex.page(3).per(50)
-```
-
-* `scroll`
-
-You can as well use the underlying scroll API directly, ie. without using higher
-level pagination:
-
-```ruby
-query = CommentIndex.scroll(timeout: "5m")
-
-until query.records.empty?
-  # ...
-
-  query = query.scroll(id: query.scroll_id, timeout: "5m")
-end
 ```
 
 * `profile`
@@ -576,8 +562,8 @@ end
 
 * `find_results_in_batches`
 
-Used like `find_in_batches`, but yielding the raw results instead of database
-records. Again, the batch size and scroll API timeout can be specified.
+Used like `find_in_batches`, but yielding the raw results (as
+`SearchFlip::Result` objects) instead of database records.
 
 ```ruby
 CommentIndex.search("hello world").find_results_in_batches(batch_size: 100) do |batch|
@@ -587,12 +573,36 @@ end
 
 * `find_each`
 
-Like `#find_in_batches`, use `#find_each` to fetch records in batches, but yields
-one record at a time.
+Like `#find_in_batches` but yielding one record at a time.
 
 ```ruby
 CommentIndex.search("hello world").find_each(batch_size: 100) do |record|
   # ...
+end
+```
+
+* `find_each_result`
+
+Like `#find_results_in_batches`, but yielding one record at a time.
+
+```ruby
+CommentIndex.search("hello world").find_each_result(batch_size: 100) do |batch|
+  # ...
+end
+```
+
+* `scroll`
+
+You can as well use the underlying scroll API directly, ie. without using higher
+level scrolling:
+
+```ruby
+query = CommentIndex.scroll(timeout: "5m")
+
+until query.records.empty?
+  # ...
+
+  query = query.scroll(id: query.scroll_id, timeout: "5m")
 end
 ```
 
@@ -656,8 +666,8 @@ You can add a custom clause to the request via `custom`
 CommentIndex.custom(custom_clause: '...')
 ```
 
-This can be useful for Elasticsearch features not yet supported by SearchFlip,
-custom plugin clauses, etc.
+This can be useful for Elasticsearch features not yet supported via criteria
+methods by SearchFlip, custom plugin clauses, etc.
 
 ### Custom Criteria Methods
 
@@ -672,7 +682,7 @@ class HotelIndex
   end
 end
 
-HotelIndex.where_geo(lat: 53.57532, lon: 10.01534, distance: '50km')
+HotelIndex.search("bed and breakfast").where_geo(lat: 53.57532, lon: 10.01534, distance: '50km').aggregate(:rating)
 ```
 
 ## Using multiple Elasticsearch clusters
@@ -738,8 +748,9 @@ class MyIndex
 end
 ```
 
-Thus, simply add your custom implementation of those methods that work with
-whatever ORM you use.
+Thus, if your ORM supports `.find_each`, `#id` and `#where` you are already
+good to go. Otherwise, simply add your custom implementation of those methods
+that work with whatever ORM you use.
 
 ## Date and Timestamps in JSON
 
