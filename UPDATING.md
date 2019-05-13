@@ -3,7 +3,7 @@
 
 ## Update 1.x to 2.x
 
-* **[BREAKING]** No longer include the mapping in `SearchFlip::Index.mapping`
+* **[BREAKING]** No longer include the `type_name` in `SearchFlip::Index.mapping`
 
 1.x:
 
