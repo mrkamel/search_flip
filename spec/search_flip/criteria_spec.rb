@@ -36,7 +36,7 @@ RSpec.describe SearchFlip::Criteria do
       methods = [
         :profile_value, :failsafe_value, :terminate_after_value, :timeout_value,
         :offset_value, :limit_value, :scroll_args, :source_value, :preference_value,
-        :search_type_value, :routing_value
+        :search_type_value, :routing_value, :track_total_hits_value
       ]
 
       methods.each do |method|
@@ -1022,6 +1022,16 @@ RSpec.describe SearchFlip::Criteria do
       records = temp_index.criteria.with_title("expected").records
 
       expect(records).to eq([expected])
+    end
+  end
+
+  describe "#track_total_hits" do
+    it "is added to the request" do
+      if ProductIndex.connection.version.to_i >= 7
+        query = ProductIndex.track_total_hits(false)
+        expect(query.request[:track_total_hits]).to eq(false)
+        expect { query.execute }.not_to raise_error
+      end
     end
   end
 

@@ -254,7 +254,8 @@ module SearchFlip
         :includes, :eager_load, :preload, :sort, :resort, :order, :reorder, :offset, :limit, :paginate,
         :page, :per, :search, :highlight, :suggest, :custom, :find_in_batches, :find_results_in_batches,
         :find_each, :find_each_result, :failsafe, :total_entries, :total_count, :timeout, :terminate_after,
-        :records, :results, :should, :should_not, :must, :must_not, :preference, :search_type, :routing
+        :records, :results, :should, :should_not, :must, :must_not, :preference, :search_type, :routing,
+        :track_total_hits
 
       # Override to specify the type name used within ElasticSearch. Recap,
       # this gem uses an individual index for each index class, because

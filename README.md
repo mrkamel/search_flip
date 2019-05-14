@@ -705,6 +705,26 @@ end
 This allows to use different clusters per index e.g. when migrating indices to
 new versions of Elasticsearch.
 
+You can specify basic auth, additional headers, etc via:
+
+```ruby
+http_client = SearchFlip::HTTPClient.new
+
+# Basic Auth
+http_client = http_client.basic_auth(user: "username", pass: "password")
+
+# Raw Auth Header
+http_client = http_client.auth("Bearer VGhlIEhUVFAgR2VtLCBST0NLUw")
+
+# Proxy Settings
+http_client = http_client.via("proxy.host", 8080)
+
+# Custom headers
+http_client = http_client.headers(key: "value")
+
+SearchFlip::Connection.new(base_url: "...", http_client: http_client)
+```
+
 ## Routing and other index-time options
 
 Override `index_options` in case you want to use routing or pass other
@@ -801,10 +821,11 @@ require "search_flip/to_json"
 
 ## Feature Support
 
-* `#post_search` and `#profile` are only supported from up to ElasticSearch
+* `#post_search` and `#profile` are only supported from up to Elasticsearch
   version >= 2.
-* for ElasticSearch 2.x, the delete-by-query plugin is required to delete
+* for Elasticsearch 2.x, the delete-by-query plugin is required to delete
   records via queries
+* `#track_total_hits` is only available with Elasticsearch >= 7
 
 ## Keeping your Models and Indices in Sync
 
