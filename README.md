@@ -1,6 +1,4 @@
 
-<img src="logo.png" width="200" align="right">
-
 # search_flip
 
 **Full-Featured ElasticSearch Ruby Client with a Chainable DSL**
