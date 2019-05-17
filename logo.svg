@@ -10,11 +10,11 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
-   width="115.30965"
-   height="19.5625"
-   viewBox="0 0 115.30964 19.5625"
+   width="300"
+   height="50"
+   viewBox="0 0 299.99998 50"
    id="svg4869"
-   sodipodi:docname="search_flip_logo.svg"
+   sodipodi:docname="logo.svg"
    inkscape:export-filename="/home/hkf/projects/search_flip/logo.png"
    inkscape:export-xdpi="299.34824"
    inkscape:export-ydpi="299.34824"
@@ -50,9 +50,9 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:zoom="5.9"
-     inkscape:cx="81.543277"
-     inkscape:cy="0.97556615"
+     inkscape:zoom="2.085965"
+     inkscape:cx="91.987216"
+     inkscape:cy="-41.606043"
      inkscape:window-x="0"
      inkscape:window-y="31"
      inkscape:window-maximized="1"
@@ -60,37 +60,37 @@
   <title
      id="title4865">arrow-long-up</title>
   <path
-     d="M 13.464828,1.1891087 11.933761,7.0826637 10.333833,5.4827347 1.1414444,14.675123 0,13.533679 9.1923881,4.3412903 7.5712725,2.7201747 Z"
+     d="M 39.922489,4.151999 36.230955,18.361869 32.37339,14.504302 10.209748,36.667943 7.4576271,33.915823 29.621268,11.75218 25.712619,7.843531 Z"
      id="path4867"
      inkscape:connector-curvature="0"
-     style="stroke-width:0.74890774"
+     style="stroke-width:1.80568123"
      inkscape:export-xdpi="325.4834"
      inkscape:export-ydpi="325.4834"
      sodipodi:nodetypes="cccccccc"
      inkscape:export-filename="/home/hkf/projects/search_flip/text4908.png" />
   <path
-     d="M 4.2170097,18.287011 9.9607539,16.606134 8.4985304,15.10154 17.69092,5.9091505 16.573683,4.8342866 7.3812951,14.026675 5.8978868,12.543267 Z"
+     d="M 17.625202,45.376517 31.473864,41.323778 27.948317,37.696072 50.111962,15.532428 47.418207,12.940838 25.254566,35.10448 21.677941,31.527854 Z"
      id="path4867-7"
      inkscape:connector-curvature="0"
-     style="stroke-width:0.72273237"
+     style="stroke-width:1.74257004"
      inkscape:export-xdpi="325.4834"
      inkscape:export-ydpi="325.4834"
      sodipodi:nodetypes="cccccccc"
      inkscape:export-filename="/home/hkf/projects/search_flip/text4908.png" />
   <text
      xml:space="preserve"
-     style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:-0.27000001px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
-     x="21.392977"
-     y="15.020834"
+     style="font-style:normal;font-weight:normal;font-size:96.44345093px;line-height:1.25;font-family:sans-serif;letter-spacing:-0.65099335px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:2.41108632"
+     x="59.037937"
+     y="37.501484"
      id="text4908"
      inkscape:export-filename="/home/hkf/projects/search_flip/text4908.png"
      inkscape:export-xdpi="325.4834"
      inkscape:export-ydpi="325.4834"
-     inkscape:transform-center-x="-0.84745763"
-     inkscape:transform-center-y="-4.0677966"><tspan
+     inkscape:transform-center-x="-2.0432889"
+     inkscape:transform-center-y="-9.8078108"><tspan
        sodipodi:role="line"
        id="tspan4906"
-       x="21.392977"
-       y="15.020834"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.33333397px;line-height:6;font-family:'times new roman';-inkscape-font-specification:'times new roman, ';letter-spacing:0px;word-spacing:-8.08000278px">search_flip</tspan></text>
+       x="59.037937"
+       y="37.501484"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:51.43650818px;line-height:6;font-family:'times new roman';-inkscape-font-specification:'times new roman, ';letter-spacing:0px;word-spacing:-19.48158455px;stroke-width:2.41108632">search_flip</tspan></text>
 </svg>
