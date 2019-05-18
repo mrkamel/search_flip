@@ -235,10 +235,16 @@ CommentIndex.where(username: "mrkamel").total_entries
 CommentIndex.aggregate(:username).aggregations(:username)
 # => {1=>#<SearchFlip::Result doc_count=37 ...>, 2=>... }
 ...
+```
 
+Please note that you can check the request that will be send to Elasticsearch
+by simply calling `#request` on the query:
+
+```ruby
 CommentIndex.search("hello world").sort(id: "desc").aggregate(:username).request
 # => {:query=>{:bool=>{:must=>[{:query_string=>{:query=>"hello world", :default_operator=>:AND}}]}}, ...}
 ```
+
 
 delete records:
 
