@@ -637,14 +637,6 @@ CommentIndex.where(approved: true).merge(CommentIndex.search("hello"))
 # equivalent to: CommentIndex.where(approved: true).search("hello")
 ```
 
-* `unscope`
-
-You can even remove certain already added scopes via `#unscope`:
-
-```ruby
-CommentIndex.aggregate(:username).search("hello world").unscope(:search, :aggregate)
-```
-
 * `timeout`
 
 Specify a timeout to limit query processing time:
