@@ -185,6 +185,8 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def unscope(*scopes)
+      warn "[DEPRECATION] unscope is deprecated"
+
       unknown = scopes - [:search, :post_search, :sort, :highlight, :suggest, :custom, :aggregate]
 
       raise(ArgumentError, "Can't unscope #{unknown.join(", ")}") if unknown.size > 0
