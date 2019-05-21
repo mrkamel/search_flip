@@ -1,15 +1,15 @@
 
 # search_flip
 
-**Full-Featured ElasticSearch Ruby Client with a Chainable DSL**
+**Full-Featured Elasticsearch Ruby Client with a Chainable DSL**
 
 [![Build Status](https://secure.travis-ci.org/mrkamel/search_flip.png?branch=master)](http://travis-ci.org/mrkamel/search_flip)
 [![Gem Version](https://badge.fury.io/rb/search_flip.svg)](http://badge.fury.io/rb/search_flip)
 
 Using SearchFlip it is dead-simple to create index classes that correspond to
-[ElasticSearch](https://www.elastic.co/) indices and to manipulate, query and
+[Elasticsearch](https://www.elastic.co/) indices and to manipulate, query and
 aggregate these indices using a chainable, concise, yet powerful DSL. Finally,
-SearchFlip supports ElasticSearch 1.x, 2.x, 5.x, 6.x, 7.x. Check section
+SearchFlip supports Elasticsearch 1.x, 2.x, 5.x, 6.x, 7.x. Check section
 [Feature Support](#feature-support) for version dependent features.
 
 ```ruby
@@ -249,7 +249,7 @@ CommentIndex.search("hello world").sort(id: "desc").aggregate(:username).request
 delete records:
 
 ```ruby
-# for ElasticSearch >= 2.x and < 5.x, the delete-by-query plugin is required
+# for Elasticsearch >= 2.x and < 5.x, the delete-by-query plugin is required
 # for the following query:
 
 CommentIndex.match_all.delete
@@ -414,7 +414,7 @@ CommentIndex.match_all
 
 All query/filter criteria methods (`#where`, `#where_not`, `#range`, etc.) are available
 in post filter mode as well, ie. filters/queries applied after aggregations
-are calculated. Checkout the ElasticSearch docs for further info.
+are calculated. Checkout the Elasticsearch docs for further info.
 
 ```ruby
 query = CommentIndex.aggregate(:user_id)
@@ -436,7 +436,7 @@ query = OrderIndex.aggregate(:username, order: { revenue: "desc" }) do |aggregat
 end
 ```
 
-Generally, aggregation results returned by ElasticSearch are returned as a
+Generally, aggregation results returned by Elasticsearch are returned as a
 `SearchFlip::Result`, which basically is `Hashie::Mash`such that you can access
 them via:
 
@@ -444,7 +444,7 @@ them via:
 query.aggregations(:username)["mrkamel"].revenue.value
 ```
 
-Still, if you want to get the raw aggregations returned by ElasticSearch,
+Still, if you want to get the raw aggregations returned by Elasticsearch,
 access them without supplying any aggregation name to `#aggregations`:
 
 ```ruby
@@ -615,7 +615,7 @@ end
 * `failsafe`
 
 Use `#failsafe` to prevent any exceptions from being raised for query string
-syntax errors or ElasticSearch being unavailable, etc.
+syntax errors or Elasticsearch being unavailable, etc.
 
 ```ruby
 CommentIndex.search("invalid/request").execute
@@ -772,7 +772,7 @@ that work with whatever ORM you use.
 
 ## Date and Timestamps in JSON
 
-ElasticSearch requires dates and timestamps to have one of the formats listed
+Elasticsearch requires dates and timestamps to have one of the formats listed
 here: [https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#strict-date-time](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#strict-date-time).
 
 However, `JSON.generate` in ruby by default outputs something like:
@@ -782,7 +782,7 @@ JSON.generate(time: Time.now.utc)
 # => "{\"time\":\"2018-02-22 18:19:33 UTC\"}"
 ```
 
-This format is not compatible with ElasticSearch by default. If you're on
+This format is not compatible with Elasticsearch by default. If you're on
 Rails, ActiveSupport adds its own `#to_json` methods to `Time`, `Date`, etc.
 However, ActiveSupport checks whether they are used in combination with
 `JSON.generate` or not and adapt:
@@ -848,7 +848,7 @@ model changes.
 
 ## Links
 
-* ElasticSearch: [https://www.elastic.co/](https://www.elastic.co/)
+* Elasticsearch: [https://www.elastic.co/](https://www.elastic.co/)
 * Reference Docs: [http://www.rubydoc.info/github/mrkamel/search_flip](http://www.rubydoc.info/github/mrkamel/search_flip)
 * Travis: [http://travis-ci.org/mrkamel/search_flip](http://travis-ci.org/mrkamel/search_flip)
 * will_paginate: [https://github.com/mislav/will_paginate](https://github.com/mislav/will_paginate)
@@ -866,7 +866,7 @@ model changes.
 ## Running the test suite
 
 Running the tests is super easy. The test suite uses sqlite, such that you only
-need to install ElasticSearch. You can install ElasticSearch on your own, or
+need to install Elasticsearch. You can install Elasticsearch on your own, or
 you can e.g. use docker-compose:
 
 ```
