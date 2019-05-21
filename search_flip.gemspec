@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.version       = SearchFlip::VERSION
   spec.authors       = ["Benjamin Vetter"]
   spec.email         = ["vetter@flakks.com"]
-  spec.description   = %q{Compositional EasticSearch client library}
-  spec.summary       = %q{Powerful ElasticSearch client library to easily build complex queries}
+  spec.description   = %q{Full-Featured ElasticSearch Ruby Client with a Chainable DSL}
+  spec.summary       = %q{Full-Featured ElasticSearch Ruby Client with a Chainable DSL}
   spec.homepage      = "https://github.com/mrkamel/search_flip"
   spec.license       = "MIT"
 
