@@ -3,7 +3,7 @@
 
 **Full-Featured Elasticsearch Ruby Client with a Chainable DSL**
 
-[![Build Status](https://secure.travis-ci.org/mrkamel/search_flip.png?branch=master)](http://travis-ci.org/mrkamel/search_flip)
+[![Build Status](https://secure.travis-ci.org/mrkamel/search_flip.svg?branch=master)](http://travis-ci.org/mrkamel/search_flip)
 [![Gem Version](https://badge.fury.io/rb/search_flip.svg)](http://badge.fury.io/rb/search_flip)
 
 Using SearchFlip it is dead-simple to create index classes that correspond to
