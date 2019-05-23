@@ -96,7 +96,7 @@ Available config options are:
 * `bulk_limit` a global limit for bulk requests
 * `bulk_max_mb` a global limit for the payload of bulk requests
 * `auto_refresh` tells SearchFlip to automatically refresh an index after
-  import, index, delete, etc operations. This is e.g. usuful for testing, etc.
+  import, index, delete, etc operations. This is e.g. useful for testing, etc.
   Defaults to false.
 
 ## Usage
@@ -109,7 +109,7 @@ class CommentIndex
 end
 ```
 
-Then tell the Index about the index name, the correspoding model and how to
+Then tell the Index about the index name, the corresponding model and how to
 serialize the model for indexing.
 
 ```ruby
@@ -211,7 +211,7 @@ CommentIndex.close_index
 CommentIndex.open_index
 ```
 
-index records (automatically uses the bulk API):
+Index records (automatically uses the [Bulk API]):
 
 ```ruby
 CommentIndex.import(Comment.all)
@@ -220,7 +220,7 @@ CommentIndex.import([Comment.find(1), Comment.find(2)])
 CommentIndex.import(Comment.where("created_at > ?", Time.now - 7.days))
 ```
 
-query records:
+Query records:
 
 ```ruby
 CommentIndex.total_entries
@@ -238,7 +238,7 @@ CommentIndex.aggregate(:username).aggregations(:username)
 ```
 
 Please note that you can check the request that will be send to Elasticsearch
-by simply calling `#request` on the query:
+by calling `#request` on the query:
 
 ```ruby
 CommentIndex.search("hello world").sort(id: "desc").aggregate(:username).request
@@ -246,7 +246,7 @@ CommentIndex.search("hello world").sort(id: "desc").aggregate(:username).request
 ```
 
 
-delete records:
+Delete records:
 
 ```ruby
 # for Elasticsearch >= 2.x and < 5.x, the delete-by-query plugin is required
@@ -292,11 +292,10 @@ new_user.connection.update_aliases(actions: [
 ])
 ```
 
-If the alias already exists, you of course have to remove it as well first
-within `update_aliases`.
+If the alias already exists, you have to remove it as well first within `update_aliases`.
 
-Please note that `with_settings(index_name: '...')` returns an anonymous, i.e.
-temporary, class inherting from UserIndex and overwriting `index_name`.
+Please note: `with_settings(index_name: '...')` returns an anonymous (i.e.
+temporary) class which inherits from UserIndex and overwrites `index_name`.
 
 ## Chainable Methods
 
@@ -309,7 +308,7 @@ SearchFlip provides powerful methods to query/filter Elasticsearch:
 
 * `where`
 
-Feels like ActiveRecord's `where` and adds a bool filter clause to the request:
+The `.where` method feels like ActiveRecord's `where` and adds a bool filter clause to the request:
 
 ```ruby
 CommentIndex.where(reviewed: true)
@@ -319,7 +318,7 @@ CommentIndex.where(state: ["approved", "rejected"])
 
 * `where_not`
 
-Like `where`, but exluding the matching documents:
+The `.where_not` method is like `,where`, but excluding the matching documents:
 
 ```ruby
 CommentIndex.where_not(id: [1, 2, 3])
@@ -327,7 +326,7 @@ CommentIndex.where_not(id: [1, 2, 3])
 
 * `range`
 
-To add a range filter query:
+Use `.range` to add a range filter query:
 
 ```ruby
 CommentIndex.range(:created_at, gt: Date.today - 1.week, lt: Date.today)
@@ -335,7 +334,7 @@ CommentIndex.range(:created_at, gt: Date.today - 1.week, lt: Date.today)
 
 * `filter`
 
-Use `filter` to add raw filter queries:
+Use `.filter` to add raw filter queries:
 
 ```ruby
 CommentIndex.filter(term: { state: "approved" })
@@ -343,7 +342,7 @@ CommentIndex.filter(term: { state: "approved" })
 
 * `should`
 
-Use `should` to add raw should queries:
+Use `.should` to add raw should queries:
 
 ```ruby
 CommentIndex.should(term: { state: "approved" })
@@ -351,7 +350,7 @@ CommentIndex.should(term: { state: "approved" })
 
 * `must`
 
-Use `must` to add raw must queries:
+Use `.must` to add raw must queries:
 
 ```ruby
 CommentIndex.must(term: { state: "approved" })
@@ -876,3 +875,6 @@ $ rspec
 ```
 
 That's it.
+
+
+[Bulk API]: https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
