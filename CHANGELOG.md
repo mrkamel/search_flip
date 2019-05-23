@@ -1,6 +1,13 @@
 
 # CHANGELOG
 
+## v2.2.0
+
+* [DEPRECATED] `SearchFlip::Criteria#unscope` is now deprecated
+* Added `SearchFlip::Criteria#track_total_hits`
+
+## v2.1.0
+
 ## v2.0.0
 
 * Added `SearchFlip::Connection`
