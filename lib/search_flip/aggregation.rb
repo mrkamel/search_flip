@@ -1,7 +1,7 @@
 
 module SearchFlip
   # The SearchFlip::Aggregation class puts together everything
-  # required to use the ElasticSearch aggregation framework via mixins and
+  # required to use the Elasticsearch aggregation framework via mixins and
   # adds a method to convert it to a hash format to be used in the request.
 
   class Aggregation

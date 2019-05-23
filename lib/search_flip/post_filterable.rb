@@ -29,7 +29,7 @@ module SearchFlip
 
     # Adds a post query string query to the criteria while using AND as the
     # default operator unless otherwise specified. Check out the
-    # ElasticSearch docs for further details.
+    # Elasticsearch docs for further details.
     #
     # @example
     #   CommentIndex.aggregate(:user_id).post_search("message:hello OR message:worl*")
@@ -201,7 +201,7 @@ module SearchFlip
     # Adds a post range filter to the criteria without being forced to specify
     # the left and right end of the range, such that you can eg simply specify
     # lt, lte, gt and gte. For fully specified ranges, you can easily use
-    # #post_where, etc. Check out the ElasticSearch docs for further details
+    # #post_where, etc. Check out the Elasticsearch docs for further details
     # regarding the range filter.
     #
     # @example

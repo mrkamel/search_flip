@@ -11,14 +11,14 @@ module SearchFlip
     # @api private
     #
     # Initializes a new response object for the provided criteria and raw
-    # ElasticSearch response.
+    # Elasticsearch response.
 
     def initialize(criteria, response)
       self.criteria = criteria
       self.response = response
     end
 
-    # Returns the raw response, ie a hash derived from the ElasticSearch JSON
+    # Returns the raw response, ie a hash derived from the Elasticsearch JSON
     # response.
     #
     # @example
@@ -198,25 +198,25 @@ module SearchFlip
       end
     end
 
-    # Returns the hits returned by ElasticSearch.
+    # Returns the hits returned by Elasticsearch.
     #
     # @example
     #   CommentIndex.search("hello world").hits
     #   # => {"total"=>3, "max_score"=>2.34, "hits"=>[{...}, ...]}
     #
-    # @return [Hash] The hits returned by ElasticSearch
+    # @return [Hash] The hits returned by Elasticsearch
 
     def hits
       response["hits"]
     end
 
-    # Returns the scroll id returned by ElasticSearch, that can be used in the
+    # Returns the scroll id returned by Elasticsearch, that can be used in the
     # following request to fetch the next batch of records.
     #
     # @example
     #   CommentIndex.scroll(timeout: "1m").scroll_id #=> "cXVlcnlUaGVuRmV0Y2..."
     #
-    # @return [String] The scroll id returned by ElasticSearch
+    # @return [String] The scroll id returned by Elasticsearch
 
     def scroll_id
       response["_scroll_id"]
@@ -224,7 +224,7 @@ module SearchFlip
 
     # Returns the database records, usually ActiveRecord objects, depending on
     # the ORM you're using. The records are sorted using the order returned by
-    # ElasticSearch.
+    # Elasticsearch.
     #
     # @example
     #   CommentIndex.search("hello world").records # => [#<Comment ...>, ...]
@@ -240,7 +240,7 @@ module SearchFlip
     end
 
     # Builds and returns a scope for the array of ids in the current result set
-    # returned by ElasticSearch, including the eager load, preload and includes
+    # returned by Elasticsearch, including the eager load, preload and includes
     # associations, if specified. A scope is eg an ActiveRecord::Relation,
     # depending on the ORM you're using.
     #
@@ -259,7 +259,7 @@ module SearchFlip
       res
     end
 
-    # Returns the array of ids returned by ElasticSearch for the current result
+    # Returns the array of ids returned by Elasticsearch for the current result
     # set, ie the ids listed in the hits section of the response.
     #
     # @example
@@ -273,19 +273,19 @@ module SearchFlip
 
     def_delegators :ids, :size, :count, :length
 
-    # Returns the response time in milliseconds of ElasticSearch specified in
+    # Returns the response time in milliseconds of Elasticsearch specified in
     # the took info of the response.
     #
     # @example
     #   CommentIndex.match_all.took # => 6
     #
-    # @return [Fixnum] The ElasticSearch response time in milliseconds
+    # @return [Fixnum] The Elasticsearch response time in milliseconds
 
     def took
       response["took"]
     end
 
-    # Returns a single or all aggregations returned by ElasticSearch, depending
+    # Returns a single or all aggregations returned by Elasticsearch, depending
     # on whether or not a name is specified. If no name is specified, the raw
     # aggregation hash is simply returned. Contrary, if a name is specified,
     # only this aggregation is returned. Moreover, if a name is specified and
@@ -300,7 +300,7 @@ module SearchFlip
     #   CommentIndex.aggregate(:user_id).aggregations(:user_id)
     #   # => {4922=>1129, ...}
     #
-    # @return [Hash] Specific or all aggregations returned by ElasticSearch
+    # @return [Hash] Specific or all aggregations returned by Elasticsearch
 
     def aggregations(name = nil)
       return response["aggregations"] || {} unless name

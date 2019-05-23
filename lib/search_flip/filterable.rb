@@ -16,7 +16,7 @@ module SearchFlip
     end
 
     # Adds a query string query to the criteria while using AND as the default
-    # operator unless otherwise specified. Check out the ElasticSearch docs
+    # operator unless otherwise specified. Check out the Elasticsearch docs
     # for further details.
     #
     # @example
@@ -166,7 +166,7 @@ module SearchFlip
     # Adds a range filter to the criteria without being forced to specify the
     # left and right end of the range, such that you can eg simply specify lt,
     # lte, gt and gte. For fully specified ranges, you can as well use #where,
-    # etc. Check out the ElasticSearch docs for further details regarding the
+    # etc. Check out the Elasticsearch docs for further details regarding the
     # range filter.
     #
     # @example
@@ -184,7 +184,7 @@ module SearchFlip
 
     # Adds a match all filter/query to the criteria, which simply matches all
     # documents. This can be eg be used within filter aggregations or for
-    # filter chaining. Check out the ElasticSearch docs for further details.
+    # filter chaining. Check out the Elasticsearch docs for further details.
     #
     # @example Basic usage
     #   CommentIndex.match_all

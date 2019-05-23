@@ -4,7 +4,7 @@ module SearchFlip
   #
   # The SearchFlip::HTTPClient class wraps the http gem, is for internal use
   # and responsible for the http request/response handling, ie communicating
-  # with ElasticSearch.
+  # with Elasticsearch.
 
   class HTTPClient
     attr_accessor :request

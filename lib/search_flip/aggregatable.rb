@@ -1,7 +1,7 @@
 
 module SearchFlip
   # The SearchFlip::Aggregatable mixin provides handy methods for using
-  # the ElasticSearch aggregation framework, which can be chained with
+  # the Elasticsearch aggregation framework, which can be chained with
   # each other, all other criteria methods and even nested.
   #
   # @example
@@ -16,7 +16,7 @@ module SearchFlip
     end
 
     # Adds an arbitrary aggregation to the request which can be chained as well
-    # as nested. Check out the examples and ElasticSearch docs for further
+    # as nested. Check out the examples and Elasticsearch docs for further
     # details.
     #
     # @example Basic usage with optons

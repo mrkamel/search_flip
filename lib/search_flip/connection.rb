@@ -20,12 +20,12 @@ module SearchFlip
       @version_mutex = Mutex.new
     end
 
-    # Queries and returns the ElasticSearch version used.
+    # Queries and returns the Elasticsearch version used.
     #
     # @example
     #   connection.version # => e.g. 2.4.1
     #
-    # @return [String] The ElasticSearch version
+    # @return [String] The Elasticsearch version
 
     def version
       @version_mutex.synchronize do
@@ -33,7 +33,7 @@ module SearchFlip
       end
     end
 
-    # Queries and returns the ElasticSearch cluster health.
+    # Queries and returns the Elasticsearch cluster health.
     #
     # @example
     #   connection.cluster_health # => { "status" => "green", ... }
@@ -44,7 +44,7 @@ module SearchFlip
       http_client.headers(accept: "application/json").get("#{base_url}/_cluster/health").parse
     end
 
-    # Uses the ElasticSearch Multi Search API to execute multiple search requests
+    # Uses the Elasticsearch Multi Search API to execute multiple search requests
     # within a single request. Raises SearchFlip::ResponseError in case any
     # errors occur.
     #
@@ -97,7 +97,7 @@ module SearchFlip
         .parse
     end
 
-    # Sends an analyze request to ElasticSearch. Raises
+    # Sends an analyze request to Elasticsearch. Raises
     # SearchFlip::ResponseError in case any errors occur.
     #
     # @example
@@ -131,7 +131,7 @@ module SearchFlip
       Hashie::Mash.new(res)
     end
 
-    # Returns whether or not the associated ElasticSearch alias already
+    # Returns whether or not the associated Elasticsearch alias already
     # exists.
     #
     # @example
@@ -168,7 +168,7 @@ module SearchFlip
 
     alias_method :cat_indices, :get_indices
 
-    # Creates the specified index within ElasticSearch and applies index
+    # Creates the specified index within Elasticsearch and applies index
     # settings, if specified. Raises SearchFlip::ResponseError in case any
     # errors occur.
     #
@@ -184,7 +184,7 @@ module SearchFlip
       true
     end
 
-    # Closes the specified index within ElasticSearch. Raises
+    # Closes the specified index within Elasticsearch. Raises
     # SearchFlip::ResponseError in case any errors occur
     #
     # @param index_name [String] The index name
@@ -197,7 +197,7 @@ module SearchFlip
       true
     end
 
-    # Opens the specified index within ElasticSearch. Raises
+    # Opens the specified index within Elasticsearch. Raises
     # SearchFlip::ResponseError in case any errors occur
     #
     # @param index_name [String] The index name
@@ -210,7 +210,7 @@ module SearchFlip
       true
     end
 
-    # Updates the index settings within ElasticSearch according to the index
+    # Updates the index settings within Elasticsearch according to the index
     # settings specified. Raises SearchFlip::ResponseError in case any
     # errors occur.
     #
@@ -225,7 +225,7 @@ module SearchFlip
       true
     end
 
-    # Fetches the index settings for the specified index from ElasticSearch.
+    # Fetches the index settings for the specified index from Elasticsearch.
     # Sends a GET request to index_url/_settings. Raises
     # SearchFlip::ResponseError in case any errors occur.
     #
@@ -237,7 +237,7 @@ module SearchFlip
       http_client.headers(accept: "application/json").get("#{index_url(index_name)}/_settings").parse
     end
 
-    # Sends a refresh request to ElasticSearch. Raises
+    # Sends a refresh request to Elasticsearch. Raises
     # SearchFlip::ResponseError in case any errors occur.
     #
     # @param index_names [String, Array] The optional index names to refresh
@@ -250,7 +250,7 @@ module SearchFlip
     end
 
     # Updates the type mapping for the specified index and type within
-    # ElasticSearch according to the specified mapping. Raises
+    # Elasticsearch according to the specified mapping. Raises
     # SearchFlip::ResponseError in case any errors occur.
     #
     # @param index_name [String] The index name
@@ -270,7 +270,7 @@ module SearchFlip
     end
 
     # Retrieves the mapping for the specified index and type from
-    # ElasticSearch. Raises SearchFlip::ResponseError in case any errors occur.
+    # Elasticsearch. Raises SearchFlip::ResponseError in case any errors occur.
     #
     # @param index_name [String] The index name
     # @param type_name [String] The type name. Starting with Elasticsearch 7,
@@ -285,7 +285,7 @@ module SearchFlip
       http_client.headers(accept: "application/json").get("#{url}/_mapping", params: params).parse
     end
 
-    # Deletes the specified index from ElasticSearch. Raises
+    # Deletes the specified index from Elasticsearch. Raises
     # SearchFlip::ResponseError in case any errors occur.
     #
     # @param index_name [String] The index name
@@ -314,24 +314,24 @@ module SearchFlip
       raise e
     end
 
-    # Returns the full ElasticSearch type URL, ie base URL, index name with
+    # Returns the full Elasticsearch type URL, ie base URL, index name with
     # prefix and type name.
     #
     # @param index_name [String] The index name
     # @param type_name [String] The type name
     #
-    # @return [String] The ElasticSearch type URL
+    # @return [String] The Elasticsearch type URL
 
     def type_url(index_name, type_name)
       "#{index_url(index_name)}/#{type_name}"
     end
 
-    # Returns the ElasticSearch index URL for the specified index name, ie base
+    # Returns the Elasticsearch index URL for the specified index name, ie base
     # URL and index name with prefix.
     #
     # @param index_name [String] The index name
     #
-    # @return [String] The ElasticSearch index URL
+    # @return [String] The Elasticsearch index URL
 
     def index_url(index_name)
       "#{base_url}/#{index_name}"

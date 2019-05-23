@@ -1,10 +1,10 @@
 
 module SearchFlip
   # The SearchFlip::Index mixin makes your class correspond to an
-  # ElasticSearch index. Your class can then create or delete the index, modify
+  # Elasticsearch index. Your class can then create or delete the index, modify
   # the mapping, import records, delete records and query the index. This gem
-  # uses an individual ElasticSearch index for each index class, because
-  # ElasticSearch requires to have the same mapping for the same field name,
+  # uses an individual Elasticsearch index for each index class, because
+  # Elasticsearch requires to have the same mapping for the same field name,
   # even if the field is living in different types of the same index.
   #
   # @example Simple index class
@@ -257,9 +257,9 @@ module SearchFlip
         :records, :results, :should, :should_not, :must, :must_not, :preference, :search_type, :routing,
         :track_total_hits
 
-      # Override to specify the type name used within ElasticSearch. Recap,
+      # Override to specify the type name used within Elasticsearch. Recap,
       # this gem uses an individual index for each index class, because
-      # ElasticSearch requires to have the same mapping for the same field
+      # Elasticsearch requires to have the same mapping for the same field
       # name, even if the field is living in different types of the same index.
       #
       # @return [String] The name used for the type within the index
@@ -268,7 +268,7 @@ module SearchFlip
         "_doc"
       end
 
-      # Returns the base name of the index within ElasticSearch, ie the index
+      # Returns the base name of the index within Elasticsearch, ie the index
       # name without prefix.
       #
       # @return [String] The base name of the index, ie without prefix
@@ -279,7 +279,7 @@ module SearchFlip
 
       # @api private
       #
-      # Returns the full name of the index within ElasticSearch, ie with prefix
+      # Returns the full name of the index within Elasticsearch, ie with prefix
       # specified via SearchFlip::Config[:index_prefix].
       #
       # @return [String] The full index name
@@ -307,7 +307,7 @@ module SearchFlip
         {}
       end
 
-      # Returns whether or not the associated ElasticSearch index already
+      # Returns whether or not the associated Elasticsearch index already
       # exists.
       #
       # @return [Boolean] Whether or not the index exists
@@ -316,7 +316,7 @@ module SearchFlip
         connection.index_exists?(index_name_with_prefix)
       end
 
-      # Fetches the index settings from ElasticSearch. Sends a GET request to
+      # Fetches the index settings from Elasticsearch. Sends a GET request to
       # index_url/_settings. Raises SearchFlip::ResponseError in case any
       # errors occur.
       #
@@ -326,7 +326,7 @@ module SearchFlip
         connection.get_index_settings(index_name_with_prefix)
       end
 
-      # Creates the index within ElasticSearch and applies index settings, if
+      # Creates the index within Elasticsearch and applies index settings, if
       # specified. Raises SearchFlip::ResponseError in case any errors
       # occur.
       #
@@ -336,7 +336,7 @@ module SearchFlip
         connection.create_index(index_name_with_prefix, index_settings)
       end
 
-      # Closes the index within ElasticSearch. Raises SearchFlip::ResponseError
+      # Closes the index within Elasticsearch. Raises SearchFlip::ResponseError
       # in case any errors occur.
       #
       # @return [Boolean] Returns true or raises SearchFlip::ResponseError
@@ -345,7 +345,7 @@ module SearchFlip
         connection.close_index(index_name_with_prefix)
       end
 
-      # Opens the index within ElasticSearch. Raises SearchFlip::ResponseError
+      # Opens the index within Elasticsearch. Raises SearchFlip::ResponseError
       # in case any errors occur.
       #
       # @return [Boolean] Returns true or raises SearchFlip::ResponseError
@@ -354,7 +354,7 @@ module SearchFlip
         connection.open_index(index_name_with_prefix)
       end
 
-      # Updates the index settings within ElasticSearch according to the index
+      # Updates the index settings within Elasticsearch according to the index
       # settings specified. Raises SearchFlip::ResponseError in case any
       # errors occur.
       #
@@ -364,7 +364,7 @@ module SearchFlip
         connection.update_index_settings(index_name_with_prefix, index_settings)
       end
 
-      # Deletes the index from ElasticSearch. Raises SearchFlip::ResponseError
+      # Deletes the index from Elasticsearch. Raises SearchFlip::ResponseError
       # in case any errors occur.
 
       def delete_index
@@ -389,7 +389,7 @@ module SearchFlip
         {}
       end
 
-      # Updates the type mapping within ElasticSearch according to the mapping
+      # Updates the type mapping within Elasticsearch according to the mapping
       # currently specified. Raises SearchFlip::ResponseError in case any
       # errors occur.
 
@@ -401,7 +401,7 @@ module SearchFlip
         end
       end
 
-      # Retrieves the current type mapping from ElasticSearch. Raises
+      # Retrieves the current type mapping from Elasticsearch. Raises
       # SearchFlip::ResponseError in case any errors occur.
       #
       # @return [Hash] The current type mapping
@@ -424,7 +424,7 @@ module SearchFlip
         type_name != "_doc" || connection.version.to_i < 7
       end
 
-      # Retrieves the document specified by id from ElasticSearch. Raises
+      # Retrieves the document specified by id from Elasticsearch. Raises
       # SearchFlip::ResponseError specific exceptions in case any errors
       # occur.
       #
@@ -457,7 +457,7 @@ module SearchFlip
         connection.http_client.headers(accept: "application/json").post("#{type_url}/_mget", json: request, params: params).parse
       end
 
-      # Sends an analyze request to ElasticSearch. Raises
+      # Sends an analyze request to Elasticsearch. Raises
       # SearchFlip::ResponseError in case any errors occur.
       #
       # @example
@@ -469,7 +469,7 @@ module SearchFlip
         connection.http_client.headers(accept: "application/json").post("#{index_url}/_analyze", json: request, params: params).parse
       end
 
-      # Sends a index refresh request to ElasticSearch. Raises
+      # Sends a index refresh request to Elasticsearch. Raises
       # SearchFlip::ResponseError in case any errors occur.
 
       def refresh
@@ -487,7 +487,7 @@ module SearchFlip
 
       # Indexes the given record set, array of records or individual record. A
       # record set usually is an ActiveRecord::Relation, but can be any other
-      # ORM as well. Uses the ElasticSearch bulk API no matter what is
+      # ORM as well. Uses the Elasticsearch bulk API no matter what is
       # provided. Refreshes the index if auto_refresh is enabled. Raises
       # SearchFlip::ResponseError in case any errors occur.
       #
@@ -525,9 +525,9 @@ module SearchFlip
       end
 
       # Indexes the given record set, array of records or individual record
-      # using ElasticSearch's create operation via the Bulk API, such that the
+      # using Elasticsearch's create operation via the Bulk API, such that the
       # request will fail if a record with a particular primary key already
-      # exists in ElasticSearch.
+      # exists in Elasticsearch.
       #
       # @see #index See #index for more details regarding available
       #   params and return values
@@ -543,9 +543,9 @@ module SearchFlip
       end
 
       # Indexes the given record set, array of records or individual record
-      # using ElasticSearch's update operation via the Bulk API, such that the
+      # using Elasticsearch's update operation via the Bulk API, such that the
       # request will fail if a record you want to update does not already exist
-      # in ElasticSearch.
+      # in Elasticsearch.
       #
       # @see #index See #index for more details regarding available
       #   params and return values
@@ -561,7 +561,7 @@ module SearchFlip
       end
 
       # Deletes the given record set, array of records or individual record
-      # from ElasticSearch using the Bulk API.
+      # from Elasticsearch using the Bulk API.
       #
       # @see #index See #index for more details regarding available
       #   params and return values
@@ -615,19 +615,19 @@ module SearchFlip
         refresh if SearchFlip::Config[:auto_refresh]
       end
 
-      # Returns the full ElasticSearch type URL, ie base URL, index name with
+      # Returns the full Elasticsearch type URL, ie base URL, index name with
       # prefix and type name.
       #
-      # @return [String] The ElasticSearch type URL
+      # @return [String] The Elasticsearch type URL
 
       def type_url
         connection.type_url(index_name_with_prefix, type_name)
       end
 
-      # Returns the ElasticSearch index URL, ie base URL and index name with
+      # Returns the Elasticsearch index URL, ie base URL and index name with
       # prefix.
       #
-      # @return [String] The ElasticSearch index URL
+      # @return [String] The Elasticsearch index URL
 
       def index_url
         connection.index_url(index_name_with_prefix)

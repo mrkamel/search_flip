@@ -3,7 +3,7 @@ module SearchFlip
   # The SearchFlip::Criteria class serves the purpose of chaining various
   # filtering and aggregation methods. Each chainable method creates a new
   # criteria object until a method is called that finally sends the respective
-  # request to ElasticSearch and returns the result.
+  # request to Elasticsearch and returns the result.
   #
   # @example
   #   CommentIndex.where(public: true).sort(id: "desc").limit(1_000).records
@@ -331,9 +331,9 @@ module SearchFlip
     #   query.results[0].highlight.title # => "<em>hello</em> world"
     #
     # @param fields [Hash, Array, String, Symbol] The fields to highligt.
-    #   Supports raw ElasticSearch values by passing a Hash.
+    #   Supports raw Elasticsearch values by passing a Hash.
     #
-    # @param options [Hash] Extra highlighting options. Check out the ElasticSearch
+    # @param options [Hash] Extra highlighting options. Check out the Elasticsearch
     #   docs for further details.
     #
     # @return [SearchFlip::Criteria] A new criteria including the highlighting
@@ -363,7 +363,7 @@ module SearchFlip
     #
     # @param name [String, Symbol] The name of the suggestion section
     #
-    # @param options [Hash] Additional suggestion options. Check out the ElasticSearch
+    # @param options [Hash] Additional suggestion options. Check out the Elasticsearch
     #   docs for further details.
     #
     # @return [SearchFlip::Criteria] A new criteria including the suggestion section
@@ -416,8 +416,8 @@ module SearchFlip
       end
     end
 
-    # Sends a delete by query request to ElasticSearch, such that all documents
-    # matching the query get deleted. Please note, for certain ElasticSearch
+    # Sends a delete by query request to Elasticsearch, such that all documents
+    # matching the query get deleted. Please note, for certain Elasticsearch
     # versions you need to install the delete-by-query plugin to get support
     # for this feature. Refreshes the index if the auto_refresh is enabled.
     # Raises SearchFlip::ResponseError in case any errors occur.
@@ -444,7 +444,7 @@ module SearchFlip
       true
     end
 
-    # Use to specify which fields of the source document you want ElasticSearch
+    # Use to specify which fields of the source document you want Elasticsearch
     # to return for each matching result.
     #
     # @example
@@ -519,10 +519,10 @@ module SearchFlip
       end
     end
 
-    # Specify the sort order you want ElasticSearch to use for sorting the
+    # Specify the sort order you want Elasticsearch to use for sorting the
     # results. When you call this multiple times, the sort orders are appended
     # to the already existing ones. The sort arguments get passed to
-    # ElasticSearch without modifications, such that you can use sort by
+    # Elasticsearch without modifications, such that you can use sort by
     # script, etc here as well.
     #
     # @example Default usage
@@ -542,7 +542,7 @@ module SearchFlip
     # @example Sort by native script
     #   CommentIndex.sort("_script" => "sort_script", lang: "native", order: "asc", type: "number")
     #
-    # @param args The sort values that get passed to ElasticSearch
+    # @param args The sort values that get passed to Elasticsearch
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
@@ -554,7 +554,7 @@ module SearchFlip
 
     alias_method :order, :sort
 
-    # Specify the sort order you want ElasticSearch to use for sorting the
+    # Specify the sort order you want Elasticsearch to use for sorting the
     # results with already existing sort orders being removed.
     #
     # @example
@@ -577,7 +577,7 @@ module SearchFlip
     alias_method :reorder, :resort
 
     # Adds a fully custom field/section to the request, such that upcoming or
-    # minor ElasticSearch features as well as other custom requirements can be
+    # minor Elasticsearch features as well as other custom requirements can be
     # used without having yet specialized criteria methods.
     #
     # @note Use with caution, because using #custom will potentiall override
@@ -623,7 +623,7 @@ module SearchFlip
       (offset_value || 0).to_i
     end
 
-    # Sets the request limit, ie ElasticSearch's size parameter that is used
+    # Sets the request limit, ie Elasticsearch's size parameter that is used
     # to restrict the results that get returned.
     #
     # @example
@@ -649,7 +649,7 @@ module SearchFlip
     end
 
     # Sets pagination parameters for the criteria by using offset and limit,
-    # ie ElasticSearch's from and size parameters.
+    # ie Elasticsearch's from and size parameters.
     #
     # @example
     #   CommentIndex.paginate(page: 3)
@@ -677,7 +677,7 @@ module SearchFlip
 
     # Fetches the records specified by the criteria in batches using the
     # ElasicSearch scroll API and yields each batch. The batch size and scroll
-    # API timeout can be specified. Check out the ElasticSearch docs for
+    # API timeout can be specified. Check out the Elasticsearch docs for
     # further details.
     #
     # @example
@@ -689,7 +689,7 @@ module SearchFlip
     # @option options batch_size [Fixnum] The number of records to fetch per
     #   batch. Uses #limit to control the batch size.
     # @option options timeout [String] The timeout per scroll request, ie how
-    #   long ElasticSearch will keep the request handle open.
+    #   long Elasticsearch will keep the request handle open.
 
     def find_in_batches(options = {})
       return enum_for(:find_in_batches, options) unless block_given?
@@ -700,8 +700,8 @@ module SearchFlip
     end
 
     # Fetches the results specified by the criteria in batches using the
-    # ElasticSearch scroll API and yields each batch. The batch size and scroll
-    # API timeout can be specified. Checkout out the ElasticSearch docs for
+    # Elasticsearch scroll API and yields each batch. The batch size and scroll
+    # API timeout can be specified. Checkout out the Elasticsearch docs for
     # further details.
     #
     # @example
@@ -713,7 +713,7 @@ module SearchFlip
     # @option options batch_size [Fixnum] The number of records to fetch per
     #   batch. Uses #limit to control the batch size.
     # @option options timeout [String] The timeout per scroll request, ie how
-    #   long ElasticSearch will keep the request handle open.
+    #   long Elasticsearch will keep the request handle open.
 
     def find_results_in_batches(options = {})
       return enum_for(:find_results_in_batches, options) unless block_given?
@@ -724,8 +724,8 @@ module SearchFlip
     end
 
     # Fetches the records specified by the relatin in batches using the
-    # ElasticSearch scroll API and yields each record. The batch size and
-    # scroll API timeout can be specified. Check out the ElasticSearch docs for
+    # Elasticsearch scroll API and yields each record. The batch size and
+    # scroll API timeout can be specified. Check out the Elasticsearch docs for
     # further details.
     #
     # @example
@@ -737,7 +737,7 @@ module SearchFlip
     # @option options batch_size [Fixnum] The number of records to fetch per
     #   batch. Uses #limit to control the batch size.
     # @option options timeout [String] The timeout per scroll request, ie how
-    #   long ElasticSearch will keep the request handle open.
+    #   long Elasticsearch will keep the request handle open.
 
     def find_each(options = {})
       return enum_for(:find_each, options) unless block_given?
@@ -752,8 +752,8 @@ module SearchFlip
     alias_method :each, :find_each
 
     # Fetches the results specified by the criteria in batches using the
-    # ElasticSearch scroll API and yields each result. The batch size and scroll
-    # API timeout can be specified. Checkout out the ElasticSearch docs for
+    # Elasticsearch scroll API and yields each result. The batch size and scroll
+    # API timeout can be specified. Checkout out the Elasticsearch docs for
     # further details.
     #
     # @example
@@ -765,7 +765,7 @@ module SearchFlip
     # @option options batch_size [Fixnum] The number of records to fetch per
     #   batch. Uses #limit to control the batch size.
     # @option options timeout [String] The timeout per scroll request, ie how
-    #   long ElasticSearch will keep the request handle open.
+    #   long Elasticsearch will keep the request handle open.
 
     def find_each_result(options = {})
       return enum_for(:find_each_result, options) unless block_given?
@@ -778,7 +778,7 @@ module SearchFlip
     end
 
     # Executes the search request for the current criteria, ie sends the
-    # request to ElasticSearch and returns the response. Connection and
+    # request to Elasticsearch and returns the response. Connection and
     # response errors will be rescued if you specify the criteria to be
     # #failsafe, such that an empty response is returned instead.
     #
@@ -825,7 +825,7 @@ module SearchFlip
     alias_method :response, :execute
 
     # Marks the criteria to be failsafe, ie certain exceptions raised due to
-    # invalid queries, inavailability of ElasticSearch, etc get rescued and an
+    # invalid queries, inavailability of Elasticsearch, etc get rescued and an
     # empty criteria is returned instead.
     #
     # @see #execute See #execute for further details
