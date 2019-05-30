@@ -47,7 +47,7 @@ Comment.search(
 Comment.search("hello world", where: { available: true }, order: { id: "desc" }, aggs: [:username])
 
 # search_flip
-CommentIndex.where(available: true).search("hello world").sort(id: "desc").aggregate(:username)
+CommentIndex.search("hello world").where(available: true).sort(id: "desc").aggregate(:username)
 
 ```
 
