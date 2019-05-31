@@ -11,7 +11,7 @@ module SearchFlip
   module Filterable
     def self.included(base)
       base.class_eval do
-        attr_accessor :search_values, :must_values, :must_not_values, :should_values, :filter_values
+        attr_accessor :must_values, :must_not_values, :should_values, :filter_values
       end
     end
 
@@ -30,11 +30,9 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def search(q, options = {})
-      fresh.tap do |criteria|
-        if q.to_s.strip.length > 0
-          criteria.search_values = (search_values || []) + [query_string: { query: q, default_operator: :AND }.merge(options)]
-        end
-      end
+      return self if q.to_s.strip.length.zero?
+
+      must(query_string: { query: q, default_operator: :AND }.merge(options))
     end
 
     # Adds filters to your criteria for the supplied hash composed of
