@@ -23,7 +23,7 @@ module SearchFlip
   module PostFilterable
     def self.included(base)
       base.class_eval do
-        attr_accessor :post_search_values, :post_must_values, :post_must_not_values, :post_should_values, :post_filter_values
+        attr_accessor :post_must_values, :post_must_not_values, :post_should_values, :post_filter_values
       end
     end
 
@@ -44,11 +44,9 @@ module SearchFlip
     def post_search(q, options = {})
       raise(SearchFlip::NotSupportedError) if target.connection.version.to_i < 2
 
-      fresh.tap do |criteria|
-        if q.to_s.strip.length > 0
-          criteria.post_search_values = (post_search_values || []) + [query_string: { query: q, default_operator: :AND }.merge(options)]
-        end
-      end
+      return self if q.to_s.strip.length.zero?
+
+      post_must(query_string: { query: q, default_operator: :AND }.merge(options))
     end
 
     # Adds post filters to your criteria for the supplied hash composed of
