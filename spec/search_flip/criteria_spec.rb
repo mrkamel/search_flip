@@ -36,7 +36,7 @@ RSpec.describe SearchFlip::Criteria do
       methods = [
         :profile_value, :failsafe_value, :terminate_after_value, :timeout_value,
         :offset_value, :limit_value, :scroll_args, :source_value, :preference_value,
-        :search_type_value, :routing_value, :track_total_hits_value
+        :search_type_value, :routing_value, :track_total_hits_value, :explain_value
       ]
 
       methods.each do |method|
@@ -1032,6 +1032,15 @@ RSpec.describe SearchFlip::Criteria do
         expect(query.request[:track_total_hits]).to eq(false)
         expect { query.execute }.not_to raise_error
       end
+    end
+  end
+
+  describe "#explain" do
+    it "returns the explaination" do
+      ProductIndex.import create(:product)
+
+      query = ProductIndex.match_all.explain(true)
+      expect(query.results.first._hit.key?(:_explanation)).to eq(true)
     end
   end
 

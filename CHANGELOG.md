@@ -1,9 +1,16 @@
 
 # CHANGELOG
 
+## v2.3.0
+
+* [DEPRECATED] `SearchFlip::Criteria#should` is deprecated and become
+  equivalent to `.must(bool: { should ... })` in search_flip 3
+* Added `SearchFlip::Criteria#explain`
+
 ## v2.2.0
 
-* [DEPRECATED] `SearchFlip::Criteria#unscope` is now deprecated
+* [DEPRECATED] `SearchFlip::Criteria#unscope` is deprecated and will be removed
+  in search_flip 3
 * Added `SearchFlip::Criteria#track_total_hits`
 
 ## v2.1.0
