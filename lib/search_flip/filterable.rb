@@ -158,7 +158,7 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def should(*args)
-      warn "[DEPRECATION] should will change in search_flip 3. Please use .must(bool: { should: ... }) until release."
+      warn "[DEPRECATION] should will change and become equalivalent to .must(bool: { should: ... }) in search_flip 3"
 
       fresh.tap do |criteria|
         criteria.should_values = (should_values || []) + args
