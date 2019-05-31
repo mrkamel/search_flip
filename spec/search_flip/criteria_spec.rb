@@ -54,8 +54,8 @@ RSpec.describe SearchFlip::Criteria do
 
     describe "array concatenations" do
       methods = [
-        :sort_values, :includes_values, :preload_values, :eager_load_values, :search_values,
-        :must_values, :must_not_values, :should_values, :filter_values, :post_search_values,
+        :sort_values, :includes_values, :preload_values, :eager_load_values,
+        :must_values, :must_not_values, :should_values, :filter_values,
         :post_must_values, :post_must_not_values, :post_should_values, :post_filter_values
       ]
 
@@ -888,19 +888,6 @@ RSpec.describe SearchFlip::Criteria do
       expect(ProductIndex.search("Title1 Title3", default_operator: :OR).records.to_set).to eq([product1, product3].to_set)
       expect(ProductIndex.search("Title1 OR Title2").search("Title1 OR Title3").records).to eq([product1])
       expect(ProductIndex.search("Title1 OR Title3").where(price: 5..15).records).to eq([product1])
-    end
-  end
-
-  describe "#unscope" do
-    it "removes the specified constraints and is chainable" do
-      product1 = create(:product, title: "Title1", description: "Description1", price: 10)
-      product2 = create(:product, title: "Title2", description: "Description2", price: 20)
-      product3 = create(:product, title: "Title3", description: "Description2", price: 30)
-
-      ProductIndex.import [product1, product2, product3]
-
-      expect(ProductIndex.search("Title1 OR Title2").search("Title1 OR Title3").records).to eq([product1])
-      expect(ProductIndex.search("Title1 OR Title2").unscope(:search).search("Title1 OR Title3").records.to_set).to eq([product1, product3].to_set)
     end
   end
 

@@ -58,12 +58,10 @@ module SearchFlip
         criteria.includes_values = (criteria.includes_values || []) + other.includes_values if other.includes_values
         criteria.preload_values = (criteria.preload_values || []) + other.preload_values if other.preload_values
         criteria.eager_load_values = (criteria.eager_load_values || []) + other.eager_load_values if other.eager_load_values
-        criteria.search_values = (criteria.search_values || []) + other.search_values if other.search_values
         criteria.must_values = (criteria.must_values || []) + other.must_values if other.must_values
         criteria.must_not_values = (criteria.must_not_values || []) + other.must_not_values if other.must_not_values
         criteria.should_values = (criteria.should_values || []) + other.should_values if other.should_values
         criteria.filter_values = (criteria.filter_values || []) + other.filter_values if other.filter_values
-        criteria.post_search_values = (criteria.post_search_values || []) + other.post_search_values if other.post_search_values
         criteria.post_must_values = (criteria.post_must_values || []) + other.post_must_values if other.post_must_values
         criteria.post_must_not_values = (criteria.post_must_not_values || []) + other.post_must_not_values if other.post_must_not_values
         criteria.post_should_values = (criteria.post_should_values || []) + other.post_should_values if other.post_should_values
@@ -190,37 +188,6 @@ module SearchFlip
       end
     end
 
-    # Creates a new criteria while removing all specified scopes. Currently,
-    # you can unscope :search, :post_search, :sort, :highlight, :suggest, :custom
-    # and :aggregate.
-    #
-    # @example
-    #   CommentIndex.search("hello world").aggregate(:username).unscope(:search, :aggregate)
-    #
-    # @param scopes [Symbol] All scopes that you want to remove
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def unscope(*scopes)
-      warn "[DEPRECATION] unscope is deprecated and will be removed in search_flip 3"
-
-      unknown = scopes - [:search, :post_search, :sort, :highlight, :suggest, :custom, :aggregate]
-
-      raise(ArgumentError, "Can't unscope #{unknown.join(", ")}") if unknown.size > 0
-
-      scopes = scopes.to_set
-
-      fresh.tap do |criteria|
-        criteria.search_values = nil if scopes.include?(:search)
-        criteria.post_search_values = nil if scopes.include?(:post_search)
-        criteria.sort_values = nil if scopes.include?(:sort)
-        criteria.hightlight_values = nil if scopes.include?(:highlight)
-        criteria.suggest_values = nil if scopes.include?(:suggest)
-        criteria.custom_values = nil if scopes.include?(:custom)
-        criteria.aggregation_values = nil if scopes.include?(:aggregate)
-      end
-    end
-
     # @api private
     #
     # Convenience method to have a unified conversion api.
@@ -266,11 +233,11 @@ module SearchFlip
     def request
       res = {}
 
-      if must_values || search_values || must_not_values || should_values || filter_values
+      if must_values || must_not_values || should_values || filter_values
         if connection.version.to_i >= 2
           res[:query] = {
             bool: {}
-              .merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {})
+              .merge(must_values ? { must: must_values } : {})
               .merge(must_not_values ? { must_not: must_not_values } : {})
               .merge(should_values ? { should: should_values } : {})
               .merge(filter_values ? { filter: filter_values } : {})
@@ -279,7 +246,7 @@ module SearchFlip
           filters = (filter_values || []) + (must_not_values || []).map { |must_not_value| { not: must_not_value } }
 
           queries = {}
-            .merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {})
+            .merge(must_values ? { must: must_values } : {})
             .merge(should_values ? { should: should_values } : {})
 
           res[:query] =
@@ -306,11 +273,11 @@ module SearchFlip
       res[:sort] = sort_values if sort_values
       res[:aggregations] = aggregation_values if aggregation_values
 
-      if post_must_values || post_search_values || post_must_not_values || post_should_values || post_filter_values
+      if post_must_values || post_must_not_values || post_should_values || post_filter_values
         if connection.version.to_i >= 2
           res[:post_filter] = {
             bool: {}
-              .merge(post_must_values || post_search_values ? { must: (post_must_values || []) + (post_search_values || []) } : {})
+              .merge(post_must_values ? { must: post_must_values } : {})
               .merge(post_must_not_values ? { must_not: post_must_not_values } : {})
               .merge(post_should_values ? { should: post_should_values } : {})
               .merge(post_filter_values ? { filter: post_filter_values } : {})
@@ -319,7 +286,7 @@ module SearchFlip
           post_filters = (post_filter_values || []) + (post_must_not_values || []).map { |post_must_not_value| { not: post_must_not_value } }
 
           post_queries = {}
-            .merge(post_must_values || post_search_values ? { must: (post_must_values || []) + (post_search_values || []) } : {})
+            .merge(post_must_values ? { must: post_must_values } : {})
             .merge(post_should_values ? { should: post_should_values } : {})
 
           post_filters_and_queries = post_filters + (post_queries.size > 0 ? [bool: post_queries] : [])
