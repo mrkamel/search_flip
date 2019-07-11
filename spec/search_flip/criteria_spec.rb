@@ -36,7 +36,7 @@ RSpec.describe SearchFlip::Criteria do
       methods = [
         :profile_value, :failsafe_value, :terminate_after_value, :timeout_value,
         :offset_value, :limit_value, :scroll_args, :source_value, :preference_value,
-        :search_type_value, :routing_value, :track_total_hits_value
+        :search_type_value, :routing_value, :track_total_hits_value, :explain_value
       ]
 
       methods.each do |method|
@@ -256,6 +256,54 @@ RSpec.describe SearchFlip::Criteria do
 
       expect(query1.records.to_set).to eq([product1, product2].to_set)
       expect(query2.records).to eq([product1])
+    end
+  end
+
+  describe "#must" do
+    it "sets up the constraints correctly and is chainable" do
+      product1 = create(:product, price: 100, category: "category1")
+      product2 = create(:product, price: 200, category: "category2")
+      product3 = create(:product, price: 300, category: "category1")
+
+      ProductIndex.import [product1, product2, product3]
+
+      query1 = ProductIndex.must(range: { price: { gte: 100, lte: 200 } })
+      query2 = query1.must(term: { category: "category1" })
+
+      expect(query1.records.to_set).to eq([product1, product2].to_set)
+      expect(query2.records).to eq([product1])
+    end
+  end
+
+  describe "#must_not" do
+    it "sets up the constraints correctly and is chainable" do
+      product1 = create(:product, price: 100, category: "category1")
+      product2 = create(:product, price: 200, category: "category2")
+      product3 = create(:product, price: 300, category: "category1")
+
+      ProductIndex.import [product1, product2, product3]
+
+      query1 = ProductIndex.must_not(range: { price: { gt: 200, lte: 300 } })
+      query2 = query1.must_not(term: { category: "category2" })
+
+      expect(query1.records.to_set).to eq([product1, product2].to_set)
+      expect(query2.records).to eq([product1])
+    end
+  end
+
+  describe "#should" do
+    it "sets up the constraints correctly and is chainable" do
+      product1 = create(:product, price: 100, category: "category1")
+      product2 = create(:product, price: 200, category: "category2")
+      product3 = create(:product, price: 300, category: "category1")
+
+      ProductIndex.import [product1, product2, product3]
+
+      query1 = ProductIndex.should(range: { price: { gte: 100, lt: 200 } })
+      query2 = query1.should(term: { category: "category2" })
+
+      expect(query1.records.to_set).to eq([product1].to_set)
+      expect(query2.records.to_set).to eq([product1, product2].to_set)
     end
   end
 
@@ -1032,6 +1080,15 @@ RSpec.describe SearchFlip::Criteria do
         expect(query.request[:track_total_hits]).to eq(false)
         expect { query.execute }.not_to raise_error
       end
+    end
+  end
+
+  describe "#explain" do
+    it "returns the explaination" do
+      ProductIndex.import create(:product)
+
+      query = ProductIndex.match_all.explain(true)
+      expect(query.results.first._hit.key?(:_explanation)).to eq(true)
     end
   end
 
