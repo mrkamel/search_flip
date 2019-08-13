@@ -7,6 +7,7 @@ env:
   - ES_IMAGE=elasticsearch:5.4
   - ES_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:6.7.0
   - ES_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:7.0.0
+  - ES_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:7.3.0
 rvm:
   - ruby-head
 before_install:
