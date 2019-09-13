@@ -55,8 +55,8 @@ RSpec.describe SearchFlip::Criteria do
     describe "array concatenations" do
       methods = [
         :sort_values, :includes_values, :preload_values, :eager_load_values,
-        :must_values, :must_not_values, :should_values, :filter_values,
-        :post_must_values, :post_must_not_values, :post_should_values, :post_filter_values
+        :must_values, :must_not_values, :filter_values,
+        :post_must_values, :post_must_not_values, :post_filter_values
       ]
 
       methods.each do |method|
@@ -299,11 +299,12 @@ RSpec.describe SearchFlip::Criteria do
 
       ProductIndex.import [product1, product2, product3]
 
-      query1 = ProductIndex.should(range: { price: { gte: 100, lt: 200 } })
-      query2 = query1.should(term: { category: "category2" })
+      query = ProductIndex.should(
+        { range: { price: { gte: 100, lt: 200 } } },
+        { term: { category: "category2" } }
+      )
 
-      expect(query1.records.to_set).to eq([product1].to_set)
-      expect(query2.records.to_set).to eq([product1, product2].to_set)
+      expect(query.records.to_set).to eq([product1, product2].to_set)
     end
   end
 
@@ -515,6 +516,80 @@ RSpec.describe SearchFlip::Criteria do
 
       aggregations = query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
       expect(aggregations).to eq("category1" => 2, "category2" => 1)
+    end
+  end
+
+  describe "#post_must" do
+    it "sets up the constraints correctly and is chainable" do
+      product1 = create(:product, price: 100, category: "category1")
+      product2 = create(:product, price: 200, category: "category2")
+      product3 = create(:product, price: 300, category: "category1")
+
+      ProductIndex.import [product1, product2, product3]
+
+      query1 = ProductIndex.aggregate(:category).post_must(range: { price: { gte: 100, lte: 200 } })
+      query2 = query1.post_must(term: { category: "category1" })
+
+      expect(query1.records.to_set).to eq([product1, product2].to_set)
+      expect(query2.records).to eq([product1])
+
+      aggregations = query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1)
+
+      aggregations = query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1)
+    end
+  end
+
+  describe "#post_must_not" do
+    it "sets up the constraints correctly and is chainable" do
+      product1 = create(:product, price: 100, category: "category1")
+      product2 = create(:product, price: 200, category: "category2")
+      product3 = create(:product, price: 300, category: "category1")
+
+      ProductIndex.import [product1, product2, product3]
+
+      query1 = ProductIndex.aggregate(:category).post_must_not(range: { price: { gte: 50, lte: 150 } })
+      query2 = query1.post_must_not(term: { category: "category1" })
+
+      expect(query1.records.to_set).to eq([product2, product3].to_set)
+      expect(query2.records).to eq([product2])
+
+      aggregations = query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1)
+
+      aggregations = query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1)
+    end
+  end
+
+  describe "#post_should" do
+    it "sets up the constraints correctly and is chainable" do
+      product1 = create(:product, price: 100, category: "category1")
+      product2 = create(:product, price: 200, category: "category3")
+      product3 = create(:product, price: 300, category: "category2")
+      product4 = create(:product, price: 400, category: "category1")
+
+      ProductIndex.import [product1, product2, product3, product4]
+
+      query1 = ProductIndex.aggregate(:category).post_should(
+        { term: { category: "category1" } },
+        { term: { category: "category2" } }
+      )
+
+      query2 = query1.post_should(
+        { range: { price: { gte: 50, lte: 150 } } },
+        { range: { price: { gte: 250, lte: 350 } } }
+      )
+
+      expect(query1.records.to_set).to eq([product1, product3, product4].to_set)
+      expect(query2.records.to_set).to eq([product1, product3].to_set)
+
+      aggregations = query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1, "category3" => 1)
+
+      aggregations = query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1, "category3" => 1)
     end
   end
 
