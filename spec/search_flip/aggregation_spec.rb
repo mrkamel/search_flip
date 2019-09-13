@@ -288,7 +288,7 @@ RSpec.describe SearchFlip::Aggregation do
         :profile_value, :failsafe_value, :terminate_after_value, :timeout_value, :offset_value, :limit_value,
         :scroll_args, :highlight_values, :suggest_values, :custom_value, :source_value, :sort_values,
         :includes_values, :preload_values, :eager_load_values, :post_must_values,
-        :post_must_not_values, :post_should_values, :post_filter_values, :preference_value,
+        :post_must_not_values, :post_filter_values, :preference_value,
         :search_type_value, :routing_value
       ]
 
@@ -309,7 +309,7 @@ RSpec.describe SearchFlip::Aggregation do
     end
 
     describe "array concatenations" do
-      methods = [:must_values, :must_not_values, :should_values, :filter_values]
+      methods = [:must_values, :must_not_values, :filter_values]
 
       methods.each do |method|
         it "concatenates the values for #{method}" do

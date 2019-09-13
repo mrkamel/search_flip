@@ -11,7 +11,7 @@ module SearchFlip
   module Filterable
     def self.included(base)
       base.class_eval do
-        attr_accessor :must_values, :must_not_values, :should_values, :filter_values
+        attr_accessor :must_values, :must_not_values, :filter_values
       end
     end
 
@@ -145,22 +145,20 @@ module SearchFlip
       end
     end
 
-    # Adds raw should queries to the criteria.
+    # Adds a raw should query to the criteria.
     #
     # @example
-    #   CommentIndex.should(term: { state: "new" })
-    #   CommentIndex.should(range: { created_at: { gt: Time.parse"2016-01-01") }})
+    #   CommentIndex.should(
+    #     { term: { state: "new" } },
+    #     { term: { state: "reviewed" } }
+    #   )
     #
-    # @param args [Array, Hash] The raw should query arguments
+    # @param args [Array] The raw should query arguments
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def should(*args)
-      warn "[DEPRECATION] should will change and become equalivalent to .must(bool: { should: ... }) in search_flip 3"
-
-      fresh.tap do |criteria|
-        criteria.should_values = (should_values || []) + args
-      end
+      must(bool: { should: args })
     end
 
     # Adds a range filter to the criteria without being forced to specify the

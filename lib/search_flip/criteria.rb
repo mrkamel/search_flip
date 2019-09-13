@@ -60,11 +60,9 @@ module SearchFlip
         criteria.eager_load_values = (criteria.eager_load_values || []) + other.eager_load_values if other.eager_load_values
         criteria.must_values = (criteria.must_values || []) + other.must_values if other.must_values
         criteria.must_not_values = (criteria.must_not_values || []) + other.must_not_values if other.must_not_values
-        criteria.should_values = (criteria.should_values || []) + other.should_values if other.should_values
         criteria.filter_values = (criteria.filter_values || []) + other.filter_values if other.filter_values
         criteria.post_must_values = (criteria.post_must_values || []) + other.post_must_values if other.post_must_values
         criteria.post_must_not_values = (criteria.post_must_not_values || []) + other.post_must_not_values if other.post_must_not_values
-        criteria.post_should_values = (criteria.post_should_values || []) + other.post_should_values if other.post_should_values
         criteria.post_filter_values = (criteria.post_filter_values || []) + other.post_filter_values if other.post_filter_values
 
         criteria.highlight_values = (criteria.highlight_values || {}).merge(other.highlight_values) if other.highlight_values
@@ -233,21 +231,18 @@ module SearchFlip
     def request
       res = {}
 
-      if must_values || must_not_values || should_values || filter_values
+      if must_values || must_not_values || filter_values
         if connection.version.to_i >= 2
           res[:query] = {
             bool: {}
               .merge(must_values ? { must: must_values } : {})
               .merge(must_not_values ? { must_not: must_not_values } : {})
-              .merge(should_values ? { should: should_values } : {})
               .merge(filter_values ? { filter: filter_values } : {})
           }
         else
           filters = (filter_values || []) + (must_not_values || []).map { |must_not_value| { not: must_not_value } }
 
-          queries = {}
-            .merge(must_values ? { must: must_values } : {})
-            .merge(should_values ? { should: should_values } : {})
+          queries = must_values ? { must: must_values } : {}
 
           res[:query] =
             if filters.size > 0
@@ -273,22 +268,17 @@ module SearchFlip
       res[:sort] = sort_values if sort_values
       res[:aggregations] = aggregation_values if aggregation_values
 
-      if post_must_values || post_must_not_values || post_should_values || post_filter_values
+      if post_must_values || post_must_not_values || post_filter_values
         if connection.version.to_i >= 2
           res[:post_filter] = {
             bool: {}
               .merge(post_must_values ? { must: post_must_values } : {})
               .merge(post_must_not_values ? { must_not: post_must_not_values } : {})
-              .merge(post_should_values ? { should: post_should_values } : {})
               .merge(post_filter_values ? { filter: post_filter_values } : {})
           }
         else
           post_filters = (post_filter_values || []) + (post_must_not_values || []).map { |post_must_not_value| { not: post_must_not_value } }
-
-          post_queries = {}
-            .merge(post_must_values ? { must: post_must_values } : {})
-            .merge(post_should_values ? { should: post_should_values } : {})
-
+          post_queries = post_must_values ? { must: post_must_values } : {}
           post_filters_and_queries = post_filters + (post_queries.size > 0 ? [bool: post_queries] : [])
 
           res[:post_filter] = post_filters_and_queries.size > 1 ? { and: post_filters_and_queries } : post_filters_and_queries.first

@@ -24,22 +24,17 @@ module SearchFlip
       res = {}
       res[:aggregations] = aggregation_values if aggregation_values
 
-      if must_values || must_not_values || should_values || filter_values
+      if must_values || must_not_values || filter_values
         if target.connection.version.to_i >= 2
           res[:filter] = {
             bool: {}
               .merge(must_values ? { must: must_values } : {})
               .merge(must_not_values ? { must_not: must_not_values } : {})
-              .merge(should_values ? { should: should_values } : {})
               .merge(filter_values ? { filter: filter_values } : {})
           }
         else
           filters = (filter_values || []) + (must_not_values || []).map { |must_not_value| { not: must_not_value } }
-
-          queries = {}
-            .merge(must_values ? { must: must_values } : {})
-            .merge(should_values ? { should: should_values } : {})
-
+          queries = must_values ? { must: must_values } : {}
           filters_and_queries = filters + (queries.size > 0 ? [bool: queries] : [])
 
           res[:filter] = filters_and_queries.size > 1 ? { and: filters_and_queries } : filters_and_queries.first
@@ -65,7 +60,7 @@ module SearchFlip
           :profile_value, :failsafe_value, :terminate_after_value, :timeout_value, :offset_value, :limit_value,
           :scroll_args, :highlight_values, :suggest_values, :custom_value, :source_value, :sort_values,
           :includes_values, :preload_values, :eager_load_values, :post_must_values,
-          :post_must_not_values, :post_should_values, :post_filter_values, :preference_value,
+          :post_must_not_values, :post_filter_values, :preference_value,
           :search_type_value, :routing_value
         ]
 
@@ -77,7 +72,6 @@ module SearchFlip
 
         aggregation.must_values = (aggregation.must_values || []) + other.must_values if other.must_values
         aggregation.must_not_values = (aggregation.must_not_values || []) + other.must_not_values if other.must_not_values
-        aggregation.should_values = (aggregation.should_values || []) + other.should_values if other.should_values
         aggregation.filter_values = (aggregation.filter_values || []) + other.filter_values if other.filter_values
 
         aggregation.aggregation_values = (aggregation.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values

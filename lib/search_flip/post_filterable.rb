@@ -23,7 +23,7 @@ module SearchFlip
   module PostFilterable
     def self.included(base)
       base.class_eval do
-        attr_accessor :post_must_values, :post_must_not_values, :post_should_values, :post_filter_values
+        attr_accessor :post_must_values, :post_must_not_values, :post_filter_values
       end
     end
 
@@ -176,24 +176,21 @@ module SearchFlip
       end
     end
 
-    # Adds raw post should queries to the criteria.
+    # Adds a raw post should query to the criteria.
     #
     # @example Raw post term should query
     #   query = CommentIndex.aggregate("...")
-    #   query = query.post_should(term: { state: "new" })
+    #   query = query.post_should(
+    #     { term: { state: "new" } },
+    #     { term: { state: "approved" } }
+    #   )
     #
-    # @example Raw post range should query
-    #   query = CommentIndex.aggregate("...")
-    #   query = query.post_should(range: { created_at: { gte: Time.parse("2016-01-01") }})
-    #
-    # @param args [Array, Hash] The raw should query arguments
+    # @param clauses [Array] The raw should query arguments
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_should(*args)
-      fresh.tap do |criteria|
-        criteria.post_should_values = (post_should_values || []) + args
-      end
+      post_must(bool: { should: args })
     end
 
     # Adds a post range filter to the criteria without being forced to specify
