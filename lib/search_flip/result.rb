@@ -4,7 +4,7 @@ module SearchFlip
   # Hashie::Mash to provide convenient method access to the hash attributes.
 
   class Result < Hashie::Mash
-    def self.disable_warnings?
+    def self.disable_warnings?(*args)
       true
     end
   end
