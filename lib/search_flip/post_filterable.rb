@@ -1,4 +1,3 @@
-
 module SearchFlip
   # The SearchFlip::PostFilterable mixin provides chainable methods like
   # #post_where, #post_exists, #post_range, etc to add and apply search
@@ -130,9 +129,11 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def post_filter(*args)
+    def post_filter(clause, options = nil)
+      return post_must(bool: options.merge(filter: clause)) if options
+
       fresh.tap do |criteria|
-        criteria.post_filter_values = (post_filter_values || []) + args
+        criteria.post_filter_values = (post_filter_values || []) + Helper.wrap_array(clause)
       end
     end
 
@@ -150,9 +151,11 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def post_must(*args)
+    def post_must(clause, options = nil)
+      return post_must(options.merge(must: clause)) if options
+
       fresh.tap do |criteria|
-        criteria.post_must_values = (post_must_values || []) + args
+        criteria.post_must_values = (post_must_values || []) + Helper.wrap_array(clause)
       end
     end
 
@@ -170,9 +173,11 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def post_must_not(*args)
+    def post_must_not(clause, options = nil)
+      return post_must(options.merge(must_not: clause)) if options
+
       fresh.tap do |criteria|
-        criteria.post_must_not_values = (post_must_not_values || []) + args
+        criteria.post_must_not_values = (post_must_not_values || []) + Helper.wrap_array(clause)
       end
     end
 
@@ -189,8 +194,8 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def post_should(*args)
-      post_must(bool: { should: args })
+    def post_should(clause, options = {})
+      post_must(bool: options.merge(should: clause))
     end
 
     # Adds a post range filter to the criteria without being forced to specify
@@ -246,4 +251,3 @@ module SearchFlip
     end
   end
 end
-

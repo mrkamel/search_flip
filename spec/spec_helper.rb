@@ -1,4 +1,3 @@
-
 require "search_flip"
 require "webmock/rspec"
 require "active_record"
@@ -130,7 +129,7 @@ class ProductIndex
         }
       }
     else
-      { }
+      {}
     end
   end
 
@@ -189,4 +188,3 @@ class TestIndex
 end
 
 TestIndex.delete_index if TestIndex.index_exists?
-

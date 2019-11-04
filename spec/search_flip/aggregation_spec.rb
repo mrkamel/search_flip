@@ -1,4 +1,3 @@
-
 require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Aggregation do

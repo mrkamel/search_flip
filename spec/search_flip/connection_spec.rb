@@ -1,4 +1,3 @@
-
 require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Connection do
@@ -282,4 +281,3 @@ RSpec.describe SearchFlip::Connection do
     end
   end
 end
-

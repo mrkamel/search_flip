@@ -1,4 +1,3 @@
-
 require File.expand_path("../spec_helper", __dir__)
 require "search_flip/to_json"
 

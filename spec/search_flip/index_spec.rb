@@ -1,4 +1,3 @@
-
 require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Index do
@@ -68,7 +67,7 @@ RSpec.describe SearchFlip::Index do
 
       TestIndex.create_index
 
-      expect(TestIndex.connection).to have_received(:create_index).with("test", { settings: { number_of_shards: 2 } })
+      expect(TestIndex.connection).to have_received(:create_index).with("test", settings: { number_of_shards: 2 })
     end
   end
 
@@ -618,4 +617,3 @@ RSpec.describe SearchFlip::Index do
     end
   end
 end
-

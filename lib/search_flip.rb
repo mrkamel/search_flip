@@ -1,4 +1,3 @@
-
 require "forwardable"
 require "http"
 require "hashie"
@@ -7,6 +6,7 @@ require "oj"
 require "set"
 
 require "search_flip/version"
+require "search_flip/helper"
 require "search_flip/exceptions"
 require "search_flip/json"
 require "search_flip/http_client"
@@ -40,4 +40,3 @@ module SearchFlip
     end
   end
 end
-

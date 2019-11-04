@@ -1,4 +1,3 @@
-
 require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Criteria do
@@ -273,6 +272,39 @@ RSpec.describe SearchFlip::Criteria do
       expect(query1.records.to_set).to eq([product1, product2].to_set)
       expect(query2.records).to eq([product1])
     end
+
+    it "applies specified bool options" do
+      product1 = create(:product, description: "keyword1,keyword2")
+      product2 = create(:product, description: "keyword2,keyword3")
+
+      ProductIndex.import [product1, product2]
+
+      query = ProductIndex.must(
+        {
+          bool: {
+            should: [
+              { term: { description: "keyword1" } },
+              { term: { description: "keyword2" } }
+            ]
+          }
+        },
+        boost: 1
+      )
+
+      query = query.must(
+        {
+          bool: {
+            should: [
+              { term: { description: "keyword2" } },
+              { term: { description: "keyword3" } }
+            ]
+          }
+        },
+        boost: 2
+      )
+
+      expect(query.records).to eq([product2, product1])
+    end
   end
 
   describe "#must_not" do
@@ -299,12 +331,37 @@ RSpec.describe SearchFlip::Criteria do
 
       ProductIndex.import [product1, product2, product3]
 
-      query = ProductIndex.should(
+      query = ProductIndex.should([
         { range: { price: { gte: 100, lt: 200 } } },
         { term: { category: "category2" } }
-      )
+      ])
 
       expect(query.records.to_set).to eq([product1, product2].to_set)
+    end
+
+    it "applies specified bool options" do
+      product1 = create(:product, description: "keyword1,keyword2")
+      product2 = create(:product, description: "keyword2,keyword3")
+
+      ProductIndex.import [product1, product2]
+
+      query = ProductIndex.post_should(
+        [
+          { term: { description: "keyword1" } },
+          { term: { description: "keyword2" } }
+        ],
+        boost: 1
+      )
+
+      query = query.should(
+        [
+          { term: { description: "keyword2" } },
+          { term: { description: "keyword3" } }
+        ],
+        boost: 2
+      )
+
+      expect(query.records).to eq([product2, product1])
     end
   end
 
@@ -572,15 +629,15 @@ RSpec.describe SearchFlip::Criteria do
 
       ProductIndex.import [product1, product2, product3, product4]
 
-      query1 = ProductIndex.aggregate(:category).post_should(
+      query1 = ProductIndex.aggregate(:category).post_should([
         { term: { category: "category1" } },
         { term: { category: "category2" } }
-      )
+      ])
 
-      query2 = query1.post_should(
+      query2 = query1.post_should([
         { range: { price: { gte: 50, lte: 150 } } },
         { range: { price: { gte: 250, lte: 350 } } }
-      )
+      ])
 
       expect(query1.records.to_set).to eq([product1, product3, product4].to_set)
       expect(query2.records.to_set).to eq([product1, product3].to_set)
@@ -872,7 +929,7 @@ RSpec.describe SearchFlip::Criteria do
 
       ProductIndex.import [product1, product2, product3, product4]
 
-      expect(ProductIndex.sort({ rank: :desc }, { price: :asc }).records).to eq([product2, product1, product3, product4])
+      expect(ProductIndex.sort({ rank: :desc }, price: :asc).records).to eq([product2, product1, product3, product4])
       expect(ProductIndex.sort(rank: :desc).sort(:price).records).to eq([product2, product1, product3, product4])
       expect(ProductIndex.sort(:price).sort(rank: :desc).records).to eq([product2, product1, product4, product3])
     end
@@ -887,7 +944,7 @@ RSpec.describe SearchFlip::Criteria do
 
       ProductIndex.import [product1, product2, product3, product4]
 
-      expect(ProductIndex.sort(:price).resort({ rank: :desc }, { price: :asc }).records).to eq([product2, product1, product3, product4])
+      expect(ProductIndex.sort(:price).resort({ rank: :desc }, price: :asc).records).to eq([product2, product1, product3, product4])
       expect(ProductIndex.sort(rank: :desc).resort(:price).records).to eq([product2, product1, product4, product3])
     end
   end
@@ -1189,4 +1246,3 @@ RSpec.describe SearchFlip::Criteria do
     end
   end
 end
-

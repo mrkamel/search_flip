@@ -1,4 +1,3 @@
-
 module SearchFlip
   # The SearchFlip::Filterable mixin provides chainable methods like
   # #where, #exists, #range, etc to add search filters to a criteria.
@@ -107,9 +106,11 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def filter(*args)
+    def filter(clause, options = nil)
+      return must(bool: options.merge(filter: clause)) if options
+
       fresh.tap do |criteria|
-        criteria.filter_values = (filter_values || []) + args
+        criteria.filter_values = (filter_values || []) + Helper.wrap_array(clause)
       end
     end
 
@@ -123,9 +124,11 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def must(*args)
+    def must(clause, options = nil)
+      return must(bool: options.merge(must: clause)) if options
+
       fresh.tap do |criteria|
-        criteria.must_values = (must_values || []) + args
+        criteria.must_values = (must_values || []) + Helper.wrap_array(clause)
       end
     end
 
@@ -139,9 +142,11 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def must_not(*args)
+    def must_not(clause, options = nil)
+      return must(bool: options.merge(must_not: clause)) if options
+
       fresh.tap do |criteria|
-        criteria.must_not_values = (must_not_values || []) + args
+        criteria.must_not_values = (must_not_values || []) + Helper.wrap_array(clause)
       end
     end
 
@@ -157,8 +162,8 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def should(*args)
-      must(bool: { should: args })
+    def should(clause, options = {})
+      must(bool: options.merge(should: clause))
     end
 
     # Adds a range filter to the criteria without being forced to specify the
@@ -237,4 +242,3 @@ module SearchFlip
     end
   end
 end
-

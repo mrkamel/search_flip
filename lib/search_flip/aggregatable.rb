@@ -1,4 +1,3 @@
-
 module SearchFlip
   # The SearchFlip::Aggregatable mixin provides handy methods for using
   # the Elasticsearch aggregation framework, which can be chained with
@@ -66,4 +65,3 @@ module SearchFlip
     end
   end
 end
-

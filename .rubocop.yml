@@ -1,23 +1,29 @@
 Style/FrozenStringLiteralComment:
   Enabled: false
 
-Style/UnneededPercentQ:
+Lint/RedundantRequireStatement:
   Enabled: false
 
+Layout/AlignArguments:
+  EnforcedStyle: with_fixed_indentation
+
+Layout/IndentFirstArrayElement:
+  EnforcedStyle: consistent
+
 Style/BracesAroundHashParameters:
-  Enabled: false
+  EnforcedStyle: no_braces
 
 Style/PercentLiteralDelimiters:
   Enabled: false
 
 Style/SpecialGlobalVars:
-  Enabled: false
+  EnforcedStyle: use_english_names
 
 Security/Eval:
   Enabled: false
 
 Style/WordArray:
-  Enabled: false
+  EnforcedStyle: brackets
 
 Style/ClassAndModuleChildren:
   Enabled: false
@@ -38,12 +44,9 @@ Naming/UncommunicativeMethodParamName:
   Enabled: false
 
 Style/SymbolArray:
-  Enabled: false
+  EnforcedStyle: brackets
 
 Layout/RescueEnsureAlignment:
-  Enabled: false
-
-Layout/LeadingBlankLines:
   Enabled: false
 
 Metrics/LineLength:
@@ -56,9 +59,6 @@ Metrics/ModuleLength:
   Enabled: false
 
 Style/ZeroLengthPredicate:
-  Enabled: false
-
-Layout/TrailingBlankLines:
   Enabled: false
 
 Metrics/PerceivedComplexity:
@@ -106,14 +106,8 @@ Layout/AlignParameters:
 Lint/UnusedMethodArgument:
   Enabled: false
 
-Layout/IndentArray:
-  EnforcedStyle: consistent
-
 Style/IfUnlessModifier:
   Enabled: false
 
 Style/RedundantBegin:
-  Enabled: false
-
-Style/OptionalArguments:
   Enabled: false

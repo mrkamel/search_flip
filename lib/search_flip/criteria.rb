@@ -1,4 +1,3 @@
-
 module SearchFlip
   # The SearchFlip::Criteria class serves the purpose of chaining various
   # filtering and aggregation methods. Each chainable method creates a new

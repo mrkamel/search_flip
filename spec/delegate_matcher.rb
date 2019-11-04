@@ -1,4 +1,3 @@
-
 RSpec::Matchers.define :delegate do |method|
   match do |delegator|
     @method = method
@@ -29,4 +28,3 @@ RSpec::Matchers.define :delegate do |method|
 
   chain(:to) { |to| @to = to }
 end
-

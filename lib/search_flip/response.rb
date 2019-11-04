@@ -1,4 +1,3 @@
-
 module SearchFlip
   # The SearchFlip::Response class wraps a raw SearchFlip response and
   # decorates it with methods for aggregations, hits, records, pagination, etc.
@@ -324,4 +323,3 @@ module SearchFlip
     end
   end
 end
-

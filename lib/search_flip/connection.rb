@@ -1,4 +1,3 @@
-
 module SearchFlip
   class Connection
     attr_reader :base_url, :http_client, :bulk_limit, :bulk_max_mb
@@ -338,4 +337,3 @@ module SearchFlip
     end
   end
 end
-

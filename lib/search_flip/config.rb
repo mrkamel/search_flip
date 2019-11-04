@@ -1,4 +1,3 @@
-
 module SearchFlip
   Config = {
     index_prefix: nil,
@@ -8,4 +7,3 @@ module SearchFlip
     auto_refresh: false
   }
 end
-

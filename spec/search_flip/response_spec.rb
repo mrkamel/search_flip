@@ -1,4 +1,3 @@
-
 require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Response do
@@ -182,4 +181,3 @@ RSpec.describe SearchFlip::Response do
     end
   end
 end
-

@@ -1,4 +1,3 @@
-
 module SearchFlip
   # The SearchFlip::Index mixin makes your class correspond to an
   # Elasticsearch index. Your class can then create or delete the index, modify

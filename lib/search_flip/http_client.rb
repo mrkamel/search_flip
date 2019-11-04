@@ -1,4 +1,3 @@
-
 module SearchFlip
   # @api private
   #
@@ -47,4 +46,3 @@ module SearchFlip
     end
   end
 end
-

@@ -1,4 +1,3 @@
-
 module SearchFlip
   # The SearchFlip::Aggregation class puts together everything
   # required to use the Elasticsearch aggregation framework via mixins and
@@ -101,4 +100,3 @@ module SearchFlip
     end
   end
 end
-
