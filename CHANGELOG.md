@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## v2.3.1
+
+* Make search_flip work with hashie 4.0.0
+
 ## v2.3.0
 
 * [DEPRECATED] `SearchFlip::Criteria#should` is deprecated and will become
