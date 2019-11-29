@@ -263,6 +263,23 @@ CommentIndex.bulk do |indexer|
 end
 ```
 
+When indexing or deleting documents, you can pass options to control the bulk
+indexing and you can use all options provided by the [Bulk API]:
+
+```ruby
+CommentIndex.import(Comment.first, { bulk_limit: 1_000 }, op_type: "create", routing: "routing_key")
+
+# or directly
+
+CommentIndex.create(Comment.first, { bulk_max_mb: 100 }, routing: "routing_key")
+CommentIndex.update(Comment.first, ...)
+```
+
+Checkout the elasticsearch Bulk API docs for more info as well as
+[SearchFlip::Bulk](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/Bulk)
+for a complete list of available options to control the bulk indexing of
+SearchFlip.
+
 ## Working with Elasticsearch Aliases
 
 You can use and manage Elasticsearch Aliases like the following:
