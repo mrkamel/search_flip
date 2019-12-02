@@ -1,6 +1,15 @@
 
 # CHANGELOG
 
+## v3.0.0
+
+* [BREAKING] No longer pass multiple arguments to `#must`, `#must_not`,
+  `#filter`, `#should`, `#post_must`, `#post_must_not`, `#post_filter`, and
+  `#post_should`. Pass an array of arguments instead: `.post_must([...])`
+* [BREAKING] `#should` and `#post_should` is now equivalent to `.must(bool: {
+  should: ... })` and `.post_must(bool: { should: ... })`, respectively.
+* [BREAKING] `#unscope` is removed
+
 ## v2.3.1
 
 * Make search_flip work with hashie 4.0.0
