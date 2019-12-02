@@ -335,7 +335,7 @@ CommentIndex.where(state: ["approved", "rejected"])
 
 * `where_not`
 
-The `.where_not` method is like `,where`, but excluding the matching documents:
+The `.where_not` method is like `.where`, but excluding the matching documents:
 
 ```ruby
 CommentIndex.where_not(id: [1, 2, 3])
@@ -843,7 +843,7 @@ require "search_flip/to_json"
 
 ## Keeping your Models and Indices in Sync
 
-Besides the most basic approach to get you started, SarchFlip currently doesn't
+Besides the most basic approach to get you started, SearchFlip currently doesn't
 ship with any means to automatically keep your models and indices in sync,
 because every method is very much bound to the concrete environment and depends
 on your concrete requirements. In addition, the methods to achieve model/index

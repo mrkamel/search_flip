@@ -106,9 +106,7 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def filter(clause, options = nil)
-      return must(bool: options.merge(filter: clause)) if options
-
+    def filter(clause)
       fresh.tap do |criteria|
         criteria.filter_values = (filter_values || []) + Helper.wrap_array(clause)
       end
@@ -124,9 +122,7 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def must(clause, options = nil)
-      return must(bool: options.merge(must: clause)) if options
-
+    def must(clause)
       fresh.tap do |criteria|
         criteria.must_values = (must_values || []) + Helper.wrap_array(clause)
       end
@@ -142,9 +138,7 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def must_not(clause, options = nil)
-      return must(bool: options.merge(must_not: clause)) if options
-
+    def must_not(clause)
       fresh.tap do |criteria|
         criteria.must_not_values = (must_not_values || []) + Helper.wrap_array(clause)
       end
@@ -162,8 +156,8 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def should(clause, options = {})
-      must(bool: options.merge(should: clause))
+    def should(clause)
+      must(bool: { should: clause })
     end
 
     # Adds a range filter to the criteria without being forced to specify the
