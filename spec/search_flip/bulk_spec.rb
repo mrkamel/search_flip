@@ -79,29 +79,25 @@ RSpec.describe SearchFlip::Bulk do
 
       allow(product).to receive(:description).and_return("x" * 1024 * 1024 * 10)
 
-      block = lambda do
-        ProductIndex.bulk bulk_max_mb: 1_000 do |bulk|
-          20.times do
-            bulk.index product.id, ProductIndex.serialize(product)
-          end
+      ProductIndex.bulk bulk_max_mb: 100 do |bulk|
+        allow(bulk).to receive(:upload).and_call_original
+
+        20.times do
+          bulk.index product.id, ProductIndex.serialize(product)
         end
+
+        expect(bulk).to have_received(:upload).exactly(2).times
       end
 
-      if ProductIndex.connection.version.to_i <= 2
-        expect(&block).to raise_error(SearchFlip::ConnectionError)
-      else
-        expect(&block).to raise_error(SearchFlip::ResponseError)
-      end
+      ProductIndex.bulk bulk_max_mb: 50 do |bulk|
+        allow(bulk).to receive(:upload).and_call_original
 
-      block = lambda do
-        ProductIndex.bulk bulk_max_mb: 100 do |bulk|
-          20.times do
-            bulk.index product.id, ProductIndex.serialize(product)
-          end
+        20.times do
+          bulk.index product.id, ProductIndex.serialize(product)
         end
-      end
 
-      expect(&block).not_to raise_error
+        expect(bulk).to have_received(:upload).exactly(4).times
+      end
     end
   end
 end

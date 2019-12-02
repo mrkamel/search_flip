@@ -73,11 +73,13 @@ module SearchFlip
     def post_where(hash)
       hash.inject(fresh) do |memo, (key, value)|
         if value.is_a?(Array)
-          memo.post_filter terms: { key => value }
+          memo.post_filter(terms: { key => value })
         elsif value.is_a?(Range)
-          memo.post_filter range: { key => { gte: value.min, lte: value.max } }
+          memo.post_filter(range: { key => { gte: value.min, lte: value.max } })
+        elsif value.nil?
+          memo.post_must_not(exists: { field: key })
         else
-          memo.post_filter term: { key => value }
+          memo.post_filter(term: { key => value })
         end
       end
     end
@@ -106,11 +108,13 @@ module SearchFlip
     def post_where_not(hash)
       hash.inject(fresh) do |memo, (key, value)|
         if value.is_a?(Array)
-          memo.post_must_not terms: { key => value }
+          memo.post_must_not(terms: { key => value })
         elsif value.is_a?(Range)
-          memo.post_must_not range: { key => { gte: value.min, lte: value.max } }
+          memo.post_must_not(range: { key => { gte: value.min, lte: value.max } })
+        elsif value.nil?
+          memo.post_filter(exists: { field: key })
         else
-          memo.post_must_not term: { key => value }
+          memo.post_must_not(term: { key => value })
         end
       end
     end
@@ -217,7 +221,7 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_range(field, options = {})
-      post_filter range: { field => options }
+      post_filter(range: { field => options })
     end
 
     # Adds a post exists filter to the criteria, which selects all documents
@@ -232,10 +236,10 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_exists(field)
-      post_filter exists: { field: field }
+      post_filter(exists: { field: field })
     end
 
-    # Adds a post exists not filter to the criteria, which selects all documents
+    # Adds a post exists not query to the criteria, which selects all documents
     # for which the specified field's value is null.
     #
     # @example
@@ -247,7 +251,7 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_exists_not(field)
-      post_must_not exists: { field: field }
+      post_must_not(exists: { field: field })
     end
   end
 end

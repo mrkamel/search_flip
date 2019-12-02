@@ -54,13 +54,13 @@ module SearchFlip
     def where(hash)
       hash.inject(fresh) do |memo, (key, value)|
         if value.is_a?(Array)
-          memo.filter terms: { key => value }
+          memo.filter(terms: { key => value })
         elsif value.is_a?(Range)
-          memo.filter range: { key => { gte: value.min, lte: value.max } }
+          memo.filter(range: { key => { gte: value.min, lte: value.max } })
         elsif value.nil?
-          memo.exists_not key
+          memo.must_not(exists: { field: key })
         else
-          memo.filter term: { key => value }
+          memo.filter(term: { key => value })
         end
       end
     end
@@ -85,13 +85,13 @@ module SearchFlip
     def where_not(hash)
       hash.inject(fresh) do |memo, (key, value)|
         if value.is_a?(Array)
-          memo.must_not terms: { key => value }
+          memo.must_not(terms: { key => value })
         elsif value.is_a?(Range)
-          memo.must_not range: { key => { gte: value.min, lte: value.max } }
+          memo.must_not(range: { key => { gte: value.min, lte: value.max } })
         elsif value.nil?
-          memo.exists key
+          memo.filter(exists: { field: key })
         else
-          memo.must_not term: { key => value }
+          memo.must_not(term: { key => value })
         end
       end
     end
@@ -176,10 +176,10 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def range(field, options = {})
-      filter range: { field => options }
+      filter(range: { field => options })
     end
 
-    # Adds a match all filter/query to the criteria, which simply matches all
+    # Adds a match all filter to the criteria, which simply matches all
     # documents. This can be eg be used within filter aggregations or for
     # filter chaining. Check out the Elasticsearch docs for further details.
     #
@@ -204,7 +204,7 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def match_all(options = {})
-      filter match_all: options
+      filter(match_all: options)
     end
 
     # Adds an exists filter to the criteria, which selects all documents for
@@ -218,10 +218,10 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def exists(field)
-      filter exists: { field: field }
+      filter(exists: { field: field })
     end
 
-    # Adds an exists not filter to the criteria, which selects all documents
+    # Adds an exists not query to the criteria, which selects all documents
     # for which the specified field's value is null.
     #
     # @example
@@ -232,7 +232,7 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def exists_not(field)
-      must_not exists: { field: field }
+      must_not(exists: { field: field })
     end
   end
 end

@@ -272,39 +272,6 @@ RSpec.describe SearchFlip::Criteria do
       expect(query1.records.to_set).to eq([product1, product2].to_set)
       expect(query2.records).to eq([product1])
     end
-
-    it "applies specified bool options" do
-      product1 = create(:product, description: "keyword1,keyword2")
-      product2 = create(:product, description: "keyword2,keyword3")
-
-      ProductIndex.import [product1, product2]
-
-      query = ProductIndex.must(
-        {
-          bool: {
-            should: [
-              { term: { description: "keyword1" } },
-              { term: { description: "keyword2" } }
-            ]
-          }
-        },
-        boost: 1
-      )
-
-      query = query.must(
-        {
-          bool: {
-            should: [
-              { term: { description: "keyword2" } },
-              { term: { description: "keyword3" } }
-            ]
-          }
-        },
-        boost: 2
-      )
-
-      expect(query.records).to eq([product2, product1])
-    end
   end
 
   describe "#must_not" do
@@ -337,31 +304,6 @@ RSpec.describe SearchFlip::Criteria do
       ])
 
       expect(query.records.to_set).to eq([product1, product2].to_set)
-    end
-
-    it "applies specified bool options" do
-      product1 = create(:product, description: "keyword1,keyword2")
-      product2 = create(:product, description: "keyword2,keyword3")
-
-      ProductIndex.import [product1, product2]
-
-      query = ProductIndex.post_should(
-        [
-          { term: { description: "keyword1" } },
-          { term: { description: "keyword2" } }
-        ],
-        boost: 1
-      )
-
-      query = query.should(
-        [
-          { term: { description: "keyword2" } },
-          { term: { description: "keyword3" } }
-        ],
-        boost: 2
-      )
-
-      expect(query.records).to eq([product2, product1])
     end
   end
 
@@ -500,6 +442,21 @@ RSpec.describe SearchFlip::Criteria do
       aggregations = query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
       expect(aggregations).to eq("category1" => 2, "category2" => 1)
     end
+
+    it "works with nil" do
+      expected1 = create(:product, price: nil, category: "category1")
+      expected2 = create(:product, price: nil, category: "category2")
+      rejected = create(:product, price: 300, category: "category1")
+
+      ProductIndex.import [expected1, expected2, rejected]
+
+      query = ProductIndex.aggregate(:category).post_where(price: nil)
+
+      expect(query.records.to_set).to eq([expected1, expected2].to_set)
+
+      aggregations = query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1)
+    end
   end
 
   describe "#post_where_not" do
@@ -546,6 +503,21 @@ RSpec.describe SearchFlip::Criteria do
       ProductIndex.import [expected, rejected1, rejected2]
 
       query = ProductIndex.aggregate(:category).post_where_not(price: 200..300)
+
+      expect(query.records).to eq([expected])
+
+      aggregations = query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1)
+    end
+
+    it "works with nils" do
+      expected = create(:product, price: 100, category: "category1")
+      rejected1 = create(:product, price: nil, category: "category2")
+      rejected2 = create(:product, price: nil, category: "category1")
+
+      ProductIndex.import [expected, rejected1, rejected2]
+
+      query = ProductIndex.aggregate(:category).post_where_not(price: nil)
 
       expect(query.records).to eq([expected])
 

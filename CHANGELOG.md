@@ -9,6 +9,8 @@
 * [BREAKING] `#should` and `#post_should` is now equivalent to `.must(bool: {
   should: ... })` and `.post_must(bool: { should: ... })`, respectively.
 * [BREAKING] `#unscope` is removed
+* `#post_where` and  `#post_where_not` now handle `nil` values as well:
+  `.post_where_not(title: nil)`
 
 ## v2.3.1
 
