@@ -20,8 +20,8 @@ module SearchFlip
 
     attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values,
       :offset_value, :limit_value, :includes_values, :eager_load_values, :preload_values, :failsafe_value,
-      :scroll_args, :custom_value, :terminate_after_value, :timeout_value, :preference_value,
-      :search_type_value, :routing_value, :track_total_hits_value, :explain_value
+      :scroll_args, :custom_value, :terminate_after_value, :timeout_value, :preference_value, :search_type_value,
+      :routing_value, :track_total_hits_value, :explain_value, :page_value, :per_page_value
 
     # Creates a new criteria while merging the attributes (constraints,
     # settings, etc) of the current criteria with the attributes of another one
@@ -256,7 +256,8 @@ module SearchFlip
         end
       end
 
-      res.update from: offset_value_with_default, size: limit_value_with_default
+      res.update(from: offset_value) if offset_value
+      res.update(size: limit_value) if limit_value
 
       res[:track_total_hits] = track_total_hits_value unless track_total_hits_value.nil?
       res[:explain] = explain_value unless explain_value.nil?
@@ -589,14 +590,6 @@ module SearchFlip
       end
     end
 
-    # Returns the offset value or, if not yet set,  the default limit value (0).
-    #
-    # @return [Fixnum] The offset value
-
-    def offset_value_with_default
-      (offset_value || 0).to_i
-    end
-
     # Sets the request limit, ie Elasticsearch's size parameter that is used
     # to restrict the results that get returned.
     #
@@ -614,14 +607,6 @@ module SearchFlip
       end
     end
 
-    # Returns the limit value or, if not yet set, the default limit value (30).
-    #
-    # @return [Fixnum] The limit value
-
-    def limit_value_with_default
-      (limit_value || 30).to_i
-    end
-
     # Sets pagination parameters for the criteria by using offset and limit,
     # ie Elasticsearch's from and size parameters.
     #
@@ -634,11 +619,11 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def paginate(page:, per_page: limit_value_with_default)
-      page = [page.to_i, 1].max
-      per_page = per_page.to_i
+    def paginate(page: page_value || 1, per_page: per_page_value || 30)
+      self.page_value = [page.to_i, 1].max
+      self.per_page_value = per_page.to_i
 
-      offset((page - 1) * per_page).limit(per_page)
+      offset((page_value - 1) * per_page_value).limit(per_page_value)
     end
 
     def page(value)
@@ -646,7 +631,7 @@ module SearchFlip
     end
 
     def per(value)
-      paginate(page: offset_value_with_default / limit_value_with_default + 1, per_page: value)
+      paginate(per_page: value)
     end
 
     # Fetches the records specified by the criteria in batches using the

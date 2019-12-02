@@ -57,6 +57,8 @@ module SearchFlip
     #   first page or false otherwise
 
     def first_page?
+      raise PaginationError unless pagination?
+
       current_page == 1
     end
 
@@ -73,6 +75,8 @@ module SearchFlip
     #   last page or false otherwise
 
     def last_page?
+      raise PaginationError unless pagination?
+
       current_page == total_pages
     end
 
@@ -90,6 +94,8 @@ module SearchFlip
     #   of range
 
     def out_of_range?
+      raise PaginationError unless pagination?
+
       current_page < 1 || current_page > total_pages
     end
 
@@ -102,7 +108,9 @@ module SearchFlip
     # @return [Fixnum] The current page number
 
     def current_page
-      1 + (criteria.offset_value_with_default / criteria.limit_value_with_default.to_f).ceil
+      raise PaginationError unless pagination?
+
+      criteria.page_value
     end
 
     # Returns the number of total pages for the current pagination settings, ie
@@ -115,7 +123,9 @@ module SearchFlip
     # @return [Fixnum] The total number of pages
 
     def total_pages
-      [(total_entries / criteria.limit_value_with_default.to_f).ceil, 1].max
+      raise PaginationError unless pagination?
+
+      [(total_entries / criteria.per_page_value.to_f).ceil, 1].max
     end
 
     # Returns the previous page number or nil if no previous page exists, ie if
@@ -131,6 +141,8 @@ module SearchFlip
     # @return [Fixnum, nil] The previous page number
 
     def previous_page
+      raise PaginationError unless pagination?
+
       return nil if current_page <= 1
       return total_pages if current_page > total_pages
 
@@ -149,6 +161,8 @@ module SearchFlip
     # @return [Fixnum, nil] The next page number
 
     def next_page
+      raise PaginationError unless pagination?
+
       return nil if current_page >= total_pages
       return 1 if current_page < 1
 
@@ -320,6 +334,12 @@ module SearchFlip
         else
           Result.new response["aggregations"][key]
         end
+    end
+
+    private
+
+    def pagination?
+      criteria.per_page_value && criteria.page_value
     end
   end
 end

@@ -11,9 +11,11 @@ RSpec.describe SearchFlip::Response do
   end
 
   describe "#current_page" do
-    it "returns the current page number" do
-      expect(ProductIndex.match_all.current_page).to eq(1)
+    it "raises PaginationError if pagination is not available" do
+      expect { ProductIndex.match_all.current_page }.to raise_error(SearchFlip::PaginationError)
+    end
 
+    it "returns the current page number" do
       ProductIndex.import create_list(:product, 3)
 
       expect(ProductIndex.paginate(page: 1, per_page: 2).current_page).to eq(1)
@@ -23,6 +25,10 @@ RSpec.describe SearchFlip::Response do
   end
 
   describe "#total_pages" do
+    it "raises PaginationError if pagination is not available" do
+      expect { ProductIndex.match_all.total_pages }.to raise_error(SearchFlip::PaginationError)
+    end
+
     it "returns the number of total pages" do
       expect(ProductIndex.paginate(page: 1, per_page: 2).total_pages).to eq(1)
 
@@ -33,6 +39,10 @@ RSpec.describe SearchFlip::Response do
   end
 
   describe "#previous_page" do
+    it "raises PaginationError if pagination is not available" do
+      expect { ProductIndex.match_all.previous_page }.to raise_error(SearchFlip::PaginationError)
+    end
+
     it "returns the previous page number" do
       ProductIndex.import create_list(:product, 3)
 
@@ -43,6 +53,10 @@ RSpec.describe SearchFlip::Response do
   end
 
   describe "#next_page" do
+    it "raises PaginationError if pagination is not available" do
+      expect { ProductIndex.match_all.next_page }.to raise_error(SearchFlip::PaginationError)
+    end
+
     it "returns the next page number" do
       ProductIndex.import create_list(:product, 3)
 
@@ -52,6 +66,10 @@ RSpec.describe SearchFlip::Response do
   end
 
   describe "#first_page?" do
+    it "raises PaginationError if pagination is not available" do
+      expect { ProductIndex.match_all.first_page? }.to raise_error(SearchFlip::PaginationError)
+    end
+
     it "returns whether or not the current page is the first page" do
       ProductIndex.import create(:product)
 
@@ -61,6 +79,10 @@ RSpec.describe SearchFlip::Response do
   end
 
   describe "#last_page?" do
+    it "raises PaginationError if pagination is not available" do
+      expect { ProductIndex.match_all.last_page? }.to raise_error(SearchFlip::PaginationError)
+    end
+
     it "returns whether or not the current page is the last page" do
       ProductIndex.import create_list(:product, 31)
 
@@ -70,6 +92,10 @@ RSpec.describe SearchFlip::Response do
   end
 
   describe "#out_of_range?" do
+    it "raises PaginationError if pagination is not available" do
+      expect { ProductIndex.match_all.out_of_range? }.to raise_error(SearchFlip::PaginationError)
+    end
+
     it "returns whether or not the current page is out of range" do
       ProductIndex.import create(:product)
 
