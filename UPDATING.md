@@ -1,6 +1,79 @@
 
 # Updating from previous SearchFlip versions
 
+## Update 2.x to 3.x
+
+* **[BREAKING]**  No longer pass multiple arguments to `#must`, `#must_not`,
+  `#filter`, `#should`, `#post_must`, `#post_must_not`, `#post_filter`, and
+  `#post_should`.
+
+2.x:
+
+```ruby
+CommentIndex.must({ term: { state: "new" } }, { term: { state: "approved" } })
+```
+
+3.x:
+
+```ruby
+CommentIndex.must([
+  { term: { state: "new" } },
+  { term: { state: "approved" } }
+])
+```
+
+Same for `#must_not`, `#filter`, `#should`, etc.
+
+* **[BREAKING]** `#should` and `#post_should` is now equivalent to `.must(bool: {
+  should: ... })` and `.post_must(bool: { should: ... })`, respectively.
+
+No necessary code changes, but different queries will be produced:
+
+2.x:
+
+```ruby
+query = CommentIndex.should([
+  { term: { state: "new" } },
+  { term: { state: "approved" }}
+])
+
+query = query.should([
+  { term: { state: "declined" } },
+  { term: { state: "pending" } }
+])
+```
+
+generated a query matching:
+
+`new OR approved OR declined OR pending`
+
+3.x:
+
+SearchFlip 3 generates a query matching:
+
+`(new OR approved) AND (declined OR pending)`
+
+as desired in nearly all cases.
+
+* [BREAKING] `#unscope` is removed
+
+There is no equivalent replacement, but you can achieve the same by using the
+intermediate queries instead:
+
+2.x:
+
+```ruby
+query1 = CommentIndex.where(price: 0..20).search("some terms")
+query2 = query1.unscope(:search)
+```
+
+3.x
+
+```ruby
+query1 = CommentIndex.where(price: 0..20)
+query2 = query1.search("some terms")
+```
+
 ## Update 1.x to 2.x
 
 * **[BREAKING]** No longer include the `type_name` in `SearchFlip::Index.mapping`
