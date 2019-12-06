@@ -133,9 +133,7 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def post_filter(clause, options = nil)
-      return post_must(bool: options.merge(filter: clause)) if options
-
+    def post_filter(clause)
       fresh.tap do |criteria|
         criteria.post_filter_values = (post_filter_values || []) + Helper.wrap_array(clause)
       end
@@ -155,9 +153,7 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def post_must(clause, options = nil)
-      return post_must(options.merge(must: clause)) if options
-
+    def post_must(clause)
       fresh.tap do |criteria|
         criteria.post_must_values = (post_must_values || []) + Helper.wrap_array(clause)
       end
@@ -177,9 +173,7 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def post_must_not(clause, options = nil)
-      return post_must(options.merge(must_not: clause)) if options
-
+    def post_must_not(clause)
       fresh.tap do |criteria|
         criteria.post_must_not_values = (post_must_not_values || []) + Helper.wrap_array(clause)
       end
