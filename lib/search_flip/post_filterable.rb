@@ -189,17 +189,17 @@ module SearchFlip
     #
     # @example Raw post term should query
     #   query = CommentIndex.aggregate("...")
-    #   query = query.post_should(
+    #   query = query.post_should([
     #     { term: { state: "new" } },
     #     { term: { state: "approved" } }
-    #   )
+    #   ])
     #
     # @param clauses [Array] The raw should query arguments
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def post_should(clause, options = {})
-      post_must(bool: options.merge(should: clause))
+    def post_should(clause)
+      post_must(bool: { should: clause })
     end
 
     # Adds a post range filter to the criteria without being forced to specify
