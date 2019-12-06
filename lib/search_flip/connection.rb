@@ -105,7 +105,10 @@ module SearchFlip
     # @return [Hash] The raw response
 
     def analyze(request, params = {})
-      http_client.headers(accept: "application/json").post("#{base_url}/_analyze", json: request, params: params).parse
+      http_client
+        .headers(accept: "application/json")
+        .post("#{base_url}/_analyze", json: request, params: params)
+        .parse
     end
 
     # Fetches information about the specified index aliases. Raises
@@ -121,13 +124,10 @@ module SearchFlip
     # @return [Hash] The raw response
 
     def get_aliases(index_name: "*", alias_name: "*")
-      res =
-        http_client
-          .headers(accept: "application/json", content_type: "application/json")
-          .get("#{base_url}/#{index_name}/_alias/#{alias_name}")
-          .parse
-
-      Hashie::Mash.new(res)
+      http_client
+        .headers(accept: "application/json", content_type: "application/json")
+        .get("#{base_url}/#{index_name}/_alias/#{alias_name}")
+        .parse
     end
 
     # Returns whether or not the associated Elasticsearch alias already
@@ -233,7 +233,10 @@ module SearchFlip
     # @return [Hash] The index settings
 
     def get_index_settings(index_name)
-      http_client.headers(accept: "application/json").get("#{index_url(index_name)}/_settings").parse
+      http_client
+        .headers(accept: "application/json")
+        .get("#{index_url(index_name)}/_settings")
+        .parse
     end
 
     # Sends a refresh request to Elasticsearch. Raises

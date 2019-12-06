@@ -74,6 +74,24 @@ query1 = CommentIndex.where(price: 0..20)
 query2 = query1.search("some terms")
 ```
 
+* **[BREAKING]** `SearchFlip::Connection#get_aliases` no longer returns a
+  Hashie::Mash, but a raw Hash as was already stated in the docs
+
+Code changes are only neccessary if you use methods related to `Hashie::Mash`
+on the result of `#get_aliases` like e.g.
+
+2.x:
+
+```ruby
+CommentIndex.connection.get_aliases['index_name'].aliases
+```
+
+3.x:
+
+```ruby
+CommentIndex.connection.get_aliases['index_name']['aliases']
+```
+
 ## Update 1.x to 2.x
 
 * **[BREAKING]** No longer include the `type_name` in `SearchFlip::Index.mapping`
