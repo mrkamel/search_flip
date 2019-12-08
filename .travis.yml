@@ -15,5 +15,5 @@ before_install:
 install:
   - travis_retry bundle install
 script:
- - rspec
-  - rubocop
+ - bundle exec rspec
+ - bundle exec rubocop
