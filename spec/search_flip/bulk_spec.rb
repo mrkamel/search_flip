@@ -74,12 +74,12 @@ RSpec.describe SearchFlip::Bulk do
       expect(&block).to raise_error(SearchFlip::ResponseError)
     end
 
-    it "handles overly long payloads" do
+    it "transmits up to bulk_max_mb only" do
       product = create(:product)
 
-      allow(product).to receive(:description).and_return("x" * 1024 * 1024 * 10)
+      allow(product).to receive(:description).and_return("x" * 1024 * 1024)
 
-      ProductIndex.bulk bulk_max_mb: 100 do |bulk|
+      ProductIndex.bulk bulk_max_mb: 10 do |bulk|
         allow(bulk).to receive(:upload).and_call_original
 
         20.times do
@@ -88,16 +88,26 @@ RSpec.describe SearchFlip::Bulk do
 
         expect(bulk).to have_received(:upload).exactly(2).times
       end
+    end
 
-      ProductIndex.bulk bulk_max_mb: 50 do |bulk|
+    it "uploads a last time if there is data left within the output buffer" do
+      product = create(:product)
+
+      allow(product).to receive(:description).and_return("x" * 1024 * 1024)
+
+      bulk_upload = nil
+
+      ProductIndex.bulk bulk_max_mb: 5.5 do |bulk|
+        bulk_upload = bulk
+
         allow(bulk).to receive(:upload).and_call_original
 
-        20.times do
+        6.times do
           bulk.index product.id, ProductIndex.serialize(product)
         end
-
-        expect(bulk).to have_received(:upload).exactly(4).times
       end
+
+      expect(bulk_upload).to have_received(:upload).exactly(2).times
     end
   end
 end

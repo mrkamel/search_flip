@@ -13,10 +13,10 @@ module SearchFlip
     end
 
     class << self
-      include Delegation
+      extend Forwardable
 
-      delegate_methods :headers, :via, :basic_auth, :auth, :get, :post, :put,
-        :delete, :head, to: :new
+      def_delegators :new, :headers, :via, :basic_auth, :auth
+      def_delegators :new, :get, :post, :put, :delete, :head
     end
 
     [:headers, :via, :basic_auth, :auth].each do |method|
