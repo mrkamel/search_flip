@@ -4,8 +4,8 @@ module SearchFlip
   # adds a method to convert it to a hash format to be used in the request.
 
   class Aggregation
-    include SearchFlip::Filterable
-    include SearchFlip::Aggregatable
+    include Filterable
+    include Aggregatable
 
     attr_reader :target
 

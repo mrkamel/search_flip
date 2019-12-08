@@ -3,7 +3,7 @@ module SearchFlip
   # decorates it with methods for aggregations, hits, records, pagination, etc.
 
   class Response
-    extend Forwardable
+    include Delegation
 
     attr_accessor :criteria, :response
 
@@ -33,16 +33,16 @@ module SearchFlip
     # Returns the total number of results.
     #
     # @example
-    #   CommentIndex.search("hello world").total_entries
+    #   CommentIndex.search("hello world").total_count
     #   # => 13
     #
     # @return [Fixnum] The total number of results
 
-    def total_entries
+    def total_count
       hits["total"].is_a?(Hash) ? hits["total"]["value"] : hits["total"]
     end
 
-    alias_method :total_count, :total_entries
+    alias_method :total_entries, :total_count
 
     # Returns whether or not the current page is the first page.
     #
@@ -284,7 +284,7 @@ module SearchFlip
       @ids ||= hits["hits"].map { |hit| hit["_id"] }
     end
 
-    def_delegators :ids, :size, :count, :length
+    delegate_methods :size, :count, :length, to: :ids
 
     # Returns the response time in milliseconds of Elasticsearch specified in
     # the took info of the response.

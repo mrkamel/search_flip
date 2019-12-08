@@ -13,10 +13,10 @@ module SearchFlip
   #   CommentIndex.sort("_doc").find_each { |comment| "..." }
 
   class Criteria
-    include SearchFlip::Filterable
-    include SearchFlip::PostFilterable
-    include SearchFlip::Aggregatable
-    extend Forwardable
+    include Filterable
+    include PostFilterable
+    include Aggregatable
+    include Delegation
 
     attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values,
       :offset_value, :limit_value, :includes_values, :eager_load_values, :preload_values, :failsafe_value,
@@ -835,12 +835,12 @@ module SearchFlip
       end
     end
 
-    def_delegators :response, :total_entries, :total_count, :current_page, :previous_page,
+    delegate_methods :total_entries, :total_count, :current_page, :previous_page,
       :prev_page, :next_page, :first_page?, :last_page?, :out_of_range?, :total_pages,
       :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions,
-      :scope, :results, :records, :scroll_id, :raw_response
+      :scope, :results, :records, :scroll_id, :raw_response, to: :response
 
-    def_delegators :target, :connection
+    delegate_methods :connection, to: :target
 
     private
 
