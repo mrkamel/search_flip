@@ -147,10 +147,10 @@ module SearchFlip
     # Adds a raw should query to the criteria.
     #
     # @example
-    #   CommentIndex.should(
+    #   CommentIndex.should([
     #     { term: { state: "new" } },
     #     { term: { state: "reviewed" } }
-    #   )
+    #   ])
     #
     # @param args [Array] The raw should query arguments
     #
