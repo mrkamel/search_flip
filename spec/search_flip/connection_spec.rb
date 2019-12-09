@@ -113,13 +113,15 @@ RSpec.describe SearchFlip::Connection do
     end
 
     it "respects a payload" do
-      connection = SearchFlip::Connection.new
+      begin
+        connection = SearchFlip::Connection.new
 
-      connection.create_index("index_name", settings: { number_of_shards: 3 })
+        connection.create_index("index_name", settings: { number_of_shards: 3 })
 
-      expect(connection.get_index_settings("index_name")["index_name"]["settings"]["index"]["number_of_shards"]).to eq("3")
-    ensure
-      connection.delete_index("index_name") if connection.index_exists?("index_name")
+        expect(connection.get_index_settings("index_name")["index_name"]["settings"]["index"]["number_of_shards"]).to eq("3")
+      ensure
+        connection.delete_index("index_name") if connection.index_exists?("index_name")
+      end
     end
   end
 
