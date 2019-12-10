@@ -99,7 +99,7 @@ RSpec.describe SearchFlip::Connection do
     it "accepts additional parameters" do
       connection = SearchFlip::Connection.new
 
-      expect(connection.get_indices("comments", params: { h: "i,sth" })).to eq("i" => "comments", "sth" => "false")
+      expect(connection.get_indices("comments", params: { h: "i" })).to eq([{ "i" => "comments" }])
     end
   end
 
@@ -168,35 +168,35 @@ RSpec.describe SearchFlip::Connection do
 
   describe "#freeze_index" do
     it "freezes the specified index" do
-      begin
-        connection = SearchFlip::Connection.new
+      connection = SearchFlip::Connection.new
 
-        return if connection.version.to_f < 6.6
+      if connection.version.to_f >= 6.6
+        begin
+          connection.create_index("index_name")
+          connection.freeze_index("index_name")
 
-        connection.create_index("index_name")
-        connection.freeze_index("index_name")
-
-        expect(connection.get_indices("index_name", params: { h: "sth" }).first["sth"]).to eq("true")
-      ensure
-        connection.delete_index("index_name") if connection.index_exists?("index_name")
+          expect(connection.get_indices("index_name", params: { h: "sth" }).first["sth"]).to eq("true")
+        ensure
+          connection.delete_index("index_name") if connection.index_exists?("index_name")
+        end
       end
     end
   end
 
   describe "#unfreeze_index" do
     it "unfreezes the specified index" do
-      begin
-        connection = SearchFlip::Connection.new
+      connection = SearchFlip::Connection.new
 
-        return if connection.version.to_f < 6.6
+      if connection.version.to_f >= 6.6
+        begin
+          connection.create_index("index_name")
+          connection.freeze_index("index_name")
+          connection.unfreeze_index("index_name")
 
-        connection.create_index("index_name")
-        connection.freeze_index("index_name")
-        connection.unfreeze_index("index_name")
-
-        expect(connection.get_indices("index_name", params: { h: "sth" }).first["sth"]).to eq("false")
-      ensure
-        connection.delete_index("index_name") if connection.index_exists?("index_name")
+          expect(connection.get_indices("index_name", params: { h: "sth" }).first["sth"]).to eq("false")
+        ensure
+          connection.delete_index("index_name") if connection.index_exists?("index_name")
+        end
       end
     end
   end

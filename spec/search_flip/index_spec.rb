@@ -97,7 +97,6 @@ RSpec.describe SearchFlip::Index do
     it "delegates to connection" do
       allow(TestIndex.connection).to receive(:close_index)
 
-      TestIndex.create_index
       TestIndex.close_index
 
       expect(TestIndex.connection).to have_received(:close_index).with("test")
@@ -108,8 +107,6 @@ RSpec.describe SearchFlip::Index do
     it "delegates to connection" do
       allow(TestIndex.connection).to receive(:open_index)
 
-      TestIndex.create_index
-      TestIndex.close_index
       TestIndex.open_index
 
       expect(TestIndex.connection).to have_received(:open_index).with("test")
@@ -120,7 +117,6 @@ RSpec.describe SearchFlip::Index do
     it "delegates to connection" do
       allow(TestIndex.connection).to receive(:freeze_index)
 
-      TestIndex.create_index
       TestIndex.freeze_index
 
       expect(TestIndex.connection).to have_received(:freeze_index).with("test")
@@ -131,8 +127,6 @@ RSpec.describe SearchFlip::Index do
     it "delegates to connection" do
       allow(TestIndex.connection).to receive(:unfreeze_index)
 
-      TestIndex.create_index
-      TestIndex.freeze_index
       TestIndex.unfreeze_index
 
       expect(TestIndex.connection).to have_received(:unfreeze_index).with("test")

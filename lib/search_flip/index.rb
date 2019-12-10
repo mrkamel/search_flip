@@ -353,6 +353,24 @@ module SearchFlip
         connection.open_index(index_name_with_prefix)
       end
 
+      # Freezes the index within Elasticsearch. Raises SearchFlip::ResponseError
+      # in case any errors occur.
+      #
+      # @return [Boolean] Returns true or raises SearchFlip::ResponseError
+
+      def freeze_index
+        connection.freeze_index(index_name_with_prefix)
+      end
+
+      # Unfreezes the index within Elasticsearch. Raises SearchFlip::ResponseError
+      # in case any errors occur.
+      #
+      # @return [Boolean] Returns true or raises SearchFlip::ResponseError
+
+      def unfreeze_index
+        connection.unfreeze_index(index_name_with_prefix)
+      end
+
       # Updates the index settings within Elasticsearch according to the index
       # settings specified. Raises SearchFlip::ResponseError in case any
       # errors occur.
