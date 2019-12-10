@@ -125,7 +125,7 @@ module SearchFlip
 
     def get_aliases(index_name: "*", alias_name: "*")
       http_client
-        .headers(accept: "application/json")
+        .headers(accept: "application/json", content_type: "application/json")
         .get("#{base_url}/#{index_name}/_alias/#{alias_name}")
         .parse
     end
@@ -140,7 +140,7 @@ module SearchFlip
 
     def alias_exists?(alias_name)
       http_client
-        .headers(accept: "application/json")
+        .headers(accept: "application/json", content_type: "application/json")
         .get("#{base_url}/_alias/#{alias_name}")
 
       true
@@ -160,7 +160,7 @@ module SearchFlip
 
     def get_indices(name = "*", params: {})
       http_client
-        .headers(accept: "application/json")
+        .headers(accept: "application/json", content_type: "application/json")
         .get("#{base_url}/_cat/indices/#{name}", params: params)
         .parse
     end
