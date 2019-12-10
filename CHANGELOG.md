@@ -14,6 +14,9 @@
   Hashie::Mash, but a raw Hash as was already stated in the docs
 * `#post_where` and  `#post_where_not` now handle `nil` values as well:
   `.post_where_not(title: nil)` with `exists/exists not` filters
+* `Connection#cat_indices/get_indices` now accepts additional parameters
+* `Connection#freeze_index`, `Connection#unfreeze_index`, `Index#freeze_index`
+   and `Index#unfreeze_index` added
 
 ## v2.3.1
 

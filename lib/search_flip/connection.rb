@@ -125,7 +125,7 @@ module SearchFlip
 
     def get_aliases(index_name: "*", alias_name: "*")
       http_client
-        .headers(accept: "application/json", content_type: "application/json")
+        .headers(accept: "application/json")
         .get("#{base_url}/#{index_name}/_alias/#{alias_name}")
         .parse
     end
@@ -140,7 +140,7 @@ module SearchFlip
 
     def alias_exists?(alias_name)
       http_client
-        .headers(accept: "application/json", content_type: "application/json")
+        .headers(accept: "application/json")
         .get("#{base_url}/_alias/#{alias_name}")
 
       true
@@ -158,10 +158,10 @@ module SearchFlip
     #
     # @return [Array] The raw response
 
-    def get_indices(name = "*")
+    def get_indices(name = "*", params: {})
       http_client
-        .headers(accept: "application/json", content_type: "application/json")
-        .get("#{base_url}/_cat/indices/#{name}")
+        .headers(accept: "application/json")
+        .get("#{base_url}/_cat/indices/#{name}", params: params)
         .parse
     end
 
@@ -205,6 +205,32 @@ module SearchFlip
 
     def open_index(index_name)
       http_client.post("#{index_url(index_name)}/_open")
+
+      true
+    end
+
+    # Freezes the specified index within Elasticsearch. Raises
+    # SearchFlip::ResponseError in case any errors occur
+    #
+    # @param index_name [String] The index name
+    #
+    # @return [Boolean] Returns true or raises SearchFlip::ResponseError
+
+    def freeze_index(index_name)
+      http_client.post("#{index_url(index_name)}/_freeze")
+
+      true
+    end
+
+    # Unfreezes the specified index within Elasticsearch. Raises
+    # SearchFlip::ResponseError in case any errors occur
+    #
+    # @param index_name [String] The index name
+    #
+    # @return [Boolean] Returns true or raises SearchFlip::ResponseError
+
+    def unfreeze_index(index_name)
+      http_client.post("#{index_url(index_name)}/_unfreeze")
 
       true
     end
