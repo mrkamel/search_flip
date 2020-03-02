@@ -26,7 +26,6 @@ require "search_flip/model"
 module SearchFlip
   class NotSupportedError < StandardError; end
   class ConnectionError < StandardError; end
-  class PaginationError < StandardError; end
 
   class ResponseError < StandardError
     attr_reader :code, :body
