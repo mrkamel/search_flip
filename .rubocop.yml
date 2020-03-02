@@ -1,3 +1,12 @@
+Style/HashTransformValues:
+  Enabled: false
+
+Style/HashTransformKeys:
+  Enabled: false
+
+Style/HashEachMethods:
+  Enabled: true
+
 Style/FrozenStringLiteralComment:
   Enabled: false
 
@@ -9,9 +18,6 @@ Layout/ArgumentAlignment:
 
 Layout/FirstArrayElementIndentation:
   EnforcedStyle: consistent
-
-Style/BracesAroundHashParameters:
-  EnforcedStyle: no_braces
 
 Style/PercentLiteralDelimiters:
   Enabled: false
@@ -49,7 +55,7 @@ Style/SymbolArray:
 Layout/RescueEnsureAlignment:
   Enabled: false
 
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: false
 
 Metrics/MethodLength:
