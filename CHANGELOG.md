@@ -3,6 +3,8 @@
 
 ## v3.0.0
 
+* Added `Critiera#to_query`, which returns a raw query including all
+  queries and filters, including the post filters
 * [BREAKING] No longer pass multiple arguments to `#must`, `#must_not`,
   `#filter`, `#should`, `#post_must`, `#post_must_not`, `#post_filter`, and
   `#post_should`. Pass an array of arguments instead: `.post_must([...])`
@@ -20,18 +22,18 @@
 
 ## v2.3.1
 
-* Make search_flip work with hashie 4.0.0
+* Make `search_flip` work with hashie 4.0.0
 
 ## v2.3.0
 
 * [DEPRECATED] `SearchFlip::Criteria#should` is deprecated and will become
-  equivalent to `.must(bool: { should: ... })` in search_flip 3
+  equivalent to `.must(bool: { should: ... })` in `search_flip` 3
 * Added `SearchFlip::Criteria#explain`
 
 ## v2.2.0
 
 * [DEPRECATED] `SearchFlip::Criteria#unscope` is deprecated and will be removed
-  in search_flip 3
+  in `search_flip` 3
 * Added `SearchFlip::Criteria#track_total_hits`
 
 ## v2.1.0

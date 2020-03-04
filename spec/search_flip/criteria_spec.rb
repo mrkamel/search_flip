@@ -18,6 +18,29 @@ RSpec.describe SearchFlip::Criteria do
     it { should delegate(:connection).to(:target) }
   end
 
+  describe "#to_query" do
+    it "returns the raw elasticsearch query" do
+      query = ProductIndex.where_not(category: "category3")
+      query = query.must(terms: { category: ["category1", "category2"] })
+      query = query.post_where(id: [1, 2], sale: true)
+
+      expect(query.to_query).to eq(
+        bool: {
+          must: [
+            { terms: { category: ["category1", "category2"] } }
+          ],
+          filter: [
+            { terms: { id: [1, 2] } },
+            { term: { sale: true } },
+          ],
+          must_not: [
+            { term: { category: "category3" } }
+          ]
+        }
+      )
+    end
+  end
+
   describe "#merge" do
     it "merges criterias" do
       product1 = create(:product, price: 100, category: "category1")

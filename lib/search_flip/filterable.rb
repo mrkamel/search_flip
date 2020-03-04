@@ -144,6 +144,28 @@ module SearchFlip
       end
     end
 
+    # Returns all added queries and filters, including post filters, as a raw
+    # query.
+    #
+    # @example
+    #   CommentIndex.where(state: "new").post_range(:likes_count, gt: 10).to_query
+    #   # => {:bool=>{:filter=>[{:term=>{:state=>"new"}}, {:range=>{:likes_count=>{:gt=>10}}}]}}
+    #
+    # @return [Hash] The raw query
+
+    def to_query
+      all_must_values = must_values.to_a + post_must_values.to_a
+      all_must_not_values = must_not_values.to_a + post_must_not_values.to_a
+      all_filter_values = filter_values.to_a + post_filter_values.to_a
+
+      {
+        bool: {}
+          .merge(all_must_values.size > 0 ? { must: all_must_values } : {})
+          .merge(all_must_not_values.size > 0 ? { must_not: all_must_not_values } : {})
+          .merge(all_filter_values.size > 0 ? { filter: all_filter_values } : {})
+      }
+    end
+
     # Adds a raw should query to the criteria.
     #
     # @example

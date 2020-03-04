@@ -245,7 +245,6 @@ CommentIndex.search("hello world").sort(id: "desc").aggregate(:username).request
 # => {:query=>{:bool=>{:must=>[{:query_string=>{:query=>"hello world", :default_operator=>:AND}}]}}, ...}
 ```
 
-
 Delete records:
 
 ```ruby
@@ -425,6 +424,20 @@ Simply matches all documents:
 ```ruby
 CommentIndex.match_all
 ```
+
+* `to_query`
+
+Sometimes, you want to convert a search flip query to a raw query to e.g. use
+it in a should query:
+
+```ruby
+CommentIndex.should([
+  { range: { likes_count: { gt: 10 } } },
+  CommentIndex.custom_search("search term").to_query
+])
+```
+
+and `#to_query` allows exactly that.
 
 ### Post Query/Filter Criteria Methods
 
