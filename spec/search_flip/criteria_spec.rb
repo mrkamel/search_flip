@@ -31,7 +31,7 @@ RSpec.describe SearchFlip::Criteria do
           ],
           filter: [
             { terms: { id: [1, 2] } },
-            { term: { sale: true } },
+            { term: { sale: true } }
           ],
           must_not: [
             { term: { category: "category3" } }
