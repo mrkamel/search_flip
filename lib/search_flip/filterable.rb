@@ -190,22 +190,17 @@ module SearchFlip
     # Adds a raw should query to the criteria.
     #
     # @example
-    #   CommentIndex.should(
-    #     [
-    #       { term: { state: "new" } },
-    #       { term: { state: "reviewed" } }
-    #     ],
-    #     boost: 5
-    #   )
+    #   CommentIndex.should([
+    #     { term: { state: "new" } },
+    #     { term: { state: "reviewed" } }
+    #   ])
     #
     # @param args [Array] The raw should query arguments
-    # @param bool_options [Hash] An optional hash with options for the
-    #   resulting bool query like `boost` or `minimum_should_match`
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def should(clause, bool_options = {})
-      must(bool: bool_options.merge(should: clause))
+    def should(clause)
+      must(bool: { should: clause })
     end
 
     # Adds a range filter to the criteria without being forced to specify the

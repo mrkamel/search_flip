@@ -361,13 +361,10 @@ CommentIndex.filter(term: { state: "approved" })
 Use `.should` to add raw should queries:
 
 ```ruby
-CommentIndex.should(
-  [
-    { term: { state: "approved" } },
-    { term: { user: "mrkamel" } },
-  ],
-  boost: 10
-)
+CommentIndex.should([
+  { term: { state: "approved" } },
+  { term: { user: "mrkamel" } },
+])
 ```
 
 * `must`
@@ -428,13 +425,10 @@ Sometimes, you want to convert the constraints of a search flip query to a raw
 query to e.g. use it in a should clause:
 
 ```ruby
-CommentIndex.should(
-  [
-    CommentIndex.range(:likes_count, gt: 10).to_query,
-    CommentIndex.search("search term").to_query
-  ],
-  boost: 10
-)
+CommentIndex.should([
+  CommentIndex.range(:likes_count, gt: 10).to_query,
+  CommentIndex.search("search term").to_query
+])
 ```
 
 It returns all added queries and filters, including post filters as a raw

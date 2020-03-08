@@ -351,24 +351,6 @@ RSpec.describe SearchFlip::Criteria do
 
       expect(query.records.to_set).to eq([product1, product2].to_set)
     end
-
-    it "allows to set bool options" do
-      product1 = create(:product, category: "category1")
-      product2 = create(:product, category: "category2")
-
-      ProductIndex.import [product1, product2]
-
-      query = ProductIndex.should(
-        [
-          { constant_score: { filter: { term: { category: "category1" } }, boost: 0 } },
-          { constant_score: { filter: { term: { category: "category2" } }, boost: 1 } }
-        ],
-        boost: 2
-      )
-
-      expect(query.records).to eq([product2, product1])
-      expect(query.results.map(&:_hit).map(&:_score)).to eq([2, 0])
-    end
   end
 
   describe "#range" do
