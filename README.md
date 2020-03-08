@@ -9,7 +9,7 @@
 Using SearchFlip it is dead-simple to create index classes that correspond to
 [Elasticsearch](https://www.elastic.co/) indices and to manipulate, query and
 aggregate these indices using a chainable, concise, yet powerful DSL. Finally,
-SearchFlip supports Elasticsearch 1.x, 2.x, 5.x, 6.x, 7.x. Check section
+SearchFlip supports Elasticsearch 2.x, 5.x, 6.x, 7.x. Check section
 [Feature Support](#feature-support) for version dependent features.
 
 ```ruby
@@ -848,8 +848,6 @@ require "search_flip/to_json"
 
 ## Feature Support
 
-* `#post_search` and `#profile` are only supported from up to Elasticsearch
-  version >= 2.
 * for Elasticsearch 2.x, the delete-by-query plugin is required to delete
   records via queries
 * `#track_total_hits` is only available with Elasticsearch >= 7

@@ -41,8 +41,6 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_search(q, options = {})
-      raise(SearchFlip::NotSupportedError) if target.connection.version.to_i < 2
-
       return self if q.to_s.strip.length.zero?
 
       post_must(query_string: { query: q, default_operator: :AND }.merge(options))

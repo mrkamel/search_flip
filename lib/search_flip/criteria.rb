@@ -231,29 +231,13 @@ module SearchFlip
       res = {}
 
       if must_values || must_not_values || filter_values
-        if connection.version.to_i >= 2
-          res[:query] = {
-            bool: {
-              must: must_values.to_a,
-              must_not: must_not_values.to_a,
-              filter: filter_values.to_a
-            }.reject { |_, value| value.empty? }
-          }
-        else
-          filters = (filter_values || []) + (must_not_values || []).map { |must_not_value| { not: must_not_value } }
-          queries = must_values ? { must: must_values } : {}
-
-          res[:query] =
-            if filters.size > 0
-              {
-                filtered: {}
-                  .merge(queries.size > 0 ? { query: { bool: queries } } : {})
-                  .merge(filter: filters.size > 1 ? { and: filters } : filters.first)
-              }
-            else
-              { bool: queries }
-            end
-        end
+        res[:query] = {
+          bool: {
+            must: must_values.to_a,
+            must_not: must_not_values.to_a,
+            filter: filter_values.to_a
+          }.reject { |_, value| value.empty? }
+        }
       end
 
       res.update(from: offset_value_with_default, size: limit_value_with_default)
@@ -268,21 +252,13 @@ module SearchFlip
       res[:aggregations] = aggregation_values if aggregation_values
 
       if post_must_values || post_must_not_values || post_filter_values
-        if connection.version.to_i >= 2
-          res[:post_filter] = {
-            bool: {
-              must: post_must_values.to_a,
-              must_not: post_must_not_values.to_a,
-              filter: post_filter_values.to_a
-            }.reject { |_, value| value.empty? }
-          }
-        else
-          post_filters = (post_filter_values || []) + (post_must_not_values || []).map { |post_must_not_value| { not: post_must_not_value } }
-          post_queries = post_must_values ? { must: post_must_values } : {}
-          post_filters_and_queries = post_filters + (post_queries.size > 0 ? [bool: post_queries] : [])
-
-          res[:post_filter] = post_filters_and_queries.size > 1 ? { and: post_filters_and_queries } : post_filters_and_queries.first
-        end
+        res[:post_filter] = {
+          bool: {
+            must: post_must_values.to_a,
+            must_not: post_must_not_values.to_a,
+            filter: post_filter_values.to_a
+          }.reject { |_, value| value.empty? }
+        }
       end
 
       res[:_source] = source_value unless source_value.nil?
@@ -772,17 +748,11 @@ module SearchFlip
 
         http_response =
           if scroll_args && scroll_args[:id]
-            if connection.version.to_i >= 2
-              http_request.post(
-                "#{connection.base_url}/_search/scroll",
-                params: request_params,
-                json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] }
-              )
-            else
-              http_request
-                .headers(content_type: "text/plain")
-                .post("#{connection.base_url}/_search/scroll", params: request_params.merge(scroll: scroll_args[:timeout]), body: scroll_args[:id])
-            end
+            http_request.post(
+              "#{connection.base_url}/_search/scroll",
+              params: request_params,
+              json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] }
+            )
           elsif scroll_args
             http_request.post(
               "#{target.type_url}/_search",
