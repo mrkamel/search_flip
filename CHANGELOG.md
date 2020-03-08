@@ -3,13 +3,14 @@
 
 ## v3.0.0
 
-* Added `Critiera#to_query`, which returns a raw query including all
-  queries and filters, including the post filters
+* Added `Criteria#to_query` and `Crtieria#to_filter`, which returns a raw query
+  including all queries and filters, including the post filters
 * [BREAKING] No longer pass multiple arguments to `#must`, `#must_not`,
   `#filter`, `#should`, `#post_must`, `#post_must_not`, `#post_filter`, and
   `#post_should`. Pass an array of arguments instead: `.post_must([...])`
 * [BREAKING] `#should` and `#post_should` is now equivalent to
   `.must(bool: { should: ... })` and `.post_must(bool: { should: ... })`,
+* `#should` allows to set `bool_options`, like e.g. `minimum_should_match`
   respectively.
 * [BREAKING] `#unscope` is removed
 * [BREAKING] `SearchFlip::Connection#get_aliases` no longer returns a
