@@ -361,7 +361,13 @@ CommentIndex.filter(term: { state: "approved" })
 Use `.should` to add raw should queries:
 
 ```ruby
-CommentIndex.should(term: { state: "approved" })
+CommentIndex.should(
+  [
+    { term: { state: "approved" } },
+    { term: { user: "mrkamel" } },
+  ],
+  boost: 10
+)
 ```
 
 * `must`
@@ -370,15 +376,6 @@ Use `.must` to add raw must queries:
 
 ```ruby
 CommentIndex.must(term: { state: "approved" })
-
-CommentIndex.must(
-  bool: {
-    should: [
-      { terms: { state: ["approved", "rejected"] }},
-      { term: { username: "mrkamel" }}
-    ]
-  }
-)
 ```
 
 * `must_not`
@@ -427,18 +424,35 @@ CommentIndex.match_all
 
 * `to_query`
 
-Sometimes, you want to convert a search flip query to a raw query to e.g. use
-it in a should query:
+Sometimes, you want to convert the constraints of a search flip query to a raw
+query to e.g. use it in a should clause:
 
 ```ruby
-CommentIndex.should([
-  { range: { likes_count: { gt: 10 } } },
-  CommentIndex.custom_search("search term").to_query
-])
+CommentIndex.should(
+  [
+    CommentIndex.range(:likes_count, gt: 10).to_query,
+    CommentIndex.search("search term").to_query
+  ],
+  boost: 10
+)
 ```
 
-and `#to_query` allows exactly that.
+It returns all added queries and filters, including post filters as a raw
+query and in query (score) mode:
 
+```ruby
+CommentIndex.where(id: [1, 2]).where_not(category: 'movies').to_query
+# => {:bool=>{:must=>[{:terms=>{:id=>[1, 2]}}, :must_not=>[{:term=>{:category=>"movies"}}]}}
+```
+
+* `to_filter`
+
+Like `to_query` but returns all added queries and filters in filter mode.
+
+```ruby
+CommentIndex.where(id: [1, 2]).where_not(category: 'movies').to_query
+# => {:bool=>{:filter=>[{:terms=>{:id=>[1, 2]}}, :must_not=>[{:term=>{:category=>"movies"}}]}}
+`
 ### Post Query/Filter Criteria Methods
 
 All query/filter criteria methods (`#where`, `#where_not`, `#range`, etc.) are available

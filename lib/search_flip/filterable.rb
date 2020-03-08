@@ -122,7 +122,7 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def must(clause)
+    def must(clause, bool_options = {})
       fresh.tap do |criteria|
         criteria.must_values = (must_values || []) + Helper.wrap_array(clause)
       end
@@ -145,41 +145,67 @@ module SearchFlip
     end
 
     # Returns all added queries and filters, including post filters, as a raw
-    # query.
+    # query and in query (score) mode.
     #
-    # @example
+    # @example Basic usage
     #   CommentIndex.where(state: "new").post_range(:likes_count, gt: 10).to_query
-    #   # => {:bool=>{:filter=>[{:term=>{:state=>"new"}}, {:range=>{:likes_count=>{:gt=>10}}}]}}
+    #   # => {:bool=>{:must=>[{:term=>{:state=>"new"}}, {:range=>{:likes_count=>{:gt=>10}}}]}}
+    #
+    # @example Usage with should clauses
+    #   CommentIndex.should([
+    #     CommentIndex.range(:likes_count, gt: 10),
+    #     CommentIndex.search("search term")
+    #   ])
     #
     # @return [Hash] The raw query
 
     def to_query
-      all_must_values = must_values.to_a + post_must_values.to_a
-      all_must_not_values = must_not_values.to_a + post_must_not_values.to_a
-      all_filter_values = filter_values.to_a + post_filter_values.to_a
-
       {
-        bool: {}
-          .merge(all_must_values.size > 0 ? { must: all_must_values } : {})
-          .merge(all_must_not_values.size > 0 ? { must_not: all_must_not_values } : {})
-          .merge(all_filter_values.size > 0 ? { filter: all_filter_values } : {})
+        bool: {
+          must: must_values.to_a + post_must_values.to_a + filter_values.to_a + post_filter_values.to_a,
+          must_not: must_not_values.to_a + post_must_not_values.to_a
+        }.reject { |_, value| value.empty? }
+      }
+    end
+
+    # Like `to_query` the `to_filter` method returns all added queries and
+    # filters, including post filters, as a raw query, but in filter mode
+    # instead of query (score) mode.
+    #
+    # @example
+    #   CommentIndex.where(state: "new").post_range(:likes_count, gt: 10).to_filter
+    #   # => {:bool=>{:filter=>[{:term=>{:state=>"new"}}, {:range=>{:likes_count=>{:gt=>10}}}]}}
+    #
+    # @return [Hash] The raw filter query
+
+    def to_filter
+      {
+        bool: {
+          must_not: must_not_values.to_a + post_must_not_values.to_a,
+          filter: must_values.to_a + post_must_values.to_a + filter_values.to_a + post_filter_values.to_a
+        }.reject { |_, value| value.empty? }
       }
     end
 
     # Adds a raw should query to the criteria.
     #
     # @example
-    #   CommentIndex.should([
-    #     { term: { state: "new" } },
-    #     { term: { state: "reviewed" } }
-    #   ])
+    #   CommentIndex.should(
+    #     [
+    #       { term: { state: "new" } },
+    #       { term: { state: "reviewed" } }
+    #     ],
+    #     boost: 5
+    #   )
     #
     # @param args [Array] The raw should query arguments
+    # @param bool_options [Hash] An optional hash with options for the
+    #   resulting bool query like `boost` or `minimum_should_match`
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def should(clause)
-      must(bool: { should: clause })
+    def should(clause, bool_options = {})
+      must(bool: bool_options.merge(should: clause))
     end
 
     # Adds a range filter to the criteria without being forced to specify the

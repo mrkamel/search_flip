@@ -19,17 +19,40 @@ RSpec.describe SearchFlip::Criteria do
   end
 
   describe "#to_query" do
-    it "returns the raw elasticsearch query" do
-      query = ProductIndex.where_not(category: "category3")
-      query = query.must(terms: { category: ["category1", "category2"] })
-      query = query.post_where(id: [1, 2], sale: true)
+    it "returns the added queries and filters, including post filters in query mode" do
+      query =
+        ProductIndex
+          .where_not(category: "category3")
+          .must(terms: { category: ["category1", "category2"] })
+          .post_where(id: [1, 2], sale: true)
 
       expect(query.to_query).to eq(
         bool: {
           must: [
-            { terms: { category: ["category1", "category2"] } }
+            { terms: { category: ["category1", "category2"] } },
+            { terms: { id: [1, 2] } },
+            { term: { sale: true } }
           ],
+          must_not: [
+            { term: { category: "category3" } }
+          ]
+        }
+      )
+    end
+  end
+
+  describe "#to_filter" do
+    it "returns the added queries and filters, including post filters in filter mode" do
+      query =
+        ProductIndex
+          .where_not(category: "category3")
+          .must(terms: { category: ["category1", "category2"] })
+          .post_where(id: [1, 2], sale: true)
+
+      expect(query.to_filter).to eq(
+        bool: {
           filter: [
+            { terms: { category: ["category1", "category2"] } },
             { terms: { id: [1, 2] } },
             { term: { sale: true } }
           ],
@@ -327,6 +350,24 @@ RSpec.describe SearchFlip::Criteria do
       ])
 
       expect(query.records.to_set).to eq([product1, product2].to_set)
+    end
+
+    it "allows to set bool options" do
+      product1 = create(:product, category: "category1")
+      product2 = create(:product, category: "category2")
+
+      ProductIndex.import [product1, product2]
+
+      query = ProductIndex.should(
+        [
+          { constant_score: { filter: { term: { category: "category1" } }, boost: 0 } },
+          { constant_score: { filter: { term: { category: "category2" } }, boost: 1 } }
+        ],
+        boost: 2
+      )
+
+      expect(query.records).to eq([product2, product1])
+      expect(query.results.map(&:_hit).map(&:_score)).to eq([2, 0])
     end
   end
 

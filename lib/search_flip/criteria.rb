@@ -233,14 +233,14 @@ module SearchFlip
       if must_values || must_not_values || filter_values
         if connection.version.to_i >= 2
           res[:query] = {
-            bool: {}
-              .merge(must_values ? { must: must_values } : {})
-              .merge(must_not_values ? { must_not: must_not_values } : {})
-              .merge(filter_values ? { filter: filter_values } : {})
+            bool: {
+              must: must_values.to_a,
+              must_not: must_not_values.to_a,
+              filter: filter_values.to_a
+            }.reject { |_, value| value.empty? }
           }
         else
           filters = (filter_values || []) + (must_not_values || []).map { |must_not_value| { not: must_not_value } }
-
           queries = must_values ? { must: must_values } : {}
 
           res[:query] =
@@ -270,10 +270,11 @@ module SearchFlip
       if post_must_values || post_must_not_values || post_filter_values
         if connection.version.to_i >= 2
           res[:post_filter] = {
-            bool: {}
-              .merge(post_must_values ? { must: post_must_values } : {})
-              .merge(post_must_not_values ? { must_not: post_must_not_values } : {})
-              .merge(post_filter_values ? { filter: post_filter_values } : {})
+            bool: {
+              must: post_must_values.to_a,
+              must_not: post_must_not_values.to_a,
+              filter: post_filter_values.to_a
+            }.reject { |_, value| value.empty? }
           }
         else
           post_filters = (post_filter_values || []) + (post_must_not_values || []).map { |post_must_not_value| { not: post_must_not_value } }
