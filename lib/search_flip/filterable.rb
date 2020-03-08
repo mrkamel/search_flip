@@ -145,44 +145,20 @@ module SearchFlip
     end
 
     # Returns all added queries and filters, including post filters, as a raw
-    # query and in query (score) mode.
+    # query.
     #
-    # @example Basic usage
-    #   CommentIndex.where(state: "new").post_range(:likes_count, gt: 10).to_query
-    #   # => {:bool=>{:must=>[{:term=>{:state=>"new"}}, {:range=>{:likes_count=>{:gt=>10}}}]}}
-    #
-    # @example Usage with should clauses
-    #   CommentIndex.should([
-    #     CommentIndex.range(:likes_count, gt: 10),
-    #     CommentIndex.search("search term")
-    #   ])
+    # @example
+    #   CommentIndex.where(state: "new").search("text").to_query
+    #   # => {:bool=>{:filter=>[{:term=>{:state=>"new"}}], :must=>[{:query_string=>{:query=>"text", ...}}]}}
     #
     # @return [Hash] The raw query
 
     def to_query
       {
         bool: {
-          must: must_values.to_a + post_must_values.to_a + filter_values.to_a + post_filter_values.to_a,
-          must_not: must_not_values.to_a + post_must_not_values.to_a
-        }.reject { |_, value| value.empty? }
-      }
-    end
-
-    # Like `to_query` the `to_filter` method returns all added queries and
-    # filters, including post filters, as a raw query, but in filter mode
-    # instead of query (score) mode.
-    #
-    # @example
-    #   CommentIndex.where(state: "new").post_range(:likes_count, gt: 10).to_filter
-    #   # => {:bool=>{:filter=>[{:term=>{:state=>"new"}}, {:range=>{:likes_count=>{:gt=>10}}}]}}
-    #
-    # @return [Hash] The raw filter query
-
-    def to_filter
-      {
-        bool: {
+          must: must_values.to_a,
           must_not: must_not_values.to_a + post_must_not_values.to_a,
-          filter: must_values.to_a + post_must_values.to_a + filter_values.to_a + post_filter_values.to_a
+          filter: post_must_values.to_a + filter_values.to_a + post_filter_values.to_a
         }.reject { |_, value| value.empty? }
       }
     end

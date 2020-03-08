@@ -19,48 +19,58 @@ RSpec.describe SearchFlip::Criteria do
   end
 
   describe "#to_query" do
-    it "returns the added queries and filters, including post filters in query mode" do
+    it "returns the added must, filter and must_not clauses" do
       query =
         ProductIndex
-          .where_not(category: "category3")
-          .must(terms: { category: ["category1", "category2"] })
-          .post_where(id: [1, 2], sale: true)
+          .must(term: { category: "category1" })
+          .filter(term: { category: "category2" })
+          .must_not(term: { category: "category3" })
 
       expect(query.to_query).to eq(
         bool: {
-          must: [
-            { terms: { category: ["category1", "category2"] } },
-            { terms: { id: [1, 2] } },
-            { term: { sale: true } }
-          ],
-          must_not: [
-            { term: { category: "category3" } }
+          must: [{ term: { category: "category1" } }],
+          filter: [{ term: { category: "category2" } }],
+          must_not: [{ term: { category: "category3" } }]
+        }
+      )
+    end
+
+    it "generates an executable query for must, filter and must_not clauses" do
+      query =
+        ProductIndex
+          .must(term: { category: "category1" })
+          .filter(term: { category: "category2" })
+          .must_not(term: { category: "category3" })
+
+      expect { ProductIndex.must(query.to_query).execute }.not_to raise_error
+    end
+
+    it "returns the added post_must, post_filter and post_must_not clauses" do
+      query =
+        ProductIndex
+          .post_must(term: { category: "category1" })
+          .post_filter(term: { category: "category2" })
+          .post_must_not(term: { category: "category3" })
+
+      expect(query.to_query).to eq(
+        bool: {
+          must_not: [{ term: { category: "category3" } }],
+          filter: [
+            { term: { category: "category1" } },
+            { term: { category: "category2" } }
           ]
         }
       )
     end
-  end
 
-  describe "#to_filter" do
-    it "returns the added queries and filters, including post filters in filter mode" do
+    it "generates an executable query for post_must, post_filter and post_must_not clauses" do
       query =
         ProductIndex
-          .where_not(category: "category3")
-          .must(terms: { category: ["category1", "category2"] })
-          .post_where(id: [1, 2], sale: true)
+          .post_must(term: { category: "category1" })
+          .post_filter(term: { category: "category2" })
+          .post_must_not(term: { category: "category3" })
 
-      expect(query.to_filter).to eq(
-        bool: {
-          filter: [
-            { terms: { category: ["category1", "category2"] } },
-            { terms: { id: [1, 2] } },
-            { term: { sale: true } }
-          ],
-          must_not: [
-            { term: { category: "category3" } }
-          ]
-        }
-      )
+      expect { ProductIndex.must(query.to_query).execute }.not_to raise_error
     end
   end
 

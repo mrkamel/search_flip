@@ -3,8 +3,8 @@
 
 ## v3.0.0
 
-* Added `Criteria#to_query` and `Crtieria#to_filter`, which returns a raw query
-  including all queries and filters, including the post filters
+* Added `Criteria#to_query`, which returns a raw query including all queries
+  and filters, including the post filters
 * [BREAKING] No longer pass multiple arguments to `#must`, `#must_not`,
   `#filter`, `#should`, `#post_must`, `#post_must_not`, `#post_filter`, and
   `#post_should`. Pass an array of arguments instead: `.post_must([...])`

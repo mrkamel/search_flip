@@ -432,21 +432,13 @@ CommentIndex.should([
 ```
 
 It returns all added queries and filters, including post filters as a raw
-query and in query (score) mode:
+query:
 
 ```ruby
-CommentIndex.where(id: [1, 2]).where_not(category: 'movies').to_query
-# => {:bool=>{:must=>[{:terms=>{:id=>[1, 2]}}, :must_not=>[{:term=>{:category=>"movies"}}]}}
+CommentIndex.where(state: "new").search("text")
+# => {:bool=>{:filter=>[{:term=>{:state=>"new"}}], :must=>[{:query_string=>{:query=>"text", ...}}]}}
 ```
 
-* `to_filter`
-
-Like `to_query` but returns all added queries and filters in filter mode.
-
-```ruby
-CommentIndex.where(id: [1, 2]).where_not(category: 'movies').to_query
-# => {:bool=>{:filter=>[{:terms=>{:id=>[1, 2]}}, :must_not=>[{:term=>{:category=>"movies"}}]}}
-`
 ### Post Query/Filter Criteria Methods
 
 All query/filter criteria methods (`#where`, `#where_not`, `#range`, etc.) are available
