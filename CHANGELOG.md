@@ -11,8 +11,6 @@
   `#post_should`. Pass an array of arguments instead: `.post_must([...])`
 * [BREAKING] `#should` and `#post_should` is now equivalent to
   `.must(bool: { should: ... })` and `.post_must(bool: { should: ... })`,
-* `#should` allows to set `bool_options`, like e.g. `minimum_should_match`
-  respectively.
 * [BREAKING] `#unscope` is removed
 * [BREAKING] `SearchFlip::Connection#get_aliases` no longer returns a
   Hashie::Mash, but a raw Hash as was already stated in the docs
