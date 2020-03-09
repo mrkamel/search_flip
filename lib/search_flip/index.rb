@@ -247,7 +247,7 @@ module SearchFlip
         SearchFlip::Criteria.new(target: self)
       end
 
-      def_delegators :criteria, :profile, :where, :where_not, :filter, :range, :match_all, :exists,
+      def_delegators :criteria, :all, :profile, :where, :where_not, :filter, :range, :match_all, :exists,
         :exists_not, :post_where, :post_where_not, :post_range, :post_exists, :post_exists_not,
         :post_filter, :post_must, :post_must_not, :post_should, :aggregate, :scroll, :source,
         :includes, :eager_load, :preload, :sort, :resort, :order, :reorder, :offset, :limit, :paginate,

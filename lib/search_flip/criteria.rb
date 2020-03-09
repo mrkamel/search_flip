@@ -195,6 +195,8 @@ module SearchFlip
       self
     end
 
+    alias_method :all, :criteria
+
     # Creates a new SearchFlip::Criteria.
     #
     # @param attributes [Hash] Attributes to initialize the Criteria with

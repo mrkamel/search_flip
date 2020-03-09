@@ -158,6 +158,14 @@ RSpec.describe SearchFlip::Criteria do
     end
   end
 
+  describe "#all" do
+    it "returns self" do
+      criteria = ProductIndex.criteria
+
+      expect(criteria.all.object_id).to eq(criteria.object_id)
+    end
+  end
+
   describe "#timeout" do
     it "sets the query timeout" do
       query = ProductIndex.timeout("1s")

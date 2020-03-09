@@ -5,6 +5,7 @@
 
 * Added `Criteria#to_query`, which returns a raw query including all queries
   and filters, including the post filters
+* Added `Criteria#all`
 * [BREAKING] Support for elasticsearch 1.x has been removed
 * [BREAKING] No longer pass multiple arguments to `#must`, `#must_not`,
   `#filter`, `#should`, `#post_must`, `#post_must_not`, `#post_filter`, and
