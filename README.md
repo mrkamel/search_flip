@@ -444,7 +444,7 @@ It returns all added queries and filters, including post filters as a raw
 query:
 
 ```ruby
-CommentIndex.where(state: "new").search("text")
+CommentIndex.where(state: "new").search("text").to_query
 # => {:bool=>{:filter=>[{:term=>{:state=>"new"}}], :must=>[{:query_string=>{:query=>"text", ...}}]}}
 ```
 
