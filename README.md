@@ -419,6 +419,15 @@ Simply matches all documents:
 CommentIndex.match_all
 ```
 
+* `all`
+
+Simply returns the criteria as is or an empty criteria when called on the index
+class directly. Useful for chaining.
+
+```ruby
+CommentIndex.all
+```
+
 * `to_query`
 
 Sometimes, you want to convert the constraints of a search flip query to a raw
