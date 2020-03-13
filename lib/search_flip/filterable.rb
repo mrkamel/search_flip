@@ -151,14 +151,23 @@ module SearchFlip
     #   CommentIndex.where(state: "new").search("text").to_query
     #   # => {:bool=>{:filter=>[{:term=>{:state=>"new"}}], :must=>[{:query_string=>{:query=>"text", ...}}]}}
     #
+    #   CommentIndex.must(term: { state: "new" }).to_query
+    #   # => {:term=>{:state=>"new"}}
+    #
     # @return [Hash] The raw query
 
     def to_query
+      must_clauses = must_values.to_a
+      must_not_clauses = must_not_values.to_a + post_must_not_values.to_a
+      filter_clauses = post_must_values.to_a + filter_values.to_a + post_filter_values.to_a
+
+      return must_clauses.first if must_clauses.size == 1 && must_not_clauses.empty? && filter_clauses.empty?
+
       {
         bool: {
-          must: must_values.to_a,
-          must_not: must_not_values.to_a + post_must_not_values.to_a,
-          filter: post_must_values.to_a + filter_values.to_a + post_filter_values.to_a
+          must: must_clauses,
+          must_not: must_not_clauses,
+          filter: filter_clauses
         }.reject { |_, value| value.empty? }
       }
     end

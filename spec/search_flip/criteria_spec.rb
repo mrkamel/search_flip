@@ -35,6 +35,12 @@ RSpec.describe SearchFlip::Criteria do
       )
     end
 
+    it "returns only the must clause, if there is only a single must clause" do
+      query = ProductIndex.must(term: { category: "category" })
+
+      expect(query.to_query).to eq(term: { category: "category" })
+    end
+
     it "generates an executable query for must, filter and must_not clauses" do
       query =
         ProductIndex
