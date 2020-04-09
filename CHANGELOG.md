@@ -20,6 +20,7 @@
 * `Connection#cat_indices/get_indices` now accepts additional parameters
 * `Connection#freeze_index`, `Connection#unfreeze_index`, `Index#freeze_index`
    and `Index#unfreeze_index` added
+* Added `SearchFlip::Result.from_hit`
 
 ## v2.3.1
 

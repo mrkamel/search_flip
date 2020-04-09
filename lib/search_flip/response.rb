@@ -166,15 +166,7 @@ module SearchFlip
     # @return [Array] An array of results
 
     def results
-      @results ||= hits["hits"].map do |hit|
-        raw_result = hit["_source"]
-
-        raw_result["_hit"] = hit.each_with_object({}) do |(key, value), hash|
-          hash[key] = value if key != "_source"
-        end
-
-        Result.new(raw_result)
-      end
+      @results ||= hits["hits"].map { |hit| Result.from_hit(hit) }
     end
 
     # Returns the named sugggetion, if a name is specified or alle suggestions.
