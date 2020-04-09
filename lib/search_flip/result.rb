@@ -1,10 +1,13 @@
 module SearchFlip
-  # The SearchFlip::Result class basically is a hash wrapper that uses
-  # Hashie::Mash to provide convenient method access to the hash attributes.
+  class Result < Hash
+    def method_missing(name, *args, &block)
+      return !!self[name.to_s.chop] if name.to_s.end_with?("?")
 
-  class Result < Hashie::Mash
-    def self.disable_warnings?(*args)
-      true
+      self[name.to_s]
+    end
+
+    def respond_to_missing?(name, include_private = false)
+      key?(name.to_s)
     end
 
     # Creates a SearchFlip::Result object from a raw hit. Useful for e.g.

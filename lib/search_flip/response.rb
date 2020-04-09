@@ -166,7 +166,11 @@ module SearchFlip
     # @return [Array] An array of results
 
     def results
-      @results ||= hits["hits"].map { |hit| Result.from_hit(hit) }
+      @results ||= hits["hits"].map do |hit|
+        raw_result = hit["_source"].dup
+        raw_result["_hit"] = hit.dup.tap { |obj| obj.delete("_source") }
+        raw_result
+      end
     end
 
     # Returns the named sugggetion, if a name is specified or alle suggestions.
@@ -306,11 +310,11 @@ module SearchFlip
         if response["aggregations"].nil? || response["aggregations"][key].nil?
           Result.new
         elsif response["aggregations"][key]["buckets"].is_a?(Array)
-          response["aggregations"][key]["buckets"].each_with_object({}) { |bucket, hash| hash[bucket["key"]] = Result.new(bucket) }
+          response["aggregations"][key]["buckets"].each_with_object(Result.new) { |bucket, hash| hash[bucket["key"]] = bucket }
         elsif response["aggregations"][key]["buckets"].is_a?(Hash)
-          Result.new response["aggregations"][key]["buckets"]
+          response["aggregations"][key]["buckets"]
         else
-          Result.new response["aggregations"][key]
+          response["aggregations"][key]
         end
     end
   end
