@@ -1,14 +1,5 @@
-Lint/RaiseException:
-  Enabled: true
-
-Lint/StructNewOverride:
-  Enabled: true
-
-Layout/SpaceAroundMethodCallOperator:
-  Enabled: true
-
-Style/ExponentialNotation:
-  Enabled: true
+AllCops:
+  NewCops: enable
 
 Style/HashTransformValues:
   Enabled: false
