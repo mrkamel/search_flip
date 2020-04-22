@@ -21,6 +21,8 @@
 * `Connection#freeze_index`, `Connection#unfreeze_index`, `Index#freeze_index`
    and `Index#unfreeze_index` added
 * Added `SearchFlip::Result.from_hit`
+* Added support for `source`, `sort`, `page`, `per`, `paginate`, `explain`, and
+  `highlight` to aggregations
 
 ## v2.3.1
 
