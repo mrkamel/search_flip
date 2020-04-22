@@ -57,7 +57,14 @@ module SearchFlip
         if block
           aggregation = yield(SearchFlip::Aggregation.new(target: target))
 
-          field_or_hash.is_a?(Hash) ? hash[field_or_hash.keys.first].merge!(aggregation.to_hash) : hash[field_or_hash].merge!(aggregation.to_hash)
+          if field_or_hash.is_a?(Hash)
+            value = field_or_hash.values.first
+            value = value.values.first if value.is_a?(Hash) && !value.empty?
+
+            value.merge!(aggregation.to_hash)
+          else
+            hash[field_or_hash].merge!(aggregation.to_hash)
+          end
         end
 
         criteria.aggregation_values = (aggregation_values || {}).merge(hash)

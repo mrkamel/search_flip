@@ -282,33 +282,24 @@ RSpec.describe SearchFlip::Aggregation do
       expect(result).to eq("category1" => 2, "category2" => 1)
     end
 
-    describe "unsupported methods" do
-      unsupported_methods = [
-        :profile_value, :failsafe_value, :terminate_after_value, :timeout_value, :offset_value, :limit_value,
-        :scroll_args, :highlight_values, :suggest_values, :custom_value, :source_value, :sort_values,
-        :includes_values, :preload_values, :eager_load_values, :post_must_values,
-        :post_must_not_values, :post_filter_values, :preference_value,
-        :search_type_value, :routing_value
-      ]
+    describe "assignments" do
+      methods = [:offset_value, :limit_value, :source_value, :explain_value]
 
-      unsupported_methods.each do |unsupported_method|
-        it "raises a NotSupportedError #{unsupported_method}" do
-          block = lambda do
-            TestIndex.aggregate(field: {}) do |agg|
-              criteria = SearchFlip::Criteria.new(target: TestIndex)
-              criteria.send("#{unsupported_method}=", "value")
+      methods.each do |method|
+        it "replaces the values" do
+          aggregation = SearchFlip::Aggregation.new(target: TestIndex)
+          aggregation.send("#{method}=", "value1")
 
-              agg.merge(criteria)
-            end
-          end
+          criteria = SearchFlip::Criteria.new(target: TestIndex)
+          criteria.send("#{method}=", "value2")
 
-          expect(&block).to raise_error(SearchFlip::NotSupportedError)
+          expect(aggregation.merge(criteria).send(method)).to eq("value2")
         end
       end
     end
 
     describe "array concatenations" do
-      methods = [:must_values, :must_not_values, :filter_values]
+      methods = [:sort_values, :must_values, :must_not_values, :filter_values]
 
       methods.each do |method|
         it "concatenates the values for #{method}" do
@@ -326,7 +317,7 @@ RSpec.describe SearchFlip::Aggregation do
     end
 
     describe "hash merges" do
-      methods = [:aggregation_values]
+      methods = [:highlight_values, :custom_value, :aggregation_values]
 
       methods.each do |method|
         it "merges the values for #{method}" do
@@ -339,6 +330,29 @@ RSpec.describe SearchFlip::Aggregation do
           result = aggregation.merge(criteria)
 
           expect(result.send(method)).to eq(key1: "value1", key2: "value2")
+        end
+      end
+    end
+
+    describe "unsupported methods" do
+      unsupported_methods = [
+        :profile_value, :failsafe_value, :terminate_after_value, :timeout_value, :scroll_args,
+        :suggest_values, :includes_values, :preload_values, :eager_load_values, :post_must_values,
+        :post_must_not_values, :post_filter_values, :preference_value, :search_type_value, :routing_value
+      ]
+
+      unsupported_methods.each do |unsupported_method|
+        it "raises a NotSupportedError #{unsupported_method}" do
+          block = lambda do
+            aggregation = SearchFlip::Aggregation.new(target: TestIndex)
+
+            criteria = SearchFlip::Criteria.new(target: TestIndex)
+            criteria.send("#{unsupported_method}=", "value")
+
+            aggregation.merge(criteria)
+          end
+
+          expect(&block).to raise_error(SearchFlip::NotSupportedError)
         end
       end
     end
@@ -378,6 +392,146 @@ RSpec.describe SearchFlip::Aggregation do
       end
 
       expect(result).to eq("category1" => 2, "category2" => 1)
+    end
+  end
+
+  describe "#explain" do
+    it "returns the explaination" do
+      ProductIndex.import create(:product)
+
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
+        agg.explain(true)
+      end
+
+      expect(query.aggregations("top_hits").hits.hits.first.key?("_explanation")).to eq(true)
+    end
+  end
+
+  describe "#custom" do
+    it "adds a custom entry to the request" do
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
+        agg.custom(custom_key: "custom_value")
+      end
+
+      expect(query.request[:aggregations][:top_hits][:top_hits][:custom_key]).to eq("custom_value")
+    end
+  end
+
+  describe "#highlight" do
+    it "adds a custom entry to the request" do
+      ProductIndex.import create(:product, title: "some name")
+
+      query = ProductIndex.search("some name").aggregate(top_hits: { top_hits: {} }) do |agg|
+        agg.highlight(:title)
+      end
+
+      expect(query.aggregations("top_hits").hits.hits.first.highlight.title).to be_present
+    end
+  end
+
+  describe "#page" do
+    it "returns the respective result window" do
+      product1, product2 = create_list(:product, 2)
+
+      ProductIndex.import [product1, product2]
+
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
+        agg.sort(:id).per(1).page(2)
+      end
+
+      expect(query.aggregations("top_hits").hits.hits.first._id).to eq(product2.id.to_s)
+    end
+  end
+
+  describe "#per" do
+    it "returns the respective result window" do
+      ProductIndex.import create_list(:product, 2)
+
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
+        agg.per(1)
+      end
+
+      expect(query.aggregations("top_hits").hits.hits.size).to eq(1)
+    end
+  end
+
+  describe "#paginate" do
+    it "returns the respective result window" do
+      product1, product2 = create_list(:product, 2)
+
+      ProductIndex.import [product1, product2]
+
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
+        agg.sort(:id).paginate(page: 2, per_page: 1)
+      end
+
+      expect(query.aggregations("top_hits").hits.hits.first._id).to eq(product2.id.to_s)
+    end
+  end
+
+  describe "#limit" do
+    it "returns the respective result window" do
+      ProductIndex.import create_list(:product, 2)
+
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
+        agg.limit(1)
+      end
+
+      expect(query.aggregations("top_hits").hits.hits.size).to eq(1)
+    end
+  end
+
+  describe "#offset" do
+    it "returns the respective result window" do
+      product1, product2 = create_list(:product, 2)
+
+      ProductIndex.import [product1, product2]
+
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
+        agg.sort(:id).limit(1).offset(1)
+      end
+
+      expect(query.aggregations("top_hits").hits.hits.first._id).to eq(product2.id.to_s)
+    end
+  end
+
+  describe "#sort" do
+    it "returns the results in the specified order" do
+      product1, product2 = create_list(:product, 2)
+
+      ProductIndex.import [product1, product2]
+
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
+        agg.sort(id: "desc")
+      end
+
+      expect(query.aggregations("top_hits").hits.hits.map(&:_id)).to eq([product2, product1].map(&:id).map(&:to_s))
+    end
+  end
+
+  describe "#resort" do
+    it "overrides the previous sorting and returns the results in the specified order" do
+      product1, product2 = create_list(:product, 2)
+
+      ProductIndex.import [product1, product2]
+
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
+        agg.sort(id: "desc").resort(:id)
+      end
+
+      expect(query.aggregations("top_hits").hits.hits.map(&:_id)).to eq([product1, product2].map(&:id).map(&:to_s))
+    end
+  end
+
+  describe "#source" do
+    it "returns the specified fields only" do
+      ProductIndex.import create(:product)
+
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
+        agg.source([:id, :title])
+      end
+
+      expect(query.aggregations("top_hits").hits.hits.first._source.keys).to eq(["id", "title"])
     end
   end
 end

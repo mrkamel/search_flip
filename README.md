@@ -505,6 +505,14 @@ end
 query.aggregations(:average_price).average_price.value
 ```
 
+Even various criteria for top hits aggregations can be specified elegantly:
+
+```ruby
+query = ProductIndex.aggregate(sponsored: { top_hits: {} }) do |aggregation|
+  aggregation.sort(:rank).highlight(:title).source([:id, :title])
+end
+```
+
 Checkout [Aggregatable](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/Aggregatable)
 as well as [Aggregation](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/Aggregation)
 for a complete API reference.

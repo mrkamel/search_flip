@@ -13,15 +13,20 @@ module SearchFlip
   #   CommentIndex.sort("_doc").find_each { |comment| "..." }
 
   class Criteria
+    include Sortable
+    include Sourceable
+    include Highlightable
+    include Explainable
+    include Paginatable
+    include Customable
     include Filterable
     include PostFilterable
     include Aggregatable
     extend Forwardable
 
-    attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values,
-      :offset_value, :limit_value, :includes_values, :eager_load_values, :preload_values, :failsafe_value,
-      :scroll_args, :custom_value, :terminate_after_value, :timeout_value, :preference_value, :search_type_value,
-      :routing_value, :track_total_hits_value, :explain_value
+    attr_accessor :target, :profile_value, :source_value, :suggest_values, :includes_values,
+      :eager_load_values, :preload_values, :failsafe_value, :scroll_args, :terminate_after_value,
+      :timeout_value, :preference_value, :search_type_value, :routing_value, :track_total_hits_value
 
     # Creates a new criteria while merging the attributes (constraints,
     # settings, etc) of the current criteria with the attributes of another one
@@ -68,22 +73,6 @@ module SearchFlip
         criteria.suggest_values = (criteria.suggest_values || {}).merge(other.suggest_values) if other.suggest_values
         criteria.custom_value = (criteria.custom_value || {}).merge(other.custom_value) if other.custom_value
         criteria.aggregation_values = (criteria.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values
-      end
-    end
-
-    # Specifies whether or not to enable explanation for each hit on how
-    # its score was computed.
-    #
-    # @example
-    #   CommentIndex.explain(true)
-    #
-    # @param value [Boolean] The value for explain
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def explain(value)
-      fresh.tap do |criteria|
-        criteria.explain_value = value
       end
     end
 
@@ -271,43 +260,6 @@ module SearchFlip
       res
     end
 
-    # Adds highlighting of the given fields to the request.
-    #
-    # @example
-    #   CommentIndex.highlight([:title, :message])
-    #   CommentIndex.highlight(:title).highlight(:description)
-    #   CommentIndex.highlight(:title, require_field_match: false)
-    #   CommentIndex.highlight(title: { type: "fvh" })
-    #
-    # @example
-    #   query = CommentIndex.highlight(:title).search("hello")
-    #   query.results[0].highlight.title # => "<em>hello</em> world"
-    #
-    # @param fields [Hash, Array, String, Symbol] The fields to highligt.
-    #   Supports raw Elasticsearch values by passing a Hash.
-    #
-    # @param options [Hash] Extra highlighting options. Check out the Elasticsearch
-    #   docs for further details.
-    #
-    # @return [SearchFlip::Criteria] A new criteria including the highlighting
-
-    def highlight(fields, options = {})
-      fresh.tap do |criteria|
-        criteria.highlight_values = (criteria.highlight_values || {}).merge(options)
-
-        hash =
-          if fields.is_a?(Hash)
-            fields
-          elsif fields.is_a?(Array)
-            fields.each_with_object({}) { |field, h| h[field] = {} }
-          else
-            { fields => {} }
-          end
-
-        criteria.highlight_values[:fields] = (criteria.highlight_values[:fields] || {}).merge(hash)
-      end
-    end
-
     # Adds a suggestion section with the given name to the request.
     #
     # @example
@@ -397,24 +349,6 @@ module SearchFlip
       true
     end
 
-    # Use to specify which fields of the source document you want Elasticsearch
-    # to return for each matching result.
-    #
-    # @example
-    #   CommentIndex.source([:id, :message]).search("hello world")
-    #   CommentIndex.source(exclude: "description")
-    #   CommentIndex.source(false)
-    #
-    # @param value Pass any allowed value to restrict the returned source
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def source(value)
-      fresh.tap do |criteria|
-        criteria.source_value = value
-      end
-    end
-
     # Specify associations of the target model you want to include via
     # ActiveRecord's or other ORM's mechanisms when records get fetched from
     # the database.
@@ -470,166 +404,6 @@ module SearchFlip
       fresh.tap do |criteria|
         criteria.preload_values = (preload_values || []) + args
       end
-    end
-
-    # Specify the sort order you want Elasticsearch to use for sorting the
-    # results. When you call this multiple times, the sort orders are appended
-    # to the already existing ones. The sort arguments get passed to
-    # Elasticsearch without modifications, such that you can use sort by
-    # script, etc here as well.
-    #
-    # @example Default usage
-    #   CommentIndex.sort(:user_id, :id)
-    #
-    #   # Same as
-    #
-    #   CommentIndex.sort(:user_id).sort(:id)
-    #
-    # @example Default hash usage
-    #   CommentIndex.sort(user_id: "asc").sort(id: "desc")
-    #
-    #   # Same as
-    #
-    #   CommentIndex.sort({ user_id: "asc" }, { id: "desc" })
-    #
-    # @example Sort by native script
-    #   CommentIndex.sort("_script" => "sort_script", lang: "native", order: "asc", type: "number")
-    #
-    # @param args The sort values that get passed to Elasticsearch
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def sort(*args)
-      fresh.tap do |criteria|
-        criteria.sort_values = (sort_values || []) + args
-      end
-    end
-
-    alias_method :order, :sort
-
-    # Specify the sort order you want Elasticsearch to use for sorting the
-    # results with already existing sort orders being removed.
-    #
-    # @example
-    #   CommentIndex.sort(user_id: "asc").resort(id: "desc")
-    #
-    #   # Same as
-    #
-    #   CommentIndex.sort(id: "desc")
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-    #
-    # @see #sort See #sort for more details
-
-    def resort(*args)
-      fresh.tap do |criteria|
-        criteria.sort_values = args
-      end
-    end
-
-    alias_method :reorder, :resort
-
-    # Adds a fully custom field/section to the request, such that upcoming or
-    # minor Elasticsearch features as well as other custom requirements can be
-    # used without having yet specialized criteria methods.
-    #
-    # @note Use with caution, because using #custom will potentiall override
-    #   other sections like +aggregations+, +query+, +sort+, etc if you use the
-    #   the same section names.
-    #
-    # @example
-    #   CommentIndex.custom(section: { argument: "value" }).request
-    #   => {:section=>{:argument=>"value"},...}
-    #
-    # @param hash [Hash] The custom section that is added to the request
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def custom(hash)
-      fresh.tap do |criteria|
-        criteria.custom_value = (custom_value || {}).merge(hash)
-      end
-    end
-
-    # Sets the request offset, ie SearchFlip's from parameter that is used
-    # to skip results in the result set from being returned.
-    #
-    # @example
-    #   CommentIndex.offset(100)
-    #
-    # @param value [Fixnum] The offset value, ie the number of results that are
-    #   skipped in the result set
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def offset(value)
-      fresh.tap do |criteria|
-        criteria.offset_value = value.to_i
-      end
-    end
-
-    # @api private
-    #
-    # Returns the offset value or, if not yet set,  the default limit value (0).
-    #
-    # @return [Fixnum] The offset value
-
-    def offset_value_with_default
-      (offset_value || 0).to_i
-    end
-
-    # Sets the request limit, ie Elasticsearch's size parameter that is used
-    # to restrict the results that get returned.
-    #
-    # @example
-    #   CommentIndex.limit(100)
-    #
-    # @param value [Fixnum] The limit value, ie the max number of results that
-    #   should be returned
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def limit(value)
-      fresh.tap do |criteria|
-        criteria.limit_value = value.to_i
-      end
-    end
-
-    # @api private
-    #
-    # Returns the limit value or, if not yet set, the default limit value (30).
-    #
-    # @return [Fixnum] The limit value
-
-    def limit_value_with_default
-      (limit_value || 30).to_i
-    end
-
-    # Sets pagination parameters for the criteria by using offset and limit,
-    # ie Elasticsearch's from and size parameters.
-    #
-    # @example
-    #   CommentIndex.paginate(page: 3)
-    #   CommentIndex.paginate(page: 5, per_page: 60)
-    #
-    # @param page [#to_i] The current page
-    # @param per_page [#to_i] The number of results per page
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def paginate(page: 1, per_page: 30)
-      page = [page.to_i, 1].max
-      per_page = per_page.to_i
-
-      offset((page - 1) * per_page).limit(per_page)
-    end
-
-    def page(value)
-      paginate(page: value, per_page: limit_value_with_default)
-    end
-
-    def per(value)
-      paginate(page: 1 + (offset_value_with_default / limit_value_with_default), per_page: value)
     end
 
     # Fetches the records specified by the criteria in batches using the
