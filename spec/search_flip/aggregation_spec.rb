@@ -271,8 +271,8 @@ RSpec.describe SearchFlip::Aggregation do
 
       ProductIndex.import [product1, product2, product3, product4]
 
-      query = ProductIndex.aggregate(categories: {}) do |agg|
-        agg.merge(ProductIndex.where(price: 100..200)).aggregate(:category)
+      query = ProductIndex.aggregate(categories: {}) do |aggregation|
+        aggregation.merge(ProductIndex.where(price: 100..200)).aggregate(:category)
       end
 
       result = query.aggregations(:categories).category.buckets.each_with_object({}) do |bucket, hash|
@@ -383,8 +383,8 @@ RSpec.describe SearchFlip::Aggregation do
 
       temp_index.import [product1, product2, product3, product4]
 
-      query = temp_index.aggregate(categories: {}) do |agg|
-        agg.merge(temp_index.with_price_range(100..200)).aggregate(:category)
+      query = temp_index.aggregate(categories: {}) do |aggregation|
+        aggregation.merge(temp_index.with_price_range(100..200)).aggregate(:category)
       end
 
       result = query.aggregations(:categories).category.buckets.each_with_object({}) do |bucket, hash|
@@ -399,8 +399,8 @@ RSpec.describe SearchFlip::Aggregation do
     it "returns the explaination" do
       ProductIndex.import create(:product)
 
-      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
-        agg.explain(true)
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |aggregation|
+        aggregation.explain(true)
       end
 
       expect(query.aggregations("top_hits").hits.hits.first.key?("_explanation")).to eq(true)
@@ -409,8 +409,8 @@ RSpec.describe SearchFlip::Aggregation do
 
   describe "#custom" do
     it "adds a custom entry to the request" do
-      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
-        agg.custom(custom_key: "custom_value")
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |aggregation|
+        aggregation.custom(custom_key: "custom_value")
       end
 
       expect(query.request[:aggregations][:top_hits][:top_hits][:custom_key]).to eq("custom_value")
@@ -419,10 +419,10 @@ RSpec.describe SearchFlip::Aggregation do
 
   describe "#highlight" do
     it "adds a custom entry to the request" do
-      ProductIndex.import create(:product, title: "some name")
+      ProductIndex.import create(:product, title: "Title highlight")
 
-      query = ProductIndex.search("some name").aggregate(top_hits: { top_hits: {} }) do |agg|
-        agg.highlight(:title)
+      query = ProductIndex.search("title:highlight").aggregate(top_hits: { top_hits: {} }) do |aggregation|
+        aggregation.highlight([:title])
       end
 
       expect(query.aggregations("top_hits").hits.hits.first.highlight.title).to be_present
@@ -435,8 +435,8 @@ RSpec.describe SearchFlip::Aggregation do
 
       ProductIndex.import [product1, product2]
 
-      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
-        agg.sort(:id).per(1).page(2)
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |aggregation|
+        aggregation.sort(:id).per(1).page(2)
       end
 
       expect(query.aggregations("top_hits").hits.hits.first._id).to eq(product2.id.to_s)
@@ -447,8 +447,8 @@ RSpec.describe SearchFlip::Aggregation do
     it "returns the respective result window" do
       ProductIndex.import create_list(:product, 2)
 
-      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
-        agg.per(1)
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |aggregation|
+        aggregation.per(1)
       end
 
       expect(query.aggregations("top_hits").hits.hits.size).to eq(1)
@@ -461,8 +461,8 @@ RSpec.describe SearchFlip::Aggregation do
 
       ProductIndex.import [product1, product2]
 
-      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
-        agg.sort(:id).paginate(page: 2, per_page: 1)
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |aggregation|
+        aggregation.sort(:id).paginate(page: 2, per_page: 1)
       end
 
       expect(query.aggregations("top_hits").hits.hits.first._id).to eq(product2.id.to_s)
@@ -473,8 +473,8 @@ RSpec.describe SearchFlip::Aggregation do
     it "returns the respective result window" do
       ProductIndex.import create_list(:product, 2)
 
-      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
-        agg.limit(1)
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |aggregation|
+        aggregation.limit(1)
       end
 
       expect(query.aggregations("top_hits").hits.hits.size).to eq(1)
@@ -487,8 +487,8 @@ RSpec.describe SearchFlip::Aggregation do
 
       ProductIndex.import [product1, product2]
 
-      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
-        agg.sort(:id).limit(1).offset(1)
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |aggregation|
+        aggregation.sort(:id).limit(1).offset(1)
       end
 
       expect(query.aggregations("top_hits").hits.hits.first._id).to eq(product2.id.to_s)
@@ -501,8 +501,8 @@ RSpec.describe SearchFlip::Aggregation do
 
       ProductIndex.import [product1, product2]
 
-      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
-        agg.sort(id: "desc")
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |aggregation|
+        aggregation.sort(id: "desc")
       end
 
       expect(query.aggregations("top_hits").hits.hits.map(&:_id)).to eq([product2, product1].map(&:id).map(&:to_s))
@@ -515,8 +515,8 @@ RSpec.describe SearchFlip::Aggregation do
 
       ProductIndex.import [product1, product2]
 
-      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
-        agg.sort(id: "desc").resort(:id)
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |aggregation|
+        aggregation.sort(id: "desc").resort(:id)
       end
 
       expect(query.aggregations("top_hits").hits.hits.map(&:_id)).to eq([product1, product2].map(&:id).map(&:to_s))
@@ -527,8 +527,8 @@ RSpec.describe SearchFlip::Aggregation do
     it "returns the specified fields only" do
       ProductIndex.import create(:product)
 
-      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |agg|
-        agg.source([:id, :title])
+      query = ProductIndex.aggregate(top_hits: { top_hits: {} }) do |aggregation|
+        aggregation.source([:id, :title])
       end
 
       expect(query.aggregations("top_hits").hits.hits.first._source.keys).to eq(["id", "title"])
