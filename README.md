@@ -812,6 +812,8 @@ ActiveSupport::Notifications.subscribe("request.search_flip") do |name, start, f
 end
 ```
 
+A notification will be send for every request that gets send to elasticsearch.
+
 ## Non-ActiveRecord models
 
 SearchFlip ships with built-in support for ActiveRecord models, but using
