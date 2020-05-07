@@ -793,8 +793,10 @@ These options will be passed whenever records get indexed, deleted, etc.
 ## Instrumentation
 
 SearchFlip supports instrumentation for request execution via
-`ActiveSupport::Notifications` compatible instrumenters to e.g.  allow global
-performance tracking, etc.
+`ActiveSupport::Notifications` compatible instrumenters to e.g. allow global
+performance tracing, etc.
+
+To use instrumentation, configure the instrumenter:
 
 ```ruby
 SearchFlip::Config[:instrumenter] = ActiveSupport::Notifications.notifier
