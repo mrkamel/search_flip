@@ -274,7 +274,7 @@ CommentIndex.create(Comment.first, { bulk_max_mb: 100 }, routing: "routing_key")
 CommentIndex.update(Comment.first, ...)
 ```
 
-Checkout the elasticsearch [Bulk API] docs for more info as well as
+Checkout the Elasticsearch [Bulk API] docs for more info as well as
 [SearchFlip::Bulk](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/Bulk)
 for a complete list of available options to control the bulk indexing of
 SearchFlip.
@@ -807,12 +807,12 @@ Subsequently, you can subscribe to notifcations for `request.search_flip`:
 ```ruby
 ActiveSupport::Notifications.subscribe("request.search_flip") do |name, start, finish, id, payload|
   payload[:index] # the index class
-  payload[:request] # the request hash sent to elasticsearch
+  payload[:request] # the request hash sent to Elasticsearch
   payload[:response] # the SearchFlip::Response object or nil in case of errors
 end
 ```
 
-A notification will be send for every request that gets send to elasticsearch.
+A notification will be send for every request that is sent to Elasticsearch.
 
 ## Non-ActiveRecord models
 
