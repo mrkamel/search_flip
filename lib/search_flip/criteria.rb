@@ -219,45 +219,47 @@ module SearchFlip
     # @return [Hash] The generated request object
 
     def request
-      res = {}
+      @request ||= begin
+        res = {}
 
-      if must_values || must_not_values || filter_values
-        res[:query] = {
-          bool: {
-            must: must_values.to_a,
-            must_not: must_not_values.to_a,
-            filter: filter_values.to_a
-          }.reject { |_, value| value.empty? }
-        }
+        if must_values || must_not_values || filter_values
+          res[:query] = {
+            bool: {
+              must: must_values.to_a,
+              must_not: must_not_values.to_a,
+              filter: filter_values.to_a
+            }.reject { |_, value| value.empty? }
+          }
+        end
+
+        res.update(from: offset_value_with_default, size: limit_value_with_default)
+
+        res[:track_total_hits] = track_total_hits_value unless track_total_hits_value.nil?
+        res[:explain] = explain_value unless explain_value.nil?
+        res[:timeout] = timeout_value if timeout_value
+        res[:terminate_after] = terminate_after_value if terminate_after_value
+        res[:highlight] = highlight_values if highlight_values
+        res[:suggest] = suggest_values if suggest_values
+        res[:sort] = sort_values if sort_values
+        res[:aggregations] = aggregation_values if aggregation_values
+
+        if post_must_values || post_must_not_values || post_filter_values
+          res[:post_filter] = {
+            bool: {
+              must: post_must_values.to_a,
+              must_not: post_must_not_values.to_a,
+              filter: post_filter_values.to_a
+            }.reject { |_, value| value.empty? }
+          }
+        end
+
+        res[:_source] = source_value unless source_value.nil?
+        res[:profile] = true if profile_value
+
+        res.update(custom_value) if custom_value
+
+        res
       end
-
-      res.update(from: offset_value_with_default, size: limit_value_with_default)
-
-      res[:track_total_hits] = track_total_hits_value unless track_total_hits_value.nil?
-      res[:explain] = explain_value unless explain_value.nil?
-      res[:timeout] = timeout_value if timeout_value
-      res[:terminate_after] = terminate_after_value if terminate_after_value
-      res[:highlight] = highlight_values if highlight_values
-      res[:suggest] = suggest_values if suggest_values
-      res[:sort] = sort_values if sort_values
-      res[:aggregations] = aggregation_values if aggregation_values
-
-      if post_must_values || post_must_not_values || post_filter_values
-        res[:post_filter] = {
-          bool: {
-            must: post_must_values.to_a,
-            must_not: post_must_not_values.to_a,
-            filter: post_filter_values.to_a
-          }.reject { |_, value| value.empty? }
-        }
-      end
-
-      res[:_source] = source_value unless source_value.nil?
-      res[:profile] = true if profile_value
-
-      res.update(custom_value) if custom_value
-
-      res
     end
 
     # Adds a suggestion section with the given name to the request.
@@ -520,30 +522,13 @@ module SearchFlip
 
     def execute
       @response ||= begin
-        http_request = connection.http_client.headers(accept: "application/json")
+        Config[:instrumenter].instrument("request.search_flip", index: target, request: request) do |payload|
+          response = execute!
 
-        http_response =
-          if scroll_args && scroll_args[:id]
-            http_request.post(
-              "#{connection.base_url}/_search/scroll",
-              params: request_params,
-              json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] }
-            )
-          elsif scroll_args
-            http_request.post(
-              "#{target.type_url}/_search",
-              params: request_params.merge(scroll: scroll_args[:timeout]),
-              json: request
-            )
-          else
-            http_request.post("#{target.type_url}/_search", params: request_params, json: request)
-          end
+          payload[:response] = response
 
-        SearchFlip::Response.new(self, http_response.parse)
-      rescue SearchFlip::ConnectionError, SearchFlip::ResponseError => e
-        raise e unless failsafe_value
-
-        SearchFlip::Response.new(self, "took" => 0, "hits" => { "total" => 0, "hits" => [] })
+          response
+        end
       end
     end
 
@@ -585,6 +570,7 @@ module SearchFlip
 
     def fresh
       dup.tap do |criteria|
+        criteria.instance_variable_set(:@request, nil)
         criteria.instance_variable_set(:@response, nil)
       end
     end
@@ -609,6 +595,33 @@ module SearchFlip
     def_delegators :target, :connection
 
     private
+
+    def execute!
+      http_request = connection.http_client.headers(accept: "application/json")
+
+      http_response =
+        if scroll_args && scroll_args[:id]
+          http_request.post(
+            "#{connection.base_url}/_search/scroll",
+            params: request_params,
+            json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] }
+          )
+        elsif scroll_args
+          http_request.post(
+            "#{target.type_url}/_search",
+            params: request_params.merge(scroll: scroll_args[:timeout]),
+            json: request
+          )
+        else
+          http_request.post("#{target.type_url}/_search", params: request_params, json: request)
+        end
+
+      SearchFlip::Response.new(self, http_response.parse)
+    rescue SearchFlip::ConnectionError, SearchFlip::ResponseError => e
+      raise e unless failsafe_value
+
+      SearchFlip::Response.new(self, "took" => 0, "hits" => { "total" => 0, "hits" => [] })
+    end
 
     def yield_in_batches(options = {})
       return enum_for(:yield_in_batches, options) unless block_given?

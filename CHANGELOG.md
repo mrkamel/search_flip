@@ -23,6 +23,7 @@
 * Added `SearchFlip::Result.from_hit`
 * Added support for `source`, `sort`, `page`, `per`, `paginate`, `explain`, and
   `highlight` to aggregations
+* Added support for instrumentation
 
 ## v2.3.1
 

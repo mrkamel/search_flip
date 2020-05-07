@@ -790,6 +790,26 @@ end
 
 These options will be passed whenever records get indexed, deleted, etc.
 
+## Instrumentation
+
+SearchFlip supports instrumentation for request execution via
+`ActiveSupport::Notifications` compatible instrumenters to e.g.  allow global
+performance tracking, etc.
+
+```ruby
+SearchFlip::Config[:instrumenter] = ActiveSupport::Notifications.notifier
+```
+
+Subsequently, you can subscribe to notifcations for `request.search_flip`:
+
+```ruby
+ActiveSupport::Notifications.subscribe("request.search_flip") do |name, start, finish, id, payload|
+  payload[:index] # the index class
+  payload[:request] # the request hash sent to elasticsearch
+  payload[:response] # the SearchFlip::Response object or nil in case of errors
+end
+```
+
 ## Non-ActiveRecord models
 
 SearchFlip ships with built-in support for ActiveRecord models, but using

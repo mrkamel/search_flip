@@ -1198,9 +1198,12 @@ RSpec.describe SearchFlip::Criteria do
 
       query = ProductIndex.criteria.tap(&:records)
 
+      expect(query.instance_variable_get(:@request)).not_to be_nil
       expect(query.instance_variable_get(:@response)).not_to be_nil
 
       expect(query.object_id).not_to eq(query.fresh.object_id)
+
+      expect(query.fresh.instance_variable_get(:@request)).to be_nil
       expect(query.fresh.instance_variable_get(:@response)).to be_nil
     end
   end
@@ -1234,10 +1237,49 @@ RSpec.describe SearchFlip::Criteria do
     end
   end
 
+  describe "#execute" do
+    around do |example|
+      default_instrumenter = SearchFlip::Config[:instrumenter]
+
+      SearchFlip::Config[:instrumenter] = ActiveSupport::Notifications.instrumenter
+
+      begin
+        example.run
+      ensure
+        SearchFlip::Config[:instrumenter] = default_instrumenter
+      end
+    end
+
+    let(:notifications) { [] }
+
+    let!(:subscriber) do
+      ActiveSupport::Notifications.subscribe("request.search_flip") do |*args|
+        notifications << args
+      end
+    end
+
+    after { ActiveSupport::Notifications.unsubscribe(subscriber) }
+
+    it "instruments the request" do
+      ProductIndex.match_all.execute
+
+      expect(notifications).to be_present
+    end
+
+    it "passes the index, request and response" do
+      ProductIndex.match_all.execute
+
+      expect(notifications.first[4][:index]).to eq(ProductIndex)
+      expect(notifications.first[4][:request]).to be_present
+      expect(notifications.first[4][:response]).to be_present
+    end
+  end
+
   describe "#track_total_hits" do
     it "is added to the request" do
       if ProductIndex.connection.version.to_i >= 7
         query = ProductIndex.track_total_hits(false)
+
         expect(query.request[:track_total_hits]).to eq(false)
         expect { query.execute }.not_to raise_error
       end
