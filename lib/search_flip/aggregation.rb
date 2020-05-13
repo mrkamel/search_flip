@@ -104,9 +104,9 @@ module SearchFlip
       target.respond_to?(name, *args)
     end
 
-    def method_missing(name, *args, &block)
+    def method_missing(name, *args, **kwargs, &block)
       if target.respond_to?(name)
-        merge(target.send(name, *args, &block))
+        merge(target.send(name, *args, **kwargs, &block))
       else
         super
       end

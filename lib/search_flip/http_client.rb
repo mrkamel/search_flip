@@ -20,23 +20,23 @@ module SearchFlip
     end
 
     [:headers, :via, :basic_auth, :auth].each do |method|
-      define_method method do |*args|
+      define_method method do |*args, **kwargs|
         dup.tap do |client|
-          client.request = request.send(method, *args)
+          client.request = request.send(method, *args, **kwargs)
         end
       end
     end
 
     [:get, :post, :put, :delete, :head].each do |method|
-      define_method method do |*args|
-        execute(method, *args)
+      define_method method do |*args, **kwargs|
+        execute(method, *args, **kwargs)
       end
     end
 
     private
 
-    def execute(method, *args)
-      response = request.send(method, *args)
+    def execute(method, *args, **kwargs)
+      response = request.send(method, *args, **kwargs)
 
       raise SearchFlip::ResponseError.new(code: response.code, body: response.body.to_s) unless response.status.success?
 

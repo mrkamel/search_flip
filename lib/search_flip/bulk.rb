@@ -77,7 +77,7 @@ module SearchFlip
     #   and versioning
 
     def index(id, object, options = {})
-      perform :index, id, SearchFlip::JSON.generate(object), options
+      perform(:index, id, SearchFlip::JSON.generate(object), options)
     end
 
     # @api private
@@ -86,8 +86,8 @@ module SearchFlip
     #
     # @see #index
 
-    def import(*args)
-      index(*args)
+    def import(*args, **kwargs)
+      index(*args, **kwargs)
     end
 
     # @api private
@@ -100,7 +100,7 @@ module SearchFlip
     #   and versioning
 
     def create(id, object, options = {})
-      perform :create, id, SearchFlip::JSON.generate(object), options
+      perform(:create, id, SearchFlip::JSON.generate(object), options)
     end
 
     # @api private
@@ -113,7 +113,7 @@ module SearchFlip
     #   and versioning
 
     def update(id, object, options = {})
-      perform :update, id, SearchFlip::JSON.generate(object), options
+      perform(:update, id, SearchFlip::JSON.generate(object), options)
     end
 
     # @api private
@@ -125,7 +125,7 @@ module SearchFlip
     #   and versioning
 
     def delete(id, options = {})
-      perform :delete, id, nil, options
+      perform(:delete, id, nil, options)
     end
 
     private

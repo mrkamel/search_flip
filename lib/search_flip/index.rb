@@ -498,8 +498,8 @@ module SearchFlip
       #
       # @see #index See #index for more details
 
-      def import(*args)
-        index(*args)
+      def import(*args, **kwargs)
+        index(*args, **kwargs)
       end
 
       # Indexes the given record set, array of records or individual record. A

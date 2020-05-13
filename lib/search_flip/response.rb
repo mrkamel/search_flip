@@ -222,7 +222,7 @@ module SearchFlip
     #
     # @return [Array] An array of database records
 
-    def records(options = {})
+    def records
       @records ||= begin
         sort_map = ids.each_with_index.each_with_object({}) { |(id, index), hash| hash[id.to_s] = index }
 
