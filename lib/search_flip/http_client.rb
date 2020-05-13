@@ -22,21 +22,35 @@ module SearchFlip
     [:headers, :via, :basic_auth, :auth].each do |method|
       define_method method do |*args, **kwargs|
         dup.tap do |client|
-          client.request = request.send(method, *args, **kwargs)
+          client.request =
+            if kwargs.empty?
+              request.send(method, *args)
+            else
+              request.send(method, *args, **kwargs)
+            end
         end
       end
     end
 
     [:get, :post, :put, :delete, :head].each do |method|
       define_method method do |*args, **kwargs|
-        execute(method, *args, **kwargs)
+        if kwargs.empty?
+          execute(method, *args)
+        else
+          execute(method, *args, **kwargs)
+        end
       end
     end
 
     private
 
     def execute(method, *args, **kwargs)
-      response = request.send(method, *args, **kwargs)
+      response =
+        if kwargs.empty?
+          request.send(method, *args)
+        else
+          request.send(method, *args, **kwargs)
+        end
 
       raise SearchFlip::ResponseError.new(code: response.code, body: response.body.to_s) unless response.status.success?
 

@@ -106,7 +106,11 @@ module SearchFlip
 
     def method_missing(name, *args, **kwargs, &block)
       if target.respond_to?(name)
-        merge(target.send(name, *args, **kwargs, &block))
+        if kwargs.empty?
+          merge(target.send(name, *args, &block))
+        else
+          merge(target.send(name, *args, **kwargs, &block))
+        end
       else
         super
       end

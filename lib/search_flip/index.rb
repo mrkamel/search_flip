@@ -499,7 +499,11 @@ module SearchFlip
       # @see #index See #index for more details
 
       def import(*args, **kwargs)
-        index(*args, **kwargs)
+        if kwargs.empty?
+          index(*args)
+        else
+          index(*args, **kwargs)
+        end
       end
 
       # Indexes the given record set, array of records or individual record. A

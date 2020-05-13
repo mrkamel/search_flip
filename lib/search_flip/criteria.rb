@@ -206,9 +206,9 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] Simply returns self
 
-    def with_settings(*args, **kwargs)
+    def with_settings(**kwargs)
       fresh.tap do |criteria|
-        criteria.target = target.with_settings(*args, **kwargs)
+        criteria.target = target.with_settings(**kwargs)
       end
     end
 
@@ -575,13 +575,17 @@ module SearchFlip
       end
     end
 
-    def respond_to_missing?(name, *args, **kwargs)
-      target.respond_to?(name, *args, **kwargs)
+    def respond_to_missing?(name, *args)
+      target.respond_to?(name, *args)
     end
 
     def method_missing(name, *args, **kwargs, &block)
       if target.respond_to?(name)
-        merge(target.send(name, *args, **kwargs, &block))
+        if kwargs.empty?
+          merge(target.send(name, *args, &block))
+        else
+          merge(target.send(name, *args, **kwargs, &block))
+        end
       else
         super
       end
