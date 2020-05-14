@@ -20,37 +20,27 @@ module SearchFlip
     end
 
     [:headers, :via, :basic_auth, :auth].each do |method|
-      define_method method do |*args, **kwargs|
+      define_method method do |*args|
         dup.tap do |client|
-          client.request =
-            if kwargs.empty?
-              request.send(method, *args)
-            else
-              request.send(method, *args, **kwargs)
-            end
+          client.request = request.send(method, *args)
         end
       end
+
+      ruby2_keywords method
     end
 
     [:get, :post, :put, :delete, :head].each do |method|
-      define_method method do |*args, **kwargs|
-        if kwargs.empty?
-          execute(method, *args)
-        else
-          execute(method, *args, **kwargs)
-        end
+      define_method(method) do |*args|
+        execute(method, *args)
       end
+
+      ruby2_keywords method
     end
 
     private
 
-    def execute(method, *args, **kwargs)
-      response =
-        if kwargs.empty?
-          request.send(method, *args)
-        else
-          request.send(method, *args, **kwargs)
-        end
+    ruby2_keywords def execute(method, *args)
+      response = request.send(method, *args)
 
       raise SearchFlip::ResponseError.new(code: response.code, body: response.body.to_s) unless response.status.success?
 

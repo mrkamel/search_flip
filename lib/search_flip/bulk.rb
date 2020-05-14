@@ -86,8 +86,8 @@ module SearchFlip
     #
     # @see #index
 
-    def import(*args, **kwargs)
-      index(*args, **kwargs)
+    ruby2_keywords def import(*args)
+      index(*args)
     end
 
     # @api private

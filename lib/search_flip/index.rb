@@ -498,12 +498,8 @@ module SearchFlip
       #
       # @see #index See #index for more details
 
-      def import(*args, **kwargs)
-        if kwargs.empty?
-          index(*args)
-        else
-          index(*args, **kwargs)
-        end
+      ruby2_keywords def import(*args)
+        index(*args)
       end
 
       # Indexes the given record set, array of records or individual record. A
