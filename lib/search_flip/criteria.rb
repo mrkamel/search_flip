@@ -579,13 +579,15 @@ module SearchFlip
       target.respond_to?(name, *args)
     end
 
-    ruby2_keywords def method_missing(name, *args, &block)
+    def method_missing(name, *args, &block)
       if target.respond_to?(name)
         merge(target.send(name, *args, &block))
       else
         super
       end
     end
+
+    ruby2_keywords :method_missing
 
     def_delegators :response, :total_entries, :total_count, :current_page, :previous_page,
       :prev_page, :next_page, :first_page?, :last_page?, :out_of_range?, :total_pages,
