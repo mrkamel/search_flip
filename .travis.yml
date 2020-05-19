@@ -10,6 +10,7 @@ env:
   - ES_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:7.4.0
 rvm:
   - ruby-2.6.2
+  - ruby-2.7.1
 before_install:
   - docker-compose up -d
   - sleep 10

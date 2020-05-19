@@ -481,7 +481,7 @@ module SearchFlip
       #
       # @see #index See #index for more details
 
-      def import(*args)
+      ruby2_keywords def import(*args)
         index(*args)
       end
 

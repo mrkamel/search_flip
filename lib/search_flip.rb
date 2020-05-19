@@ -1,4 +1,5 @@
 
+require "ruby2_keywords"
 require "forwardable"
 require "http"
 require "hashie"

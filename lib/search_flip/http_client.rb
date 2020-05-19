@@ -26,17 +26,21 @@ module SearchFlip
           client.request = request.send(method, *args)
         end
       end
+
+      ruby2_keywords method
     end
 
     [:get, :post, :put, :delete, :head].each do |method|
       define_method method do |*args|
         execute(method, *args)
       end
+
+      ruby2_keywords method
     end
 
     private
 
-    def execute(method, *args)
+    ruby2_keywords def execute(method, *args)
       response = request.send(method, *args)
 
       raise SearchFlip::ResponseError.new(code: response.code, body: response.body.to_s) unless response.status.success?
