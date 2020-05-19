@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## v2.3.2
+
+* Remove ruby 2.7 warnings
+
 ## v2.3.1
 
 * Make search_flip work with hashie 4.0.0
