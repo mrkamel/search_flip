@@ -1,4 +1,3 @@
-
 module SearchFlip
   # @api private
   #
@@ -31,7 +30,7 @@ module SearchFlip
     end
 
     [:get, :post, :put, :delete, :head].each do |method|
-      define_method method do |*args|
+      define_method(method) do |*args|
         execute(method, *args)
       end
 
@@ -51,4 +50,3 @@ module SearchFlip
     end
   end
 end
-

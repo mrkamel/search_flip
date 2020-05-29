@@ -1,4 +1,3 @@
-
 module SearchFlip
   # The SearchFlip::Aggregatable mixin provides handy methods for using
   # the Elasticsearch aggregation framework, which can be chained with
@@ -58,7 +57,15 @@ module SearchFlip
         if block
           aggregation = yield(SearchFlip::Aggregation.new(target: target))
 
-          field_or_hash.is_a?(Hash) ? hash[field_or_hash.keys.first].merge!(aggregation.to_hash) : hash[field_or_hash].merge!(aggregation.to_hash)
+          if field_or_hash.is_a?(Hash)
+            aggregation_hash = field_or_hash.values.first
+            aggregation_hash = aggregation_hash[:top_hits] if aggregation_hash.is_a?(Hash) && aggregation_hash.key?(:top_hits)
+            aggregation_hash = aggregation_hash["top_hits"] if aggregation_hash.is_a?(Hash) && aggregation_hash.key?("top_hits")
+
+            aggregation_hash.merge!(aggregation.to_hash)
+          else
+            hash[field_or_hash].merge!(aggregation.to_hash)
+          end
         end
 
         criteria.aggregation_values = (aggregation_values || {}).merge(hash)
@@ -66,4 +73,3 @@ module SearchFlip
     end
   end
 end
-

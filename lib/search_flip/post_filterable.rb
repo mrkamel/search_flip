@@ -1,4 +1,3 @@
-
 module SearchFlip
   # The SearchFlip::PostFilterable mixin provides chainable methods like
   # #post_where, #post_exists, #post_range, etc to add and apply search
@@ -23,7 +22,7 @@ module SearchFlip
   module PostFilterable
     def self.included(base)
       base.class_eval do
-        attr_accessor :post_search_values, :post_must_values, :post_must_not_values, :post_should_values, :post_filter_values
+        attr_accessor :post_must_values, :post_must_not_values, :post_filter_values
       end
     end
 
@@ -42,13 +41,9 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_search(q, options = {})
-      raise(SearchFlip::NotSupportedError) if target.connection.version.to_i < 2
+      return self if q.to_s.strip.length.zero?
 
-      fresh.tap do |criteria|
-        if q.to_s.strip.length > 0
-          criteria.post_search_values = (post_search_values || []) + [query_string: { query: q, default_operator: :AND }.merge(options)]
-        end
-      end
+      post_must(query_string: { query: q, default_operator: :AND }.merge(options))
     end
 
     # Adds post filters to your criteria for the supplied hash composed of
@@ -76,11 +71,13 @@ module SearchFlip
     def post_where(hash)
       hash.inject(fresh) do |memo, (key, value)|
         if value.is_a?(Array)
-          memo.post_filter terms: { key => value }
+          memo.post_filter(terms: { key => value })
         elsif value.is_a?(Range)
-          memo.post_filter range: { key => { gte: value.min, lte: value.max } }
+          memo.post_filter(range: { key => { gte: value.min, lte: value.max } })
+        elsif value.nil?
+          memo.post_must_not(exists: { field: key })
         else
-          memo.post_filter term: { key => value }
+          memo.post_filter(term: { key => value })
         end
       end
     end
@@ -109,11 +106,13 @@ module SearchFlip
     def post_where_not(hash)
       hash.inject(fresh) do |memo, (key, value)|
         if value.is_a?(Array)
-          memo.post_must_not terms: { key => value }
+          memo.post_must_not(terms: { key => value })
         elsif value.is_a?(Range)
-          memo.post_must_not range: { key => { gte: value.min, lte: value.max } }
+          memo.post_must_not(range: { key => { gte: value.min, lte: value.max } })
+        elsif value.nil?
+          memo.post_filter(exists: { field: key })
         else
-          memo.post_must_not term: { key => value }
+          memo.post_must_not(term: { key => value })
         end
       end
     end
@@ -132,9 +131,9 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def post_filter(*args)
+    def post_filter(clause)
       fresh.tap do |criteria|
-        criteria.post_filter_values = (post_filter_values || []) + args
+        criteria.post_filter_values = (post_filter_values || []) + Helper.wrap_array(clause)
       end
     end
 
@@ -152,9 +151,9 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def post_must(*args)
+    def post_must(clause)
       fresh.tap do |criteria|
-        criteria.post_must_values = (post_must_values || []) + args
+        criteria.post_must_values = (post_must_values || []) + Helper.wrap_array(clause)
       end
     end
 
@@ -172,30 +171,27 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def post_must_not(*args)
+    def post_must_not(clause)
       fresh.tap do |criteria|
-        criteria.post_must_not_values = (post_must_not_values || []) + args
+        criteria.post_must_not_values = (post_must_not_values || []) + Helper.wrap_array(clause)
       end
     end
 
-    # Adds raw post should queries to the criteria.
+    # Adds a raw post should query to the criteria.
     #
     # @example Raw post term should query
     #   query = CommentIndex.aggregate("...")
-    #   query = query.post_should(term: { state: "new" })
+    #   query = query.post_should([
+    #     { term: { state: "new" } },
+    #     { term: { state: "approved" } }
+    #   ])
     #
-    # @example Raw post range should query
-    #   query = CommentIndex.aggregate("...")
-    #   query = query.post_should(range: { created_at: { gte: Time.parse("2016-01-01") }})
-    #
-    # @param args [Array, Hash] The raw should query arguments
+    # @param clauses [Array] The raw should query arguments
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def post_should(*args)
-      fresh.tap do |criteria|
-        criteria.post_should_values = (post_should_values || []) + args
-      end
+    def post_should(clause)
+      post_must(bool: { should: clause })
     end
 
     # Adds a post range filter to the criteria without being forced to specify
@@ -217,7 +213,7 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_range(field, options = {})
-      post_filter range: { field => options }
+      post_filter(range: { field => options })
     end
 
     # Adds a post exists filter to the criteria, which selects all documents
@@ -232,10 +228,10 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_exists(field)
-      post_filter exists: { field: field }
+      post_filter(exists: { field: field })
     end
 
-    # Adds a post exists not filter to the criteria, which selects all documents
+    # Adds a post exists not query to the criteria, which selects all documents
     # for which the specified field's value is null.
     #
     # @example
@@ -247,8 +243,7 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def post_exists_not(field)
-      post_must_not exists: { field: field }
+      post_must_not(exists: { field: field })
     end
   end
 end
-

@@ -1,4 +1,3 @@
-
 module SearchFlip
   # The SearchFlip::Index mixin makes your class correspond to an
   # Elasticsearch index. Your class can then create or delete the index, modify
@@ -248,13 +247,13 @@ module SearchFlip
         SearchFlip::Criteria.new(target: self)
       end
 
-      def_delegators :criteria, :profile, :where, :where_not, :filter, :range, :match_all, :exists,
+      def_delegators :criteria, :all, :profile, :where, :where_not, :filter, :range, :match_all, :exists,
         :exists_not, :post_where, :post_where_not, :post_range, :post_exists, :post_exists_not,
         :post_filter, :post_must, :post_must_not, :post_should, :aggregate, :scroll, :source,
         :includes, :eager_load, :preload, :sort, :resort, :order, :reorder, :offset, :limit, :paginate,
         :page, :per, :search, :highlight, :suggest, :custom, :find_in_batches, :find_results_in_batches,
         :find_each, :find_each_result, :failsafe, :total_entries, :total_count, :timeout, :terminate_after,
-        :records, :results, :should, :should_not, :must, :must_not, :preference, :search_type, :routing,
+        :records, :results, :must, :must_not, :should, :preference, :search_type, :routing,
         :track_total_hits, :explain
 
       # Override to specify the type name used within Elasticsearch. Recap,
@@ -352,6 +351,24 @@ module SearchFlip
 
       def open_index
         connection.open_index(index_name_with_prefix)
+      end
+
+      # Freezes the index within Elasticsearch. Raises SearchFlip::ResponseError
+      # in case any errors occur.
+      #
+      # @return [Boolean] Returns true or raises SearchFlip::ResponseError
+
+      def freeze_index
+        connection.freeze_index(index_name_with_prefix)
+      end
+
+      # Unfreezes the index within Elasticsearch. Raises SearchFlip::ResponseError
+      # in case any errors occur.
+      #
+      # @return [Boolean] Returns true or raises SearchFlip::ResponseError
+
+      def unfreeze_index
+        connection.unfreeze_index(index_name_with_prefix)
       end
 
       # Updates the index settings within Elasticsearch according to the index

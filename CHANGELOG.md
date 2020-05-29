@@ -1,24 +1,48 @@
 
 # CHANGELOG
 
+## v3.0.0
+
+* Added `Criteria#to_query`, which returns a raw query including all queries
+  and filters, including the post filters
+* Added `Criteria#all`
+* [BREAKING] Support for elasticsearch 1.x has been removed
+* [BREAKING] No longer pass multiple arguments to `#must`, `#must_not`,
+  `#filter`, `#should`, `#post_must`, `#post_must_not`, `#post_filter`, and
+  `#post_should`. Pass an array of arguments instead: `.post_must([...])`
+* [BREAKING] `#should` and `#post_should` is now equivalent to
+  `.must(bool: { should: ... })` and `.post_must(bool: { should: ... })`,
+* [BREAKING] `#unscope` is removed
+* [BREAKING] `SearchFlip::Connection#get_aliases` no longer returns a
+  Hashie::Mash, but a raw Hash as was already stated in the docs
+* `#post_where` and  `#post_where_not` now handle `nil` values as well:
+  `.post_where_not(title: nil)` with `exists/exists not` filters
+* `Connection#cat_indices/get_indices` now accepts additional parameters
+* `Connection#freeze_index`, `Connection#unfreeze_index`, `Index#freeze_index`
+   and `Index#unfreeze_index` added
+* Added `SearchFlip::Result.from_hit`
+* Added support for `source`, `sort`, `page`, `per`, `paginate`, `explain`, and
+  `highlight` to aggregations
+* Added support for instrumentation
+
 ## v2.3.2
 
 * Remove ruby 2.7 warnings
 
 ## v2.3.1
 
-* Make search_flip work with hashie 4.0.0
+* Make `search_flip` work with hashie 4.0.0
 
 ## v2.3.0
 
 * [DEPRECATED] `SearchFlip::Criteria#should` is deprecated and will become
-  equivalent to `.must(bool: { should: ... })` in search_flip 3
+  equivalent to `.must(bool: { should: ... })` in `search_flip` 3
 * Added `SearchFlip::Criteria#explain`
 
 ## v2.2.0
 
 * [DEPRECATED] `SearchFlip::Criteria#unscope` is deprecated and will be removed
-  in search_flip 3
+  in `search_flip` 3
 * Added `SearchFlip::Criteria#track_total_hits`
 
 ## v2.1.0

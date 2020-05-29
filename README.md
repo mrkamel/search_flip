@@ -9,7 +9,7 @@
 Using SearchFlip it is dead-simple to create index classes that correspond to
 [Elasticsearch](https://www.elastic.co/) indices and to manipulate, query and
 aggregate these indices using a chainable, concise, yet powerful DSL. Finally,
-SearchFlip supports Elasticsearch 1.x, 2.x, 5.x, 6.x, 7.x. Check section
+SearchFlip supports Elasticsearch 2.x, 5.x, 6.x, 7.x. Check section
 [Feature Support](#feature-support) for version dependent features.
 
 ```ruby
@@ -245,7 +245,6 @@ CommentIndex.search("hello world").sort(id: "desc").aggregate(:username).request
 # => {:query=>{:bool=>{:must=>[{:query_string=>{:query=>"hello world", :default_operator=>:AND}}]}}, ...}
 ```
 
-
 Delete records:
 
 ```ruby
@@ -275,7 +274,7 @@ CommentIndex.create(Comment.first, { bulk_max_mb: 100 }, routing: "routing_key")
 CommentIndex.update(Comment.first, ...)
 ```
 
-Checkout the elasticsearch [Bulk API] docs for more info as well as
+Checkout the Elasticsearch [Bulk API] docs for more info as well as
 [SearchFlip::Bulk](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/Bulk)
 for a complete list of available options to control the bulk indexing of
 SearchFlip.
@@ -335,7 +334,7 @@ CommentIndex.where(state: ["approved", "rejected"])
 
 * `where_not`
 
-The `.where_not` method is like `,where`, but excluding the matching documents:
+The `.where_not` method is like `.where`, but excluding the matching documents:
 
 ```ruby
 CommentIndex.where_not(id: [1, 2, 3])
@@ -362,7 +361,10 @@ CommentIndex.filter(term: { state: "approved" })
 Use `.should` to add raw should queries:
 
 ```ruby
-CommentIndex.should(term: { state: "approved" })
+CommentIndex.should([
+  { term: { state: "approved" } },
+  { term: { user: "mrkamel" } },
+])
 ```
 
 * `must`
@@ -371,15 +373,6 @@ Use `.must` to add raw must queries:
 
 ```ruby
 CommentIndex.must(term: { state: "approved" })
-
-CommentIndex.must(
-  bool: {
-    should: [
-      { terms: { state: ["approved", "rejected"] }},
-      { term: { username: "mrkamel" }}
-    ]
-  }
-)
 ```
 
 * `must_not`
@@ -424,6 +417,35 @@ Simply matches all documents:
 
 ```ruby
 CommentIndex.match_all
+```
+
+* `all`
+
+Simply returns the criteria as is or an empty criteria when called on the index
+class directly. Useful for chaining.
+
+```ruby
+CommentIndex.all
+```
+
+* `to_query`
+
+Sometimes, you want to convert the constraints of a search flip query to a raw
+query to e.g. use it in a should clause:
+
+```ruby
+CommentIndex.should([
+  CommentIndex.range(:likes_count, gt: 10).to_query,
+  CommentIndex.search("search term").to_query
+])
+```
+
+It returns all added queries and filters, including post filters as a raw
+query:
+
+```ruby
+CommentIndex.where(state: "new").search("text").to_query
+# => {:bool=>{:filter=>[{:term=>{:state=>"new"}}], :must=>[{:query_string=>{:query=>"text", ...}}]}}
 ```
 
 ### Post Query/Filter Criteria Methods
@@ -481,6 +503,14 @@ query = OrderIndex.aggregate(average_price: {}) do |aggregation|
 end
 
 query.aggregations(:average_price).average_price.value
+```
+
+Even various criteria for top hits aggregations can be specified elegantly:
+
+```ruby
+query = ProductIndex.aggregate(sponsored: { top_hits: {} }) do |aggregation|
+  aggregation.sort(:rank).highlight(:title).source([:id, :title])
+end
 ```
 
 Checkout [Aggregatable](http://www.rubydoc.info/github/mrkamel/search_flip/SearchFlip/Aggregatable)
@@ -760,6 +790,30 @@ end
 
 These options will be passed whenever records get indexed, deleted, etc.
 
+## Instrumentation
+
+SearchFlip supports instrumentation for request execution via
+`ActiveSupport::Notifications` compatible instrumenters to e.g. allow global
+performance tracing, etc.
+
+To use instrumentation, configure the instrumenter:
+
+```ruby
+SearchFlip::Config[:instrumenter] = ActiveSupport::Notifications.notifier
+```
+
+Subsequently, you can subscribe to notifcations for `request.search_flip`:
+
+```ruby
+ActiveSupport::Notifications.subscribe("request.search_flip") do |name, start, finish, id, payload|
+  payload[:index] # the index class
+  payload[:request] # the request hash sent to Elasticsearch
+  payload[:response] # the SearchFlip::Response object or nil in case of errors
+end
+```
+
+A notification will be send for every request that is sent to Elasticsearch.
+
 ## Non-ActiveRecord models
 
 SearchFlip ships with built-in support for ActiveRecord models, but using
@@ -835,15 +889,13 @@ require "search_flip/to_json"
 
 ## Feature Support
 
-* `#post_search` and `#profile` are only supported from up to Elasticsearch
-  version >= 2.
 * for Elasticsearch 2.x, the delete-by-query plugin is required to delete
   records via queries
 * `#track_total_hits` is only available with Elasticsearch >= 7
 
 ## Keeping your Models and Indices in Sync
 
-Besides the most basic approach to get you started, SarchFlip currently doesn't
+Besides the most basic approach to get you started, SearchFlip currently doesn't
 ship with any means to automatically keep your models and indices in sync,
 because every method is very much bound to the concrete environment and depends
 on your concrete requirements. In addition, the methods to achieve model/index

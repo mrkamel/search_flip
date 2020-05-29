@@ -1,4 +1,3 @@
-
 module SearchFlip
   class JSON
     @default_options = {
@@ -15,4 +14,3 @@ module SearchFlip
     end
   end
 end
-

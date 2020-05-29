@@ -1,4 +1,3 @@
-
 require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Connection do
@@ -96,6 +95,12 @@ RSpec.describe SearchFlip::Connection do
       expect(connection.get_indices.map { |index| index["index"] }.to_set).to eq(["comments", "products"].to_set)
       expect(connection.get_indices("com*").map { |index| index["index"] }).to eq(["comments"])
     end
+
+    it "accepts additional parameters" do
+      connection = SearchFlip::Connection.new
+
+      expect(connection.get_indices("comments", params: { h: "i" })).to eq([{ "i" => "comments" }])
+    end
   end
 
   describe "#create_index" do
@@ -114,13 +119,15 @@ RSpec.describe SearchFlip::Connection do
     end
 
     it "respects a payload" do
-      connection = SearchFlip::Connection.new
+      begin
+        connection = SearchFlip::Connection.new
 
-      connection.create_index("index_name", settings: { number_of_shards: 3 })
+        connection.create_index("index_name", settings: { number_of_shards: 3 })
 
-      expect(connection.get_index_settings("index_name")["index_name"]["settings"]["index"]["number_of_shards"]).to eq("3")
-    ensure
-      connection.delete_index("index_name") if connection.index_exists?("index_name")
+        expect(connection.get_index_settings("index_name")["index_name"]["settings"]["index"]["number_of_shards"]).to eq("3")
+      ensure
+        connection.delete_index("index_name") if connection.index_exists?("index_name")
+      end
     end
   end
 
@@ -155,6 +162,41 @@ RSpec.describe SearchFlip::Connection do
         expect(connection.get_indices("index_name").first["status"]).to eq("open")
       ensure
         connection.delete_index("index_name") if connection.index_exists?("index_name")
+      end
+    end
+  end
+
+  describe "#freeze_index" do
+    it "freezes the specified index" do
+      connection = SearchFlip::Connection.new
+
+      if connection.version.to_f >= 6.6
+        begin
+          connection.create_index("index_name")
+          connection.freeze_index("index_name")
+
+          expect(connection.get_indices("index_name", params: { h: "sth" }).first["sth"]).to eq("true")
+        ensure
+          connection.delete_index("index_name") if connection.index_exists?("index_name")
+        end
+      end
+    end
+  end
+
+  describe "#unfreeze_index" do
+    it "unfreezes the specified index" do
+      connection = SearchFlip::Connection.new
+
+      if connection.version.to_f >= 6.6
+        begin
+          connection.create_index("index_name")
+          connection.freeze_index("index_name")
+          connection.unfreeze_index("index_name")
+
+          expect(connection.get_indices("index_name", params: { h: "sth" }).first["sth"]).to eq("false")
+        ensure
+          connection.delete_index("index_name") if connection.index_exists?("index_name")
+        end
       end
     end
   end
@@ -282,4 +324,3 @@ RSpec.describe SearchFlip::Connection do
     end
   end
 end
-

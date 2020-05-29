@@ -1,4 +1,3 @@
-
 module SearchFlip
   # The SearchFlip::Response class wraps a raw SearchFlip response and
   # decorates it with methods for aggregations, hits, records, pagination, etc.
@@ -34,16 +33,16 @@ module SearchFlip
     # Returns the total number of results.
     #
     # @example
-    #   CommentIndex.search("hello world").total_entries
+    #   CommentIndex.search("hello world").total_count
     #   # => 13
     #
     # @return [Fixnum] The total number of results
 
-    def total_entries
+    def total_count
       hits["total"].is_a?(Hash) ? hits["total"]["value"] : hits["total"]
     end
 
-    alias_method :total_count, :total_entries
+    alias_method :total_entries, :total_count
 
     # Returns whether or not the current page is the first page.
     #
@@ -103,7 +102,7 @@ module SearchFlip
     # @return [Fixnum] The current page number
 
     def current_page
-      1 + (criteria.offset_value_with_default / criteria.limit_value_with_default.to_f).ceil
+      1 + (criteria.offset_value_with_default / criteria.limit_value_with_default)
     end
 
     # Returns the number of total pages for the current pagination settings, ie
@@ -116,7 +115,7 @@ module SearchFlip
     # @return [Fixnum] The total number of pages
 
     def total_pages
-      [(total_entries / criteria.limit_value_with_default.to_f).ceil, 1].max
+      [(total_count.to_f / criteria.limit_value_with_default).ceil, 1].max
     end
 
     # Returns the previous page number or nil if no previous page exists, ie if
@@ -167,15 +166,7 @@ module SearchFlip
     # @return [Array] An array of results
 
     def results
-      @results ||= hits["hits"].map do |hit|
-        raw_result = hit["_source"]
-
-        raw_result["_hit"] = hit.each_with_object({}) do |(key, value), hash|
-          hash[key] = value if key != "_source"
-        end
-
-        Result.new(raw_result)
-      end
+      @results ||= hits["hits"].map { |hit| Result.from_hit(hit) }
     end
 
     # Returns the named sugggetion, if a name is specified or alle suggestions.
@@ -231,7 +222,7 @@ module SearchFlip
     #
     # @return [Array] An array of database records
 
-    def records(options = {})
+    def records
       @records ||= begin
         sort_map = ids.each_with_index.each_with_object({}) { |(id, index), hash| hash[id.to_s] = index }
 
@@ -324,4 +315,3 @@ module SearchFlip
     end
   end
 end
-

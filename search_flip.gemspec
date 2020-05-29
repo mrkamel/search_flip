@@ -1,4 +1,3 @@
-
 lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
@@ -9,19 +8,19 @@ Gem::Specification.new do |spec|
   spec.version       = SearchFlip::VERSION
   spec.authors       = ["Benjamin Vetter"]
   spec.email         = ["vetter@flakks.com"]
-  spec.description   = %q{Full-Featured Elasticsearch Ruby Client with a Chainable DSL}
-  spec.summary       = %q{Full-Featured Elasticsearch Ruby Client with a Chainable DSL}
+  spec.description   = "Full-Featured Elasticsearch Ruby Client with a Chainable DSL"
+  spec.summary       = "Full-Featured Elasticsearch Ruby Client with a Chainable DSL"
   spec.homepage      = "https://github.com/mrkamel/search_flip"
   spec.license       = "MIT"
 
-  spec.files         = `git ls-files`.split($/)
+  spec.files         = `git ls-files`.split($INPUT_RECORD_SEPARATOR)
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
   spec.post_install_message = <<~MESSAGE
     Thanks for using search_flip!
-    When upgrading from 1.x to 2.x, please check out
+    When upgrading to 3.x, please check out
     https://github.com/mrkamel/search_flip/blob/master/UPDATING.md
   MESSAGE
 
@@ -30,6 +29,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "factory_bot"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
+  spec.add_development_dependency "rubocop"
   spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "timecop"
   spec.add_development_dependency "webmock"
@@ -38,4 +38,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "hashie"
   spec.add_dependency "http"
   spec.add_dependency "oj"
+  spec.add_dependency "ruby2_keywords"
 end

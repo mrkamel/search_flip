@@ -1,4 +1,3 @@
-
 require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Response do
@@ -13,8 +12,6 @@ RSpec.describe SearchFlip::Response do
 
   describe "#current_page" do
     it "returns the current page number" do
-      expect(ProductIndex.match_all.current_page).to eq(1)
-
       ProductIndex.import create_list(:product, 3)
 
       expect(ProductIndex.paginate(page: 1, per_page: 2).current_page).to eq(1)
@@ -182,4 +179,3 @@ RSpec.describe SearchFlip::Response do
     end
   end
 end
-

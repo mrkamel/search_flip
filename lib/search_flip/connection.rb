@@ -1,4 +1,3 @@
-
 module SearchFlip
   class Connection
     attr_reader :base_url, :http_client, :bulk_limit, :bulk_max_mb
@@ -106,7 +105,10 @@ module SearchFlip
     # @return [Hash] The raw response
 
     def analyze(request, params = {})
-      http_client.headers(accept: "application/json").post("#{base_url}/_analyze", json: request, params: params).parse
+      http_client
+        .headers(accept: "application/json")
+        .post("#{base_url}/_analyze", json: request, params: params)
+        .parse
     end
 
     # Fetches information about the specified index aliases. Raises
@@ -122,13 +124,10 @@ module SearchFlip
     # @return [Hash] The raw response
 
     def get_aliases(index_name: "*", alias_name: "*")
-      res =
-        http_client
-          .headers(accept: "application/json", content_type: "application/json")
-          .get("#{base_url}/#{index_name}/_alias/#{alias_name}")
-          .parse
-
-      Hashie::Mash.new(res)
+      http_client
+        .headers(accept: "application/json", content_type: "application/json")
+        .get("#{base_url}/#{index_name}/_alias/#{alias_name}")
+        .parse
     end
 
     # Returns whether or not the associated Elasticsearch alias already
@@ -159,10 +158,10 @@ module SearchFlip
     #
     # @return [Array] The raw response
 
-    def get_indices(name = "*")
+    def get_indices(name = "*", params: {})
       http_client
         .headers(accept: "application/json", content_type: "application/json")
-        .get("#{base_url}/_cat/indices/#{name}")
+        .get("#{base_url}/_cat/indices/#{name}", params: params)
         .parse
     end
 
@@ -210,6 +209,32 @@ module SearchFlip
       true
     end
 
+    # Freezes the specified index within Elasticsearch. Raises
+    # SearchFlip::ResponseError in case any errors occur
+    #
+    # @param index_name [String] The index name
+    #
+    # @return [Boolean] Returns true or raises SearchFlip::ResponseError
+
+    def freeze_index(index_name)
+      http_client.post("#{index_url(index_name)}/_freeze")
+
+      true
+    end
+
+    # Unfreezes the specified index within Elasticsearch. Raises
+    # SearchFlip::ResponseError in case any errors occur
+    #
+    # @param index_name [String] The index name
+    #
+    # @return [Boolean] Returns true or raises SearchFlip::ResponseError
+
+    def unfreeze_index(index_name)
+      http_client.post("#{index_url(index_name)}/_unfreeze")
+
+      true
+    end
+
     # Updates the index settings within Elasticsearch according to the index
     # settings specified. Raises SearchFlip::ResponseError in case any
     # errors occur.
@@ -234,7 +259,10 @@ module SearchFlip
     # @return [Hash] The index settings
 
     def get_index_settings(index_name)
-      http_client.headers(accept: "application/json").get("#{index_url(index_name)}/_settings").parse
+      http_client
+        .headers(accept: "application/json")
+        .get("#{index_url(index_name)}/_settings")
+        .parse
     end
 
     # Sends a refresh request to Elasticsearch. Raises
@@ -338,4 +366,3 @@ module SearchFlip
     end
   end
 end
-

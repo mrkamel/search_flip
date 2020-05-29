@@ -1,4 +1,3 @@
-
 require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Index do
@@ -6,14 +5,14 @@ RSpec.describe SearchFlip::Index do
     subject { ProductIndex }
 
     methods = [
-      :profile, :where, :where_not, :filter, :range, :match_all, :exists,
+      :all, :profile, :where, :where_not, :filter, :range, :match_all, :exists,
       :exists_not, :post_where, :post_where_not, :post_filter, :post_must,
       :post_must_not, :post_should, :post_range, :post_exists, :post_exists_not,
       :aggregate, :scroll, :source, :includes, :eager_load, :preload, :sort, :resort,
       :order, :reorder, :offset, :limit, :paginate, :page, :per, :search,
       :find_in_batches, :highlight, :suggest, :custom, :find_each, :failsafe,
       :total_entries, :total_count, :terminate_after, :timeout, :records, :results,
-      :should, :should_not, :must, :must_not, :find_each_result,
+      :must, :must_not, :should, :find_each_result,
       :find_results_in_batches, :preference, :search_type, :routing,
       :track_total_hits, :explain
     ]
@@ -68,7 +67,7 @@ RSpec.describe SearchFlip::Index do
 
       TestIndex.create_index
 
-      expect(TestIndex.connection).to have_received(:create_index).with("test", { settings: { number_of_shards: 2 } })
+      expect(TestIndex.connection).to have_received(:create_index).with("test", settings: { number_of_shards: 2 })
     end
   end
 
@@ -96,10 +95,8 @@ RSpec.describe SearchFlip::Index do
 
   describe ".close_index" do
     it "delegates to connection" do
-      allow(TestIndex.connection).to receive(:close_index).and_call_original
+      allow(TestIndex.connection).to receive(:close_index)
 
-      TestIndex.create_index
-      sleep(0.1) while TestIndex.connection.cluster_health["status"] == "red"
       TestIndex.close_index
 
       expect(TestIndex.connection).to have_received(:close_index).with("test")
@@ -108,15 +105,31 @@ RSpec.describe SearchFlip::Index do
 
   describe ".open_index" do
     it "delegates to connection" do
-      allow(TestIndex.connection).to receive(:open_index).and_call_original
-
-      TestIndex.create_index
-      sleep(0.1) while TestIndex.connection.cluster_health["status"] == "red"
-      TestIndex.close_index
+      allow(TestIndex.connection).to receive(:open_index)
 
       TestIndex.open_index
 
       expect(TestIndex.connection).to have_received(:open_index).with("test")
+    end
+  end
+
+  describe ".freeze_index" do
+    it "delegates to connection" do
+      allow(TestIndex.connection).to receive(:freeze_index)
+
+      TestIndex.freeze_index
+
+      expect(TestIndex.connection).to have_received(:freeze_index).with("test")
+    end
+  end
+
+  describe ".unfreeze_index" do
+    it "delegates to connection" do
+      allow(TestIndex.connection).to receive(:unfreeze_index)
+
+      TestIndex.unfreeze_index
+
+      expect(TestIndex.connection).to have_received(:unfreeze_index).with("test")
     end
   end
 
@@ -618,4 +631,3 @@ RSpec.describe SearchFlip::Index do
     end
   end
 end
-

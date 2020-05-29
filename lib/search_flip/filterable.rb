@@ -1,4 +1,3 @@
-
 module SearchFlip
   # The SearchFlip::Filterable mixin provides chainable methods like
   # #where, #exists, #range, etc to add search filters to a criteria.
@@ -11,7 +10,7 @@ module SearchFlip
   module Filterable
     def self.included(base)
       base.class_eval do
-        attr_accessor :search_values, :must_values, :must_not_values, :should_values, :filter_values
+        attr_accessor :must_values, :must_not_values, :filter_values
       end
     end
 
@@ -30,11 +29,9 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def search(q, options = {})
-      fresh.tap do |criteria|
-        if q.to_s.strip.length > 0
-          criteria.search_values = (search_values || []) + [query_string: { query: q, default_operator: :AND }.merge(options)]
-        end
-      end
+      return self if q.to_s.strip.length.zero?
+
+      must(query_string: { query: q, default_operator: :AND }.merge(options))
     end
 
     # Adds filters to your criteria for the supplied hash composed of
@@ -57,13 +54,13 @@ module SearchFlip
     def where(hash)
       hash.inject(fresh) do |memo, (key, value)|
         if value.is_a?(Array)
-          memo.filter terms: { key => value }
+          memo.filter(terms: { key => value })
         elsif value.is_a?(Range)
-          memo.filter range: { key => { gte: value.min, lte: value.max } }
+          memo.filter(range: { key => { gte: value.min, lte: value.max } })
         elsif value.nil?
-          memo.exists_not key
+          memo.must_not(exists: { field: key })
         else
-          memo.filter term: { key => value }
+          memo.filter(term: { key => value })
         end
       end
     end
@@ -88,13 +85,13 @@ module SearchFlip
     def where_not(hash)
       hash.inject(fresh) do |memo, (key, value)|
         if value.is_a?(Array)
-          memo.must_not terms: { key => value }
+          memo.must_not(terms: { key => value })
         elsif value.is_a?(Range)
-          memo.must_not range: { key => { gte: value.min, lte: value.max } }
+          memo.must_not(range: { key => { gte: value.min, lte: value.max } })
         elsif value.nil?
-          memo.exists key
+          memo.filter(exists: { field: key })
         else
-          memo.must_not term: { key => value }
+          memo.must_not(term: { key => value })
         end
       end
     end
@@ -109,9 +106,9 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def filter(*args)
+    def filter(clause)
       fresh.tap do |criteria|
-        criteria.filter_values = (filter_values || []) + args
+        criteria.filter_values = (filter_values || []) + Helper.wrap_array(clause)
       end
     end
 
@@ -125,9 +122,9 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def must(*args)
+    def must(clause, bool_options = {})
       fresh.tap do |criteria|
-        criteria.must_values = (must_values || []) + args
+        criteria.must_values = (must_values || []) + Helper.wrap_array(clause)
       end
     end
 
@@ -141,28 +138,54 @@ module SearchFlip
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def must_not(*args)
+    def must_not(clause)
       fresh.tap do |criteria|
-        criteria.must_not_values = (must_not_values || []) + args
+        criteria.must_not_values = (must_not_values || []) + Helper.wrap_array(clause)
       end
     end
 
-    # Adds raw should queries to the criteria.
+    # Returns all added queries and filters, including post filters, as a raw
+    # query.
     #
     # @example
-    #   CommentIndex.should(term: { state: "new" })
-    #   CommentIndex.should(range: { created_at: { gt: Time.parse"2016-01-01") }})
+    #   CommentIndex.where(state: "new").search("text").to_query
+    #   # => {:bool=>{:filter=>[{:term=>{:state=>"new"}}], :must=>[{:query_string=>{:query=>"text", ...}}]}}
     #
-    # @param args [Array, Hash] The raw should query arguments
+    #   CommentIndex.must(term: { state: "new" }).to_query
+    #   # => {:term=>{:state=>"new"}}
+    #
+    # @return [Hash] The raw query
+
+    def to_query
+      must_clauses = must_values.to_a
+      must_not_clauses = must_not_values.to_a + post_must_not_values.to_a
+      filter_clauses = post_must_values.to_a + filter_values.to_a + post_filter_values.to_a
+
+      return must_clauses.first if must_clauses.size == 1 && must_not_clauses.empty? && filter_clauses.empty?
+
+      {
+        bool: {
+          must: must_clauses,
+          must_not: must_not_clauses,
+          filter: filter_clauses
+        }.reject { |_, value| value.empty? }
+      }
+    end
+
+    # Adds a raw should query to the criteria.
+    #
+    # @example
+    #   CommentIndex.should([
+    #     { term: { state: "new" } },
+    #     { term: { state: "reviewed" } }
+    #   ])
+    #
+    # @param args [Array] The raw should query arguments
     #
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
-    def should(*args)
-      warn "[DEPRECATION] should will change in search_flip 3. Please use .must(bool: { should: ... }) until release."
-
-      fresh.tap do |criteria|
-        criteria.should_values = (should_values || []) + args
-      end
+    def should(clause)
+      must(bool: { should: clause })
     end
 
     # Adds a range filter to the criteria without being forced to specify the
@@ -181,10 +204,10 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def range(field, options = {})
-      filter range: { field => options }
+      filter(range: { field => options })
     end
 
-    # Adds a match all filter/query to the criteria, which simply matches all
+    # Adds a match all filter to the criteria, which simply matches all
     # documents. This can be eg be used within filter aggregations or for
     # filter chaining. Check out the Elasticsearch docs for further details.
     #
@@ -209,7 +232,7 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def match_all(options = {})
-      filter match_all: options
+      filter(match_all: options)
     end
 
     # Adds an exists filter to the criteria, which selects all documents for
@@ -223,10 +246,10 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def exists(field)
-      filter exists: { field: field }
+      filter(exists: { field: field })
     end
 
-    # Adds an exists not filter to the criteria, which selects all documents
+    # Adds an exists not query to the criteria, which selects all documents
     # for which the specified field's value is null.
     #
     # @example
@@ -237,8 +260,7 @@ module SearchFlip
     # @return [SearchFlip::Criteria] A newly created extended criteria
 
     def exists_not(field)
-      must_not exists: { field: field }
+      must_not(exists: { field: field })
     end
   end
 end
-

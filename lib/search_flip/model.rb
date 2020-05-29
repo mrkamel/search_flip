@@ -1,4 +1,3 @@
-
 module SearchFlip
   module Model
     def self.included(base)
@@ -18,4 +17,3 @@ module SearchFlip
     end
   end
 end
-

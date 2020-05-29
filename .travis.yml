@@ -1,14 +1,13 @@
-
 sudo: false
 language: ruby
 env:
-  - ES_IMAGE=elasticsearch:1
   - ES_IMAGE=plainpicture/elasticsearch:2.4.1_delete-by-query
   - ES_IMAGE=elasticsearch:5.4
   - ES_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:6.7.0
   - ES_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:7.0.0
-  - ES_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:7.4.0
+  - ES_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:7.6.0
 rvm:
+  - ruby-2.5.3
   - ruby-2.6.2
   - ruby-2.7.1
 before_install:
@@ -16,5 +15,6 @@ before_install:
   - sleep 10
 install:
   - travis_retry bundle install
-script: rspec
-
+script:
+ - bundle exec rspec
+ - bundle exec rubocop

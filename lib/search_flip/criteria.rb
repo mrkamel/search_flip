@@ -1,4 +1,3 @@
-
 module SearchFlip
   # The SearchFlip::Criteria class serves the purpose of chaining various
   # filtering and aggregation methods. Each chainable method creates a new
@@ -14,15 +13,20 @@ module SearchFlip
   #   CommentIndex.sort("_doc").find_each { |comment| "..." }
 
   class Criteria
-    include SearchFlip::Filterable
-    include SearchFlip::PostFilterable
-    include SearchFlip::Aggregatable
+    include Sortable
+    include Sourceable
+    include Highlightable
+    include Explainable
+    include Paginatable
+    include Customable
+    include Filterable
+    include PostFilterable
+    include Aggregatable
     extend Forwardable
 
-    attr_accessor :target, :profile_value, :source_value, :sort_values, :highlight_values, :suggest_values,
-      :offset_value, :limit_value, :includes_values, :eager_load_values, :preload_values, :failsafe_value,
-      :scroll_args, :custom_value, :terminate_after_value, :timeout_value, :preference_value,
-      :search_type_value, :routing_value, :track_total_hits_value, :explain_value
+    attr_accessor :target, :profile_value, :source_value, :suggest_values, :includes_values,
+      :eager_load_values, :preload_values, :failsafe_value, :scroll_args, :terminate_after_value,
+      :timeout_value, :preference_value, :search_type_value, :routing_value, :track_total_hits_value
 
     # Creates a new criteria while merging the attributes (constraints,
     # settings, etc) of the current criteria with the attributes of another one
@@ -58,37 +62,17 @@ module SearchFlip
         criteria.includes_values = (criteria.includes_values || []) + other.includes_values if other.includes_values
         criteria.preload_values = (criteria.preload_values || []) + other.preload_values if other.preload_values
         criteria.eager_load_values = (criteria.eager_load_values || []) + other.eager_load_values if other.eager_load_values
-        criteria.search_values = (criteria.search_values || []) + other.search_values if other.search_values
         criteria.must_values = (criteria.must_values || []) + other.must_values if other.must_values
         criteria.must_not_values = (criteria.must_not_values || []) + other.must_not_values if other.must_not_values
-        criteria.should_values = (criteria.should_values || []) + other.should_values if other.should_values
         criteria.filter_values = (criteria.filter_values || []) + other.filter_values if other.filter_values
-        criteria.post_search_values = (criteria.post_search_values || []) + other.post_search_values if other.post_search_values
         criteria.post_must_values = (criteria.post_must_values || []) + other.post_must_values if other.post_must_values
         criteria.post_must_not_values = (criteria.post_must_not_values || []) + other.post_must_not_values if other.post_must_not_values
-        criteria.post_should_values = (criteria.post_should_values || []) + other.post_should_values if other.post_should_values
         criteria.post_filter_values = (criteria.post_filter_values || []) + other.post_filter_values if other.post_filter_values
 
         criteria.highlight_values = (criteria.highlight_values || {}).merge(other.highlight_values) if other.highlight_values
         criteria.suggest_values = (criteria.suggest_values || {}).merge(other.suggest_values) if other.suggest_values
         criteria.custom_value = (criteria.custom_value || {}).merge(other.custom_value) if other.custom_value
         criteria.aggregation_values = (criteria.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values
-      end
-    end
-
-    # Specifies whether or not to enable explanation for each hit on how
-    # its score was computed.
-    #
-    # @example
-    #   CommentIndex.explain(true)
-    #
-    # @param value [Boolean] The value for explain
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def explain(value)
-      fresh.tap do |criteria|
-        criteria.explain_value = value
       end
     end
 
@@ -190,37 +174,6 @@ module SearchFlip
       end
     end
 
-    # Creates a new criteria while removing all specified scopes. Currently,
-    # you can unscope :search, :post_search, :sort, :highlight, :suggest, :custom
-    # and :aggregate.
-    #
-    # @example
-    #   CommentIndex.search("hello world").aggregate(:username).unscope(:search, :aggregate)
-    #
-    # @param scopes [Symbol] All scopes that you want to remove
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def unscope(*scopes)
-      warn "[DEPRECATION] unscope is deprecated and will be removed in search_flip 3"
-
-      unknown = scopes - [:search, :post_search, :sort, :highlight, :suggest, :custom, :aggregate]
-
-      raise(ArgumentError, "Can't unscope #{unknown.join(", ")}") if unknown.size > 0
-
-      scopes = scopes.to_set
-
-      fresh.tap do |criteria|
-        criteria.search_values = nil if scopes.include?(:search)
-        criteria.post_search_values = nil if scopes.include?(:post_search)
-        criteria.sort_values = nil if scopes.include?(:sort)
-        criteria.hightlight_values = nil if scopes.include?(:highlight)
-        criteria.suggest_values = nil if scopes.include?(:suggest)
-        criteria.custom_values = nil if scopes.include?(:custom)
-        criteria.aggregation_values = nil if scopes.include?(:aggregate)
-      end
-    end
-
     # @api private
     #
     # Convenience method to have a unified conversion api.
@@ -230,6 +183,8 @@ module SearchFlip
     def criteria
       self
     end
+
+    alias_method :all, :criteria
 
     # Creates a new SearchFlip::Criteria.
     #
@@ -264,112 +219,46 @@ module SearchFlip
     # @return [Hash] The generated request object
 
     def request
-      res = {}
+      @request ||= begin
+        res = {}
 
-      if must_values || search_values || must_not_values || should_values || filter_values
-        if connection.version.to_i >= 2
+        if must_values || must_not_values || filter_values
           res[:query] = {
-            bool: {}
-              .merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {})
-              .merge(must_not_values ? { must_not: must_not_values } : {})
-              .merge(should_values ? { should: should_values } : {})
-              .merge(filter_values ? { filter: filter_values } : {})
+            bool: {
+              must: must_values.to_a,
+              must_not: must_not_values.to_a,
+              filter: filter_values.to_a
+            }.reject { |_, value| value.empty? }
           }
-        else
-          filters = (filter_values || []) + (must_not_values || []).map { |must_not_value| { not: must_not_value } }
-
-          queries = {}
-            .merge(must_values || search_values ? { must: (must_values || []) + (search_values || []) } : {})
-            .merge(should_values ? { should: should_values } : {})
-
-          res[:query] =
-            if filters.size > 0
-              {
-                filtered: {}
-                  .merge(queries.size > 0 ? { query: { bool: queries } } : {})
-                  .merge(filter: filters.size > 1 ? { and: filters } : filters.first)
-              }
-            else
-              { bool: queries }
-            end
         end
-      end
 
-      res.update from: offset_value_with_default, size: limit_value_with_default
+        res.update(from: offset_value_with_default, size: limit_value_with_default)
 
-      res[:track_total_hits] = track_total_hits_value unless track_total_hits_value.nil?
-      res[:explain] = explain_value unless explain_value.nil?
-      res[:timeout] = timeout_value if timeout_value
-      res[:terminate_after] = terminate_after_value if terminate_after_value
-      res[:highlight] = highlight_values if highlight_values
-      res[:suggest] = suggest_values if suggest_values
-      res[:sort] = sort_values if sort_values
-      res[:aggregations] = aggregation_values if aggregation_values
+        res[:track_total_hits] = track_total_hits_value unless track_total_hits_value.nil?
+        res[:explain] = explain_value unless explain_value.nil?
+        res[:timeout] = timeout_value if timeout_value
+        res[:terminate_after] = terminate_after_value if terminate_after_value
+        res[:highlight] = highlight_values if highlight_values
+        res[:suggest] = suggest_values if suggest_values
+        res[:sort] = sort_values if sort_values
+        res[:aggregations] = aggregation_values if aggregation_values
 
-      if post_must_values || post_search_values || post_must_not_values || post_should_values || post_filter_values
-        if connection.version.to_i >= 2
+        if post_must_values || post_must_not_values || post_filter_values
           res[:post_filter] = {
-            bool: {}
-              .merge(post_must_values || post_search_values ? { must: (post_must_values || []) + (post_search_values || []) } : {})
-              .merge(post_must_not_values ? { must_not: post_must_not_values } : {})
-              .merge(post_should_values ? { should: post_should_values } : {})
-              .merge(post_filter_values ? { filter: post_filter_values } : {})
+            bool: {
+              must: post_must_values.to_a,
+              must_not: post_must_not_values.to_a,
+              filter: post_filter_values.to_a
+            }.reject { |_, value| value.empty? }
           }
-        else
-          post_filters = (post_filter_values || []) + (post_must_not_values || []).map { |post_must_not_value| { not: post_must_not_value } }
-
-          post_queries = {}
-            .merge(post_must_values || post_search_values ? { must: (post_must_values || []) + (post_search_values || []) } : {})
-            .merge(post_should_values ? { should: post_should_values } : {})
-
-          post_filters_and_queries = post_filters + (post_queries.size > 0 ? [bool: post_queries] : [])
-
-          res[:post_filter] = post_filters_and_queries.size > 1 ? { and: post_filters_and_queries } : post_filters_and_queries.first
         end
-      end
 
-      res[:_source] = source_value unless source_value.nil?
-      res[:profile] = true if profile_value
+        res[:_source] = source_value unless source_value.nil?
+        res[:profile] = true if profile_value
 
-      res.update(custom_value) if custom_value
+        res.update(custom_value) if custom_value
 
-      res
-    end
-
-    # Adds highlighting of the given fields to the request.
-    #
-    # @example
-    #   CommentIndex.highlight([:title, :message])
-    #   CommentIndex.highlight(:title).highlight(:description)
-    #   CommentIndex.highlight(:title, require_field_match: false)
-    #   CommentIndex.highlight(title: { type: "fvh" })
-    #
-    # @example
-    #   query = CommentIndex.highlight(:title).search("hello")
-    #   query.results[0].highlight.title # => "<em>hello</em> world"
-    #
-    # @param fields [Hash, Array, String, Symbol] The fields to highligt.
-    #   Supports raw Elasticsearch values by passing a Hash.
-    #
-    # @param options [Hash] Extra highlighting options. Check out the Elasticsearch
-    #   docs for further details.
-    #
-    # @return [SearchFlip::Criteria] A new criteria including the highlighting
-
-    def highlight(fields, options = {})
-      fresh.tap do |criteria|
-        criteria.highlight_values = (criteria.highlight_values || {}).merge(options)
-
-        hash =
-          if fields.is_a?(Hash)
-            fields
-          elsif fields.is_a?(Array)
-            fields.each_with_object({}) { |field, h| h[field] = {} }
-          else
-            { fields => {} }
-          end
-
-        criteria.highlight_values[:fields] = (criteria.highlight_values[:fields] || {}).merge(hash)
+        res
       end
     end
 
@@ -462,24 +351,6 @@ module SearchFlip
       true
     end
 
-    # Use to specify which fields of the source document you want Elasticsearch
-    # to return for each matching result.
-    #
-    # @example
-    #   CommentIndex.source([:id, :message]).search("hello world")
-    #   CommentIndex.source(exclude: "description")
-    #   CommentIndex.source(false)
-    #
-    # @param value Pass any allowed value to restrict the returned source
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def source(value)
-      fresh.tap do |criteria|
-        criteria.source_value = value
-      end
-    end
-
     # Specify associations of the target model you want to include via
     # ActiveRecord's or other ORM's mechanisms when records get fetched from
     # the database.
@@ -535,162 +406,6 @@ module SearchFlip
       fresh.tap do |criteria|
         criteria.preload_values = (preload_values || []) + args
       end
-    end
-
-    # Specify the sort order you want Elasticsearch to use for sorting the
-    # results. When you call this multiple times, the sort orders are appended
-    # to the already existing ones. The sort arguments get passed to
-    # Elasticsearch without modifications, such that you can use sort by
-    # script, etc here as well.
-    #
-    # @example Default usage
-    #   CommentIndex.sort(:user_id, :id)
-    #
-    #   # Same as
-    #
-    #   CommentIndex.sort(:user_id).sort(:id)
-    #
-    # @example Default hash usage
-    #   CommentIndex.sort(user_id: "asc").sort(id: "desc")
-    #
-    #   # Same as
-    #
-    #   CommentIndex.sort({ user_id: "asc" }, { id: "desc" })
-    #
-    # @example Sort by native script
-    #   CommentIndex.sort("_script" => "sort_script", lang: "native", order: "asc", type: "number")
-    #
-    # @param args The sort values that get passed to Elasticsearch
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def sort(*args)
-      fresh.tap do |criteria|
-        criteria.sort_values = (sort_values || []) + args
-      end
-    end
-
-    alias_method :order, :sort
-
-    # Specify the sort order you want Elasticsearch to use for sorting the
-    # results with already existing sort orders being removed.
-    #
-    # @example
-    #   CommentIndex.sort(user_id: "asc").resort(id: "desc")
-    #
-    #   # Same as
-    #
-    #   CommentIndex.sort(id: "desc")
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-    #
-    # @see #sort See #sort for more details
-
-    def resort(*args)
-      fresh.tap do |criteria|
-        criteria.sort_values = args
-      end
-    end
-
-    alias_method :reorder, :resort
-
-    # Adds a fully custom field/section to the request, such that upcoming or
-    # minor Elasticsearch features as well as other custom requirements can be
-    # used without having yet specialized criteria methods.
-    #
-    # @note Use with caution, because using #custom will potentiall override
-    #   other sections like +aggregations+, +query+, +sort+, etc if you use the
-    #   the same section names.
-    #
-    # @example
-    #   CommentIndex.custom(section: { argument: "value" }).request
-    #   => {:section=>{:argument=>"value"},...}
-    #
-    # @param hash [Hash] The custom section that is added to the request
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def custom(hash)
-      fresh.tap do |criteria|
-        criteria.custom_value = (custom_value || {}).merge(hash)
-      end
-    end
-
-    # Sets the request offset, ie SearchFlip's from parameter that is used
-    # to skip results in the result set from being returned.
-    #
-    # @example
-    #   CommentIndex.offset(100)
-    #
-    # @param value [Fixnum] The offset value, ie the number of results that are
-    #   skipped in the result set
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def offset(value)
-      fresh.tap do |criteria|
-        criteria.offset_value = value.to_i
-      end
-    end
-
-    # Returns the offset value or, if not yet set,  the default limit value (0).
-    #
-    # @return [Fixnum] The offset value
-
-    def offset_value_with_default
-      (offset_value || 0).to_i
-    end
-
-    # Sets the request limit, ie Elasticsearch's size parameter that is used
-    # to restrict the results that get returned.
-    #
-    # @example
-    #   CommentIndex.limit(100)
-    #
-    # @param value [Fixnum] The limit value, ie the max number of results that
-    #   should be returned
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def limit(value)
-      fresh.tap do |criteria|
-        criteria.limit_value = value.to_i
-      end
-    end
-
-    # Returns the limit value or, if not yet set, the default limit value (30).
-    #
-    # @return [Fixnum] The limit value
-
-    def limit_value_with_default
-      (limit_value || 30).to_i
-    end
-
-    # Sets pagination parameters for the criteria by using offset and limit,
-    # ie Elasticsearch's from and size parameters.
-    #
-    # @example
-    #   CommentIndex.paginate(page: 3)
-    #   CommentIndex.paginate(page: 5, per_page: 60)
-    #
-    # @param page [#to_i] The current page
-    # @param per_page [#to_i] The number of results per page
-    #
-    # @return [SearchFlip::Criteria] A newly created extended criteria
-
-    def paginate(page:, per_page: limit_value_with_default)
-      page = [page.to_i, 1].max
-      per_page = per_page.to_i
-
-      offset((page - 1) * per_page).limit(per_page)
-    end
-
-    def page(value)
-      paginate(page: value)
-    end
-
-    def per(value)
-      paginate(page: offset_value_with_default / limit_value_with_default + 1, per_page: value)
     end
 
     # Fetches the records specified by the criteria in batches using the
@@ -807,36 +522,13 @@ module SearchFlip
 
     def execute
       @response ||= begin
-        http_request = connection.http_client.headers(accept: "application/json")
+        Config[:instrumenter].instrument("request.search_flip", index: target, request: request) do |payload|
+          response = execute!
 
-        http_response =
-          if scroll_args && scroll_args[:id]
-            if connection.version.to_i >= 2
-              http_request.post(
-                "#{connection.base_url}/_search/scroll",
-                params: request_params,
-                json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] }
-              )
-            else
-              http_request
-                .headers(content_type: "text/plain")
-                .post("#{connection.base_url}/_search/scroll", params: request_params.merge(scroll: scroll_args[:timeout]), body: scroll_args[:id])
-            end
-          elsif scroll_args
-            http_request.post(
-              "#{target.type_url}/_search",
-              params: request_params.merge(scroll: scroll_args[:timeout]),
-              json: request
-            )
-          else
-            http_request.post("#{target.type_url}/_search", params: request_params, json: request)
-          end
+          payload[:response] = response
 
-        SearchFlip::Response.new(self, http_response.parse)
-      rescue SearchFlip::ConnectionError, SearchFlip::ResponseError => e
-        raise e unless failsafe_value
-
-        SearchFlip::Response.new(self, "took" => 0, "hits" => { "total" => 0, "hits" => [] })
+          response
+        end
       end
     end
 
@@ -878,6 +570,7 @@ module SearchFlip
 
     def fresh
       dup.tap do |criteria|
+        criteria.instance_variable_set(:@request, nil)
         criteria.instance_variable_set(:@response, nil)
       end
     end
@@ -894,6 +587,8 @@ module SearchFlip
       end
     end
 
+    ruby2_keywords :method_missing
+
     def_delegators :response, :total_entries, :total_count, :current_page, :previous_page,
       :prev_page, :next_page, :first_page?, :last_page?, :out_of_range?, :total_pages,
       :hits, :ids, :count, :size, :length, :took, :aggregations, :suggestions,
@@ -902,6 +597,33 @@ module SearchFlip
     def_delegators :target, :connection
 
     private
+
+    def execute!
+      http_request = connection.http_client.headers(accept: "application/json")
+
+      http_response =
+        if scroll_args && scroll_args[:id]
+          http_request.post(
+            "#{connection.base_url}/_search/scroll",
+            params: request_params,
+            json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] }
+          )
+        elsif scroll_args
+          http_request.post(
+            "#{target.type_url}/_search",
+            params: request_params.merge(scroll: scroll_args[:timeout]),
+            json: request
+          )
+        else
+          http_request.post("#{target.type_url}/_search", params: request_params, json: request)
+        end
+
+      SearchFlip::Response.new(self, http_response.parse)
+    rescue SearchFlip::ConnectionError, SearchFlip::ResponseError => e
+      raise e unless failsafe_value
+
+      SearchFlip::Response.new(self, "took" => 0, "hits" => { "total" => 0, "hits" => [] })
+    end
 
     def yield_in_batches(options = {})
       return enum_for(:yield_in_batches, options) unless block_given?

@@ -1,4 +1,3 @@
-
 require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Criteria do
@@ -17,6 +16,68 @@ RSpec.describe SearchFlip::Criteria do
     end
 
     it { should delegate(:connection).to(:target) }
+  end
+
+  describe "#to_query" do
+    it "returns the added must, filter and must_not clauses" do
+      query =
+        ProductIndex
+          .must(term: { category: "category1" })
+          .filter(term: { category: "category2" })
+          .must_not(term: { category: "category3" })
+
+      expect(query.to_query).to eq(
+        bool: {
+          must: [{ term: { category: "category1" } }],
+          filter: [{ term: { category: "category2" } }],
+          must_not: [{ term: { category: "category3" } }]
+        }
+      )
+    end
+
+    it "returns only the must clause, if there is only a single must clause" do
+      query = ProductIndex.must(term: { category: "category" })
+
+      expect(query.to_query).to eq(term: { category: "category" })
+    end
+
+    it "generates an executable query for must, filter and must_not clauses" do
+      query =
+        ProductIndex
+          .must(term: { category: "category1" })
+          .filter(term: { category: "category2" })
+          .must_not(term: { category: "category3" })
+
+      expect { ProductIndex.must(query.to_query).execute }.not_to raise_error
+    end
+
+    it "returns the added post_must, post_filter and post_must_not clauses" do
+      query =
+        ProductIndex
+          .post_must(term: { category: "category1" })
+          .post_filter(term: { category: "category2" })
+          .post_must_not(term: { category: "category3" })
+
+      expect(query.to_query).to eq(
+        bool: {
+          must_not: [{ term: { category: "category3" } }],
+          filter: [
+            { term: { category: "category1" } },
+            { term: { category: "category2" } }
+          ]
+        }
+      )
+    end
+
+    it "generates an executable query for post_must, post_filter and post_must_not clauses" do
+      query =
+        ProductIndex
+          .post_must(term: { category: "category1" })
+          .post_filter(term: { category: "category2" })
+          .post_must_not(term: { category: "category3" })
+
+      expect { ProductIndex.must(query.to_query).execute }.not_to raise_error
+    end
   end
 
   describe "#merge" do
@@ -54,9 +115,9 @@ RSpec.describe SearchFlip::Criteria do
 
     describe "array concatenations" do
       methods = [
-        :sort_values, :includes_values, :preload_values, :eager_load_values, :search_values,
-        :must_values, :must_not_values, :should_values, :filter_values, :post_search_values,
-        :post_must_values, :post_must_not_values, :post_should_values, :post_filter_values
+        :sort_values, :includes_values, :preload_values, :eager_load_values,
+        :must_values, :must_not_values, :filter_values,
+        :post_must_values, :post_must_not_values, :post_filter_values
       ]
 
       methods.each do |method|
@@ -100,6 +161,14 @@ RSpec.describe SearchFlip::Criteria do
       criteria = ProductIndex.criteria
 
       expect(criteria.criteria.object_id).to eq(criteria.object_id)
+    end
+  end
+
+  describe "#all" do
+    it "returns self" do
+      criteria = ProductIndex.criteria
+
+      expect(criteria.all.object_id).to eq(criteria.object_id)
     end
   end
 
@@ -299,11 +368,12 @@ RSpec.describe SearchFlip::Criteria do
 
       ProductIndex.import [product1, product2, product3]
 
-      query1 = ProductIndex.should(range: { price: { gte: 100, lt: 200 } })
-      query2 = query1.should(term: { category: "category2" })
+      query = ProductIndex.should([
+        { range: { price: { gte: 100, lt: 200 } } },
+        { term: { category: "category2" } }
+      ])
 
-      expect(query1.records.to_set).to eq([product1].to_set)
-      expect(query2.records.to_set).to eq([product1, product2].to_set)
+      expect(query.records.to_set).to eq([product1, product2].to_set)
     end
   end
 
@@ -442,6 +512,21 @@ RSpec.describe SearchFlip::Criteria do
       aggregations = query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
       expect(aggregations).to eq("category1" => 2, "category2" => 1)
     end
+
+    it "works with nil" do
+      expected1 = create(:product, price: nil, category: "category1")
+      expected2 = create(:product, price: nil, category: "category2")
+      rejected = create(:product, price: 300, category: "category1")
+
+      ProductIndex.import [expected1, expected2, rejected]
+
+      query = ProductIndex.aggregate(:category).post_where(price: nil)
+
+      expect(query.records.to_set).to eq([expected1, expected2].to_set)
+
+      aggregations = query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1)
+    end
   end
 
   describe "#post_where_not" do
@@ -494,6 +579,21 @@ RSpec.describe SearchFlip::Criteria do
       aggregations = query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
       expect(aggregations).to eq("category1" => 2, "category2" => 1)
     end
+
+    it "works with nils" do
+      expected = create(:product, price: 100, category: "category1")
+      rejected1 = create(:product, price: nil, category: "category2")
+      rejected2 = create(:product, price: nil, category: "category1")
+
+      ProductIndex.import [expected, rejected1, rejected2]
+
+      query = ProductIndex.aggregate(:category).post_where_not(price: nil)
+
+      expect(query.records).to eq([expected])
+
+      aggregations = query.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1)
+    end
   end
 
   describe "#post_filter" do
@@ -515,6 +615,80 @@ RSpec.describe SearchFlip::Criteria do
 
       aggregations = query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
       expect(aggregations).to eq("category1" => 2, "category2" => 1)
+    end
+  end
+
+  describe "#post_must" do
+    it "sets up the constraints correctly and is chainable" do
+      product1 = create(:product, price: 100, category: "category1")
+      product2 = create(:product, price: 200, category: "category2")
+      product3 = create(:product, price: 300, category: "category1")
+
+      ProductIndex.import [product1, product2, product3]
+
+      query1 = ProductIndex.aggregate(:category).post_must(range: { price: { gte: 100, lte: 200 } })
+      query2 = query1.post_must(term: { category: "category1" })
+
+      expect(query1.records.to_set).to eq([product1, product2].to_set)
+      expect(query2.records).to eq([product1])
+
+      aggregations = query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1)
+
+      aggregations = query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1)
+    end
+  end
+
+  describe "#post_must_not" do
+    it "sets up the constraints correctly and is chainable" do
+      product1 = create(:product, price: 100, category: "category1")
+      product2 = create(:product, price: 200, category: "category2")
+      product3 = create(:product, price: 300, category: "category1")
+
+      ProductIndex.import [product1, product2, product3]
+
+      query1 = ProductIndex.aggregate(:category).post_must_not(range: { price: { gte: 50, lte: 150 } })
+      query2 = query1.post_must_not(term: { category: "category1" })
+
+      expect(query1.records.to_set).to eq([product2, product3].to_set)
+      expect(query2.records).to eq([product2])
+
+      aggregations = query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1)
+
+      aggregations = query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1)
+    end
+  end
+
+  describe "#post_should" do
+    it "sets up the constraints correctly and is chainable" do
+      product1 = create(:product, price: 100, category: "category1")
+      product2 = create(:product, price: 200, category: "category3")
+      product3 = create(:product, price: 300, category: "category2")
+      product4 = create(:product, price: 400, category: "category1")
+
+      ProductIndex.import [product1, product2, product3, product4]
+
+      query1 = ProductIndex.aggregate(:category).post_should([
+        { term: { category: "category1" } },
+        { term: { category: "category2" } }
+      ])
+
+      query2 = query1.post_should([
+        { range: { price: { gte: 50, lte: 150 } } },
+        { range: { price: { gte: 250, lte: 350 } } }
+      ])
+
+      expect(query1.records.to_set).to eq([product1, product3, product4].to_set)
+      expect(query2.records.to_set).to eq([product1, product3].to_set)
+
+      aggregations = query1.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1, "category3" => 1)
+
+      aggregations = query2.aggregations(:category).each_with_object({}) { |(key, agg), hash| hash[key] = agg.doc_count }
+      expect(aggregations).to eq("category1" => 2, "category2" => 1, "category3" => 1)
     end
   end
 
@@ -797,7 +971,7 @@ RSpec.describe SearchFlip::Criteria do
 
       ProductIndex.import [product1, product2, product3, product4]
 
-      expect(ProductIndex.sort({ rank: :desc }, { price: :asc }).records).to eq([product2, product1, product3, product4])
+      expect(ProductIndex.sort({ rank: :desc }, price: :asc).records).to eq([product2, product1, product3, product4])
       expect(ProductIndex.sort(rank: :desc).sort(:price).records).to eq([product2, product1, product3, product4])
       expect(ProductIndex.sort(:price).sort(rank: :desc).records).to eq([product2, product1, product4, product3])
     end
@@ -812,7 +986,7 @@ RSpec.describe SearchFlip::Criteria do
 
       ProductIndex.import [product1, product2, product3, product4]
 
-      expect(ProductIndex.sort(:price).resort({ rank: :desc }, { price: :asc }).records).to eq([product2, product1, product3, product4])
+      expect(ProductIndex.sort(:price).resort({ rank: :desc }, price: :asc).records).to eq([product2, product1, product3, product4])
       expect(ProductIndex.sort(rank: :desc).resort(:price).records).to eq([product2, product1, product4, product3])
     end
   end
@@ -888,19 +1062,6 @@ RSpec.describe SearchFlip::Criteria do
       expect(ProductIndex.search("Title1 Title3", default_operator: :OR).records.to_set).to eq([product1, product3].to_set)
       expect(ProductIndex.search("Title1 OR Title2").search("Title1 OR Title3").records).to eq([product1])
       expect(ProductIndex.search("Title1 OR Title3").where(price: 5..15).records).to eq([product1])
-    end
-  end
-
-  describe "#unscope" do
-    it "removes the specified constraints and is chainable" do
-      product1 = create(:product, title: "Title1", description: "Description1", price: 10)
-      product2 = create(:product, title: "Title2", description: "Description2", price: 20)
-      product3 = create(:product, title: "Title3", description: "Description2", price: 30)
-
-      ProductIndex.import [product1, product2, product3]
-
-      expect(ProductIndex.search("Title1 OR Title2").search("Title1 OR Title3").records).to eq([product1])
-      expect(ProductIndex.search("Title1 OR Title2").unscope(:search).search("Title1 OR Title3").records.to_set).to eq([product1, product3].to_set)
     end
   end
 
@@ -1037,9 +1198,12 @@ RSpec.describe SearchFlip::Criteria do
 
       query = ProductIndex.criteria.tap(&:records)
 
+      expect(query.instance_variable_get(:@request)).not_to be_nil
       expect(query.instance_variable_get(:@response)).not_to be_nil
 
       expect(query.object_id).not_to eq(query.fresh.object_id)
+
+      expect(query.fresh.instance_variable_get(:@request)).to be_nil
       expect(query.fresh.instance_variable_get(:@response)).to be_nil
     end
   end
@@ -1073,10 +1237,49 @@ RSpec.describe SearchFlip::Criteria do
     end
   end
 
+  describe "#execute" do
+    around do |example|
+      default_instrumenter = SearchFlip::Config[:instrumenter]
+
+      SearchFlip::Config[:instrumenter] = ActiveSupport::Notifications.instrumenter
+
+      begin
+        example.run
+      ensure
+        SearchFlip::Config[:instrumenter] = default_instrumenter
+      end
+    end
+
+    let(:notifications) { [] }
+
+    let!(:subscriber) do
+      ActiveSupport::Notifications.subscribe("request.search_flip") do |*args|
+        notifications << args
+      end
+    end
+
+    after { ActiveSupport::Notifications.unsubscribe(subscriber) }
+
+    it "instruments the request" do
+      ProductIndex.match_all.execute
+
+      expect(notifications).to be_present
+    end
+
+    it "passes the index, request and response" do
+      ProductIndex.match_all.execute
+
+      expect(notifications.first[4][:index]).to eq(ProductIndex)
+      expect(notifications.first[4][:request]).to be_present
+      expect(notifications.first[4][:response]).to be_present
+    end
+  end
+
   describe "#track_total_hits" do
     it "is added to the request" do
       if ProductIndex.connection.version.to_i >= 7
         query = ProductIndex.track_total_hits(false)
+
         expect(query.request[:track_total_hits]).to eq(false)
         expect { query.execute }.not_to raise_error
       end
@@ -1127,4 +1330,3 @@ RSpec.describe SearchFlip::Criteria do
     end
   end
 end
-

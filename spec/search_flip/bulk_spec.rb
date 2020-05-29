@@ -1,4 +1,3 @@
-
 require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Bulk do
@@ -75,34 +74,40 @@ RSpec.describe SearchFlip::Bulk do
       expect(&block).to raise_error(SearchFlip::ResponseError)
     end
 
-    it "handles overly long payloads" do
+    it "transmits up to bulk_max_mb only" do
       product = create(:product)
 
-      allow(product).to receive(:description).and_return("x" * 1024 * 1024 * 10)
+      allow(product).to receive(:description).and_return("x" * 1024 * 1024)
 
-      block = lambda do
-        ProductIndex.bulk bulk_max_mb: 1_000 do |bulk|
-          20.times do
-            bulk.index product.id, ProductIndex.serialize(product)
-          end
+      ProductIndex.bulk bulk_max_mb: 10 do |bulk|
+        allow(bulk).to receive(:upload).and_call_original
+
+        20.times do
+          bulk.index product.id, ProductIndex.serialize(product)
+        end
+
+        expect(bulk).to have_received(:upload).exactly(2).times
+      end
+    end
+
+    it "uploads a last time if there is data left within the output buffer" do
+      product = create(:product)
+
+      allow(product).to receive(:description).and_return("x" * 1024 * 1024)
+
+      bulk_upload = nil
+
+      ProductIndex.bulk bulk_max_mb: 5.5 do |bulk|
+        bulk_upload = bulk
+
+        allow(bulk).to receive(:upload).and_call_original
+
+        6.times do
+          bulk.index product.id, ProductIndex.serialize(product)
         end
       end
 
-      if ProductIndex.connection.version.to_i <= 2
-        expect(&block).to raise_error(SearchFlip::ConnectionError)
-      else
-        expect(&block).to raise_error(SearchFlip::ResponseError)
-      end
-
-      block = lambda do
-        ProductIndex.bulk bulk_max_mb: 100 do |bulk|
-          20.times do
-            bulk.index product.id, ProductIndex.serialize(product)
-          end
-        end
-      end
-
-      expect(&block).not_to raise_error
+      expect(bulk_upload).to have_received(:upload).exactly(2).times
     end
   end
 end
