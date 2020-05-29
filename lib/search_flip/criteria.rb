@@ -579,7 +579,7 @@ module SearchFlip
       target.respond_to?(name, *args)
     end
 
-    ruby2_keywords def method_missing(name, *args, &block)
+    def method_missing(name, *args, &block)
       if target.respond_to?(name)
         merge(target.send(name, *args, &block))
       else
