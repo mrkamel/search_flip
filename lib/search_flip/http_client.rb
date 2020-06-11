@@ -6,10 +6,11 @@ module SearchFlip
   # with Elasticsearch.
 
   class HTTPClient
-    attr_accessor :request
+    attr_accessor :request, :plugins
 
-    def initialize
+    def initialize(plugins: [])
       self.request = HTTP
+      self.plugins = plugins
     end
 
     class << self
@@ -30,17 +31,16 @@ module SearchFlip
     end
 
     [:get, :post, :put, :delete, :head].each do |method|
-      define_method(method) do |*args|
-        execute(method, *args)
+      define_method(method) do |uri, options = {}|
+        execute(method, uri, options)
       end
-
-      ruby2_keywords method
     end
 
     private
 
-    ruby2_keywords def execute(method, *args)
-      response = request.send(method, *args)
+    def execute(method, uri, options = {})
+      final_request = plugins.inject(self) { |res, cur| cur.call(res, method, uri, options) }
+      response = final_request.request.send(method, uri, options)
 
       raise SearchFlip::ResponseError.new(code: response.code, body: response.body.to_s) unless response.status.success?
 

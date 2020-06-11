@@ -39,6 +39,23 @@ RSpec.describe SearchFlip::HTTPClient do
     end
   end
 
+  describe "plugins" do
+    subject do
+      SearchFlip::HTTPClient.new(
+        plugins: [
+          ->(request, method, uri, options = {}) { request.headers("First-Header" => "Value") },
+          ->(request, method, uri, options = {}) { request.headers("Second-Header" => "Value") }
+        ]
+      )
+    end
+
+    it "injects the plugins and uses their result in the request" do
+      stub_request(:get, "http://localhost/path").with(query: { key: "value" }, headers: { "First-Header" => "Value", "Second-Header" => "Value" }).and_return(body: "success")
+
+      expect(subject.get("http://localhost/path", params: { key: "value" }).body.to_s).to eq("success")
+    end
+  end
+
   [:via, :basic_auth, :auth].each do |method|
     describe "##{method}" do
       it "creates a dupped instance" do
