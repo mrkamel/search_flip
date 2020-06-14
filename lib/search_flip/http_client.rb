@@ -1,6 +1,4 @@
 module SearchFlip
-  # @api private
-  #
   # The SearchFlip::HTTPClient class wraps the http gem, is for internal use
   # and responsible for the http request/response handling, ie communicating
   # with Elasticsearch.

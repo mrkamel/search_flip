@@ -43,8 +43,8 @@ RSpec.describe SearchFlip::HTTPClient do
     subject do
       SearchFlip::HTTPClient.new(
         plugins: [
-          ->(request, method, uri, options = {}) { request.headers("First-Header" => "Value") },
-          ->(request, method, uri, options = {}) { request.headers("Second-Header" => "Value") }
+          ->(request, _method, _uri, _options = {}) { request.headers("First-Header" => "Value") },
+          ->(request, _method, _uri, _options = {}) { request.headers("Second-Header" => "Value") }
         ]
       )
     end

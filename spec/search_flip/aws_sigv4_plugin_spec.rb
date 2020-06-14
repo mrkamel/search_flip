@@ -27,7 +27,7 @@ RSpec.describe SearchFlip::AwsSigv4Plugin do
     end
 
     it "feeds the http method, full url and body to the signer" do
-      signing_request =  {
+      signing_request = {
         http_method: "GET",
         url: "http://localhost/index?param=value",
         body: JSON.generate(key: "value")

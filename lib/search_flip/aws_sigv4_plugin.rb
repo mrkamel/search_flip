@@ -2,6 +2,24 @@ require "aws-sdk-core"
 require "uri"
 
 module SearchFlip
+  # The SearchFlip::AwsSigV4Plugin is a plugin for the SearchFlip::HTTPClient
+  # to be used with AWS Elasticsearch to sign requests, i.e. add signed
+  # headers, before sending the request to Elasticsearch.
+  #
+  # @example
+  #   MyConnection = SearchFlip::Connection.new(
+  #     base_url: "https://your-elasticsearch-cluster.es.amazonaws.com",
+  #     http_client: SearchFlip::HTTPClient.new(
+  #       plugins: [
+  #         SearchFlip::AwsSigv4Plugin.new(
+  #           region: "...",
+  #           access_key_id: "...",
+  #           secret_access_key: "..."
+  #         )
+  #       ]
+  #     )
+  #   )
+
   class AwsSigv4Plugin
     attr_accessor :signer
 
