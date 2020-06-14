@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
   MESSAGE
 
   spec.add_development_dependency "activerecord", ">= 3.0"
+  spec.add_development_dependency "aws-sdk-core"
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "factory_bot"
   spec.add_development_dependency "rake"
