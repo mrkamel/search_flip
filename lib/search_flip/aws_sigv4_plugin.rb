@@ -29,7 +29,7 @@ module SearchFlip
 
     def call(request, method, uri, options = {})
       full_uri = URI.parse(uri)
-      full_uri.query = URI.encode_www_form(options[:params].to_a) if options[:params]
+      full_uri.query = URI.encode_www_form(options[:params]) if options[:params]
 
       signature_request = {
         http_method: method.to_s.upcase,

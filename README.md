@@ -475,8 +475,8 @@ end
 ```
 
 Generally, aggregation results returned by Elasticsearch are returned as a
-`SearchFlip::Result`, which basically is `Hashie::Mash`such that you can access
-them via:
+`SearchFlip::Result`, which basically is a `Hashie::Mash`, such that you can
+access them via:
 
 ```ruby
 query.aggregations(:username)["mrkamel"].revenue.value
@@ -794,7 +794,7 @@ MyConnection = SearchFlip::Connection.new(
 
 Again, in your index you need to specify this connection:
 
-```
+```ruby
 class MyIndex
   include SearchFlip::Index
 
