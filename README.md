@@ -475,8 +475,8 @@ end
 ```
 
 Generally, aggregation results returned by Elasticsearch are returned as a
-`SearchFlip::Result`, which basically is `Hashie::Mash`such that you can access
-them via:
+`SearchFlip::Result`, which basically is a `Hashie::Mash`, such that you can
+access them via:
 
 ```ruby
 query.aggregations(:username)["mrkamel"].revenue.value
@@ -767,6 +767,41 @@ http_client = http_client.via("proxy.host", 8080)
 http_client = http_client.headers(key: "value")
 
 SearchFlip::Connection.new(base_url: "...", http_client: http_client)
+```
+
+## AWS Elasticsearch / Signed Requests
+
+To use SearchFlip with AWS Elasticsearch and signed requests, you have to add
+`aws-sdk-core` to your Gemfile and tell SearchFlip to use the
+`SearchFlip::AwsSigv4Plugin`:
+
+```ruby
+require "search_flip/aws_sigv4_plugin"
+
+MyConnection = SearchFlip::Connection.new(
+  base_url: "https://your-elasticsearch-cluster.es.amazonaws.com",
+  http_client: SearchFlip::HTTPClient.new(
+    plugins: [
+      SearchFlip::AwsSigv4Plugin.new(
+        region: "...",
+        access_key_id: "...",
+        secret_access_key: "..."
+      )
+    ]
+  )
+)
+```
+
+Again, in your index you need to specify this connection:
+
+```ruby
+class MyIndex
+  include SearchFlip::Index
+
+  def self.connection
+    MyConnection
+  end
+end
 ```
 
 ## Routing and other index-time options

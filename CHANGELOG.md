@@ -1,6 +1,12 @@
 
 # CHANGELOG
 
+## v3.1.0
+
+* Added plugin support in `SearchFlip::HTTPClient`
+* Added `SearchFlip::AwsSigv4Plugin` to be able to use AWS Elasticsearch with
+  signed requests
+
 ## v3.0.0
 
 * Added `Criteria#to_query`, which returns a raw query including all queries
