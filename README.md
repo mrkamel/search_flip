@@ -949,6 +949,10 @@ It uses `after_commit` (if applicable, `after_save`, `after_destroy` and
 `after_touch` otherwise) hooks to synchronously update the index when your
 model changes.
 
+## Semantic Versioning
+
+SearchFlip is using Semantic Versioning: [SemVer](http://semver.org/)
+
 ## Links
 
 * Elasticsearch: [https://www.elastic.co/](https://www.elastic.co/)
@@ -979,6 +983,5 @@ $ rspec
 ```
 
 That's it.
-
 
 [Bulk API]: https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
