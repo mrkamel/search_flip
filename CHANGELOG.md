@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## v3.1.1
+
+* Make `SearchFlip::Result.from_hit` work with the `_source` being disabled
+
 ## v3.1.0
 
 * Added plugin support in `SearchFlip::HTTPClient`

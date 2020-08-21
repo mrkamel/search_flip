@@ -13,5 +13,11 @@ RSpec.describe SearchFlip::Result do
 
       expect(result.key1[0].key2).to eq("value")
     end
+
+    it "works with the _source being disabled" do
+      result = SearchFlip::Result.from_hit("_id" => 1)
+
+      expect(result._hit._id).to eq(1)
+    end
   end
 end

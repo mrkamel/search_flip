@@ -17,7 +17,7 @@ module SearchFlip
     #   SearchFlip::Result.from_hit(top_sales_hits.first)
 
     def self.from_hit(hit)
-      raw_result = hit["_source"].dup
+      raw_result = (hit["_source"] || {}).dup
 
       raw_result["_hit"] = hit.each_with_object({}) do |(key, value), hash|
         hash[key] = value if key != "_source"
