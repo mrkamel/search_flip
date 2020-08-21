@@ -576,7 +576,7 @@ module SearchFlip
     end
 
     def respond_to_missing?(name, *args)
-      target.respond_to?(name, *args)
+      target.respond_to?(name, *args) || super
     end
 
     def method_missing(name, *args, &block)

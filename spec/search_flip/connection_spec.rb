@@ -36,10 +36,10 @@ RSpec.describe SearchFlip::Connection do
     it "changes the aliases" do
       connection = SearchFlip::Connection.new
 
-      connection.update_aliases(actions: [add: { index: "products", alias: "alias1" }])
+      connection.update_aliases(actions: [{ add: { index: "products", alias: "alias1" } }])
       expect(connection.get_aliases(alias_name: "alias1").keys).to eq(["products"])
 
-      connection.update_aliases(actions: [remove: { index: "products", alias: "alias1" }])
+      connection.update_aliases(actions: [{ remove: { index: "products", alias: "alias1" } }])
       expect(connection.alias_exists?("alias1")).to eq(false)
     end
   end
@@ -79,11 +79,11 @@ RSpec.describe SearchFlip::Connection do
 
         expect(connection.alias_exists?(:some_alias)).to eq(false)
 
-        connection.update_aliases(actions: [add: { index: "products", alias: "some_alias" }])
+        connection.update_aliases(actions: [{ add: { index: "products", alias: "some_alias" } }])
 
         expect(connection.alias_exists?(:some_alias)).to eq(true)
       ensure
-        connection.update_aliases(actions: [remove: { index: "products", alias: "some_alias" }])
+        connection.update_aliases(actions: [{ remove: { index: "products", alias: "some_alias" } }])
       end
     end
   end

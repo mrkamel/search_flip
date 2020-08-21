@@ -40,7 +40,7 @@ module SearchFlip
         else
           filters = (filter_values || []) + (must_not_values || []).map { |must_not_value| { not: must_not_value } }
           queries = must_values ? { must: must_values } : {}
-          filters_and_queries = filters + (queries.size > 0 ? [bool: queries] : [])
+          filters_and_queries = filters + (queries.size > 0 ? [{ bool: queries }] : [])
 
           res[:filter] = filters_and_queries.size > 1 ? { and: filters_and_queries } : filters_and_queries.first
         end
@@ -101,7 +101,7 @@ module SearchFlip
     end
 
     def respond_to_missing?(name, *args)
-      target.respond_to?(name, *args)
+      target.respond_to?(name, *args) || super
     end
 
     def method_missing(name, *args, &block)
