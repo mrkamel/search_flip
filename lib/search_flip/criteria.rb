@@ -48,13 +48,13 @@ module SearchFlip
         criteria.failsafe_value = other.failsafe_value unless other.failsafe_value.nil?
         criteria.terminate_after_value = other.terminate_after_value unless other.terminate_after_value.nil?
         criteria.timeout_value = other.timeout_value unless other.timeout_value.nil?
-        criteria.offset_value = other.offset_value if other.offset_value
-        criteria.limit_value = other.limit_value if other.limit_value
-        criteria.scroll_args = other.scroll_args if other.scroll_args
-        criteria.source_value = other.source_value if other.source_value
-        criteria.preference_value = other.preference_value if other.preference_value
-        criteria.search_type_value = other.search_type_value if other.search_type_value
-        criteria.routing_value = other.routing_value if other.routing_value
+        criteria.offset_value = other.offset_value unless other.offset_value.nil?
+        criteria.limit_value = other.limit_value unless other.limit_value.nil?
+        criteria.scroll_args = other.scroll_args unless other.scroll_args.nil?
+        criteria.source_value = other.source_value unless other.source_value.nil?
+        criteria.preference_value = other.preference_value unless other.preference_value.nil?
+        criteria.search_type_value = other.search_type_value unless other.search_type_value.nil?
+        criteria.routing_value = other.routing_value unless other.routing_value.nil?
         criteria.track_total_hits_value = other.track_total_hits_value unless other.track_total_hits_value.nil?
         criteria.explain_value = other.explain_value unless other.explain_value.nil?
 
