@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## v3.1.2
+
+* Fix ignored false value for source when merging criterias
+
 ## v3.1.1
 
 * Make `SearchFlip::Result.from_hit` work with the `_source` being disabled
