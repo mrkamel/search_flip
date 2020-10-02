@@ -44,35 +44,25 @@ module SearchFlip
       other = other.criteria
 
       fresh.tap do |criteria|
-        criteria.profile_value = other.profile_value unless other.profile_value.nil?
-        criteria.failsafe_value = other.failsafe_value unless other.failsafe_value.nil?
-        criteria.terminate_after_value = other.terminate_after_value unless other.terminate_after_value.nil?
-        criteria.timeout_value = other.timeout_value unless other.timeout_value.nil?
-        criteria.offset_value = other.offset_value if other.offset_value
-        criteria.limit_value = other.limit_value if other.limit_value
-        criteria.scroll_args = other.scroll_args if other.scroll_args
-        criteria.source_value = other.source_value if other.source_value
-        criteria.preference_value = other.preference_value if other.preference_value
-        criteria.search_type_value = other.search_type_value if other.search_type_value
-        criteria.routing_value = other.routing_value if other.routing_value
-        criteria.track_total_hits_value = other.track_total_hits_value unless other.track_total_hits_value.nil?
-        criteria.explain_value = other.explain_value unless other.explain_value.nil?
+        [
+          :profile_value, :failsafe_value, :terminate_after_value, :timeout_value, :offset_value,
+          :limit_value, :scroll_args, :source_value, :preference_value, :search_type_value,
+          :routing_value, :track_total_hits_value, :explain_value
+        ].each do |name|
+          criteria.send(:"#{name}=", other.send(name)) unless other.send(name).nil?
+        end
 
-        criteria.sort_values = (criteria.sort_values || []) + other.sort_values if other.sort_values
-        criteria.includes_values = (criteria.includes_values || []) + other.includes_values if other.includes_values
-        criteria.preload_values = (criteria.preload_values || []) + other.preload_values if other.preload_values
-        criteria.eager_load_values = (criteria.eager_load_values || []) + other.eager_load_values if other.eager_load_values
-        criteria.must_values = (criteria.must_values || []) + other.must_values if other.must_values
-        criteria.must_not_values = (criteria.must_not_values || []) + other.must_not_values if other.must_not_values
-        criteria.filter_values = (criteria.filter_values || []) + other.filter_values if other.filter_values
-        criteria.post_must_values = (criteria.post_must_values || []) + other.post_must_values if other.post_must_values
-        criteria.post_must_not_values = (criteria.post_must_not_values || []) + other.post_must_not_values if other.post_must_not_values
-        criteria.post_filter_values = (criteria.post_filter_values || []) + other.post_filter_values if other.post_filter_values
+        [
+          :sort_values, :includes_values, :preload_values, :eager_load_values, :must_values,
+          :must_not_values, :filter_values, :post_must_values, :post_must_not_values,
+          :post_filter_values
+        ].each do |name|
+          criteria.send(:"#{name}=", (criteria.send(name) || []) + other.send(name)) if other.send(name)
+        end
 
-        criteria.highlight_values = (criteria.highlight_values || {}).merge(other.highlight_values) if other.highlight_values
-        criteria.suggest_values = (criteria.suggest_values || {}).merge(other.suggest_values) if other.suggest_values
-        criteria.custom_value = (criteria.custom_value || {}).merge(other.custom_value) if other.custom_value
-        criteria.aggregation_values = (criteria.aggregation_values || {}).merge(other.aggregation_values) if other.aggregation_values
+        [:highlight_values, :suggest_values, :custom_value, :aggregation_values].each do |name|
+          criteria.send(:"#{name}=", (criteria.send(name) || {}).merge(other.send(name))) if other.send(name)
+        end
       end
     end
 
