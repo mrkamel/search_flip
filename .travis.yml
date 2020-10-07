@@ -10,6 +10,7 @@ rvm:
   - ruby-2.5.3
   - ruby-2.6.2
   - ruby-2.7.1
+  - ruby-3.0.0-preview1
 before_install:
   - docker-compose up -d
   - sleep 10
