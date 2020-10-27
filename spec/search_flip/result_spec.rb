@@ -1,17 +1,17 @@
 require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Result do
-  describe ".from_hit" do
-    it "adds a _hit key into _source and merges the hit keys into it" do
-      result = SearchFlip::Result.from_hit("_score" => 1.0, "_source" => { "name" => "Some name" })
-
-      expect(result).to eq("name" => "Some name", "_hit" => { "_score" => 1.0 })
+  describe "#method_missing" do
+    it "returns the value of the key equal to the message name" do
+      expect(described_class["some_key" => "value"].some_key).to eq("value")
+      expect(described_class.new.some_key).to be_nil
     end
+  end
 
-    it "allows deep method access" do
-      result = SearchFlip::Result.from_hit("_source" => { "key1" => [{ "key2" => "value" }] })
-
-      expect(result.key1[0].key2).to eq("value")
+  describe "#responds_to_missing?" do
+    it "returns true/false if the key equal to the message name is present or not" do
+      expect(described_class["some_key" => nil].respond_to?(:some_key)).to eq(true)
+      expect(described_class["some_key" => nil].respond_to?(:other_key)).to eq(false)
     end
   end
 end
