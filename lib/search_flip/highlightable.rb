@@ -34,9 +34,10 @@ module SearchFlip
         criteria.highlight_values = (criteria.highlight_values || {}).merge(options)
 
         hash =
-          if fields.is_a?(Hash)
+          case fields
+          when Hash
             fields
-          elsif fields.is_a?(Array)
+          when Array
             fields.each_with_object({}) { |field, h| h[field] = {} }
           else
             { fields => {} }

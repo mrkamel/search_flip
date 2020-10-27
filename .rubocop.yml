@@ -1,5 +1,12 @@
 AllCops:
   NewCops: enable
+  TargetRubyVersion: 2.4
+
+Gemspec/RequiredRubyVersion:
+  Enabled: false
+
+Style/ExplicitBlockArgument:
+  Enabled: false
 
 Style/HashTransformValues:
   Enabled: false

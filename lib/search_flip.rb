@@ -39,6 +39,8 @@ module SearchFlip
     attr_reader :code, :body
 
     def initialize(code:, body:)
+      super
+
       @code = code
       @body = body
     end

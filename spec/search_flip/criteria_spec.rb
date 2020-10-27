@@ -110,6 +110,16 @@ RSpec.describe SearchFlip::Criteria do
 
           expect(criteria1.merge(criteria2).send(method)).to eq("value2")
         end
+
+        it "handles false values correctly" do
+          criteria1 = SearchFlip::Criteria.new(target: TestIndex)
+          criteria1.send("#{method}=", true)
+
+          criteria2 = SearchFlip::Criteria.new(target: TestIndex)
+          criteria2.send("#{method}=", false)
+
+          expect(criteria1.merge(criteria2).send(method)).to eq(false)
+        end
       end
     end
 
