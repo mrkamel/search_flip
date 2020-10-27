@@ -13,11 +13,5 @@ RSpec.describe SearchFlip::Result do
       expect(described_class["some_key" => nil].respond_to?(:some_key)).to eq(true)
       expect(described_class["some_key" => nil].respond_to?(:other_key)).to eq(false)
     end
-
-    it "works with the _source being disabled" do
-      result = SearchFlip::Result.from_hit("_id" => 1)
-
-      expect(result._hit._id).to eq(1)
-    end
   end
 end
