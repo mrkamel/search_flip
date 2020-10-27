@@ -8,6 +8,8 @@ module SearchFlip
   #   result.some_key # => "value"
 
   class Result < Hash
+    # rubocop:disable Lint/MissingSuper
+
     def method_missing(name, *args, &block)
       self[name.to_s]
     end
@@ -15,5 +17,7 @@ module SearchFlip
     def respond_to_missing?(name, include_private = false)
       key?(name.to_s)
     end
+
+    # rubocop:enable Lint/MissingSuper
   end
 end

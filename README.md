@@ -51,8 +51,7 @@ CommentIndex.search("hello world").where(available: true).sort(id: "desc").aggre
 
 ```
 
-Finally, SearchFlip comes with a minimal set of dependencies (http-rb, hashie
-and oj only).
+Finally, SearchFlip comes with a minimal set of dependencies (http-rb and oj only).
 
 ## Reference Docs
 
@@ -475,8 +474,8 @@ end
 ```
 
 Generally, aggregation results returned by Elasticsearch are returned as a
-`SearchFlip::Result`, which basically is a `Hashie::Mash`, such that you can
-access them via:
+`SearchFlip::Result`, which basically is a Hash with method-like access, such
+that you can access them via:
 
 ```ruby
 query.aggregations(:username)["mrkamel"].revenue.value

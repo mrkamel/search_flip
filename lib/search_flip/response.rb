@@ -156,8 +156,7 @@ module SearchFlip
     end
 
     # Returns the results, ie hits, wrapped in a SearchFlip::Result object
-    # which basically is a Hashie::Mash. Check out the Hashie docs for further
-    # details.
+    # which basically is a Hash with method-like access.
     #
     # @example
     #   CommentIndex.search("hello world").results
