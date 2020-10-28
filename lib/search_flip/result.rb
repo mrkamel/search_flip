@@ -1,23 +1,19 @@
 module SearchFlip
   # The SearchFlip::Result class is a simple Hash, but extended with
   # method-like access. Keys assigned via methods are stored as strings.
+  # It represents a result, i.e. a document and provides methods to convert
+  # elasticsearch hit objects to those.
   #
-  # @example
+  # @example method access
   #   result = SearchFlip::Result.new
   #   result["some_key"] = "value"
   #   result.some_key # => "value"
 
-  class Result < Hash
-    # rubocop:disable Lint/MissingSuper
-
-    def method_missing(name, *args, &block)
-      self[name.to_s]
+  class Result < JsonHash
+    def self.from_hit(hit)
+      raw_result = self[hit["_source"] || {}]
+      raw_result["_hit"] = JsonHash[hit].tap { |json_hash| json_hash.delete("_source") }
+      raw_result
     end
-
-    def respond_to_missing?(name, include_private = false)
-      key?(name.to_s)
-    end
-
-    # rubocop:enable Lint/MissingSuper
   end
 end

@@ -608,7 +608,7 @@ module SearchFlip
           http_request.post("#{target.type_url}/_search", params: request_params, json: request)
         end
 
-      SearchFlip::Response.new(self, ::JSON.parse(http_response.body, object_class: SearchFlip::Result))
+      SearchFlip::Response.new(self, SearchFlip::JsonHash.parse(http_response.to_s))
     rescue SearchFlip::ConnectionError, SearchFlip::ResponseError => e
       raise e unless failsafe_value
 

@@ -165,11 +165,7 @@ module SearchFlip
     # @return [Array] An array of results
 
     def results
-      @results ||= hits["hits"].map do |hit|
-        raw_result = hit["_source"].dup
-        raw_result["_hit"] = hit.dup.tap { |obj| obj.delete("_source") }
-        raw_result
-      end
+      @results ||= hits["hits"].map { |hit| SearchFlip::Result.from_hit(hit) }
     end
 
     # Returns the named sugggetion, if a name is specified or alle suggestions.
