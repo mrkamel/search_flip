@@ -22,7 +22,7 @@ module SearchFlip
     #   query = CommentIndex.where(public: true).aggregate(:user_id, size: 100)
     #
     #   query.aggregations(:user_id)
-    #   # => { 4 => #<SearchFlip::Result ...>, 7 => #<SearchFlip::Result ...>, ... }
+    #   # => { 4 => #<SearchFlip::JsonHash ...>, 7 => #<SearchFlip::JsonHash ...>, ... }
     #
     # @example Simple range aggregation
     #   ranges = [{ to: 50 }, { from: 50, to: 100 }, { from: 100 }]

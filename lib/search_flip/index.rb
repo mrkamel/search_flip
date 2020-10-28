@@ -457,7 +457,7 @@ module SearchFlip
       def get(id, params = {})
         response = connection.http_client.headers(accept: "application/json").get("#{type_url}/#{id}", params: params)
 
-        SearchFlip::JsonHash.parse(response.to_s)
+        SearchFlip::JSON.parse(response.to_s)
       end
 
       # Retrieves the documents specified by ids from elasticsearch.
@@ -475,7 +475,7 @@ module SearchFlip
       def mget(request, params = {})
         response = connection.http_client.headers(accept: "application/json").post("#{type_url}/_mget", json: request, params: params)
 
-        SearchFlip::JsonHash.parse(response.to_s)
+        SearchFlip::JSON.parse(response.to_s)
       end
 
       # Sends an analyze request to Elasticsearch. Raises

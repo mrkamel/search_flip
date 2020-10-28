@@ -19,9 +19,5 @@ module SearchFlip
     end
 
     # rubocop:enable Lint/MissingSuper
-
-    def self.parse(str)
-      Oj.load(str, mode: :compat, object_class: self)
-    end
   end
 end
