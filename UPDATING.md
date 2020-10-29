@@ -6,7 +6,7 @@
 * **[BREAKING** For performance reasons, `SearchFlip::Result` no longer
   inherits `Hashie::Mash`
 
-1. It no longer supports symbol based access like `result[:id]`
+  * It no longer supports symbol based access like `result[:id]`
 
 2.x:
 
@@ -22,7 +22,7 @@ CommentIndex.match_all.results.first["id"] # or .id
 CommentIndex.aggregate(:tags).aggregations(:tags).values.first["doc_count"] # or .doc_count
 ```
 
-2. It no longer supports question mark methods like `result.title?`
+  * It no longer supports question mark methods like `result.title?`
 
 2.x:
 
@@ -36,7 +36,7 @@ CommentIndex.match_all.results.first.is_published?
 CommentIndex.match_all.results.first.is_published == true
 ```
 
-3. It no longer supports method based assignment like `result.some_key = "value"`.
+  * It no longer supports method based assignment like `result.some_key = "value"`.
 
 However, this should not have any practical implications, as changing the
 results is not considered to be a common use case.
