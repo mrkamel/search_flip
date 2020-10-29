@@ -7,11 +7,35 @@ RSpec.describe SearchFlip::JSON do
         expect(described_class.generate(timestamp: Time.now.utc)).to eq('{"timestamp":"2020-06-01T12:00:00Z"}')
       end
     end
+
+    it "delegates to Oj" do
+      allow(Oj).to receive(:dump)
+
+      payload = { key: "value" }
+
+      described_class.generate(payload)
+
+      expect(Oj).to have_received(:dump).with(payload, mode: :custom, time_format: :xmlschema)
+    end
+
+    it "generates json" do
+      expect(described_class.generate(key: "value")).to eq('{"key":"value"}')
+    end
   end
 
   describe ".parse" do
     it "returns the parsed json payload" do
       expect(described_class.parse('{"key":"value"}')).to eq("key" => "value")
+    end
+
+    it "delegates to Oj" do
+      allow(Oj).to receive(:load)
+
+      payload = '{"key":"value"}'
+
+      described_class.parse(payload)
+
+      expect(Oj).to have_received(:load).with(payload)
     end
   end
 end

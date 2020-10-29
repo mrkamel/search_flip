@@ -1,6 +1,14 @@
 
 # CHANGELOG
 
+## v4.0.0
+
+* [BREAKING] For performance reasons, `SearchFlip::Result` now no longer
+  inherits `Hashie::Mash`
+  * It no longer supports symbol based access like `result[:id]`
+  * It no longer supports question mark methods like `result.title?`
+  * It no longer supports method based assignment like `result.some_key = "value"`
+
 ## v3.2.1
 
 * Fix `refresh` having a empty body breaking in elasticsearch 7.11
