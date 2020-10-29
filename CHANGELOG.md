@@ -1,6 +1,14 @@
 
 # CHANGELOG
 
+## v4.0.0
+
+* [BREAKING] For performance reasons, `SearchFlip::Result` now no longer
+  inherits `Hashie::Mash`
+  1. It no longer supports symbol based access like `result[:id]`
+  2. It no longer supports question mark methods like `result.title?`
+  3. It no longer supports method based assignment like `result.some_key = "value"`
+
 ## v3.1.2
 
 * Fix ignored false value for source when merging criterias

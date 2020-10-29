@@ -1,8 +1,6 @@
 module SearchFlip
   # The SearchFlip::Result class is a simple Hash, but extended with
   # method-like access. Keys assigned via methods are stored as strings.
-  # It represents a result, i.e. a document and provides methods to convert
-  # elasticsearch hit objects to those.
   #
   # @example method access
   #   result = SearchFlip::Result.new
@@ -36,9 +34,13 @@ module SearchFlip
       end
     end
 
+    # rubocop:disable Lint/MissingSuper
+
     def method_missing(name, *args, &block)
       self[name.to_s]
     end
+
+    # rubocop:enable Lint/MissingSuper
 
     def respond_to_missing?(name, include_private = false)
       key?(name.to_s) || super

@@ -5,6 +5,9 @@ AllCops:
 Gemspec/RequiredRubyVersion:
   Enabled: false
 
+Style/CaseLikeIf:
+  Enabled: false
+
 Style/ExplicitBlockArgument:
   Enabled: false
 

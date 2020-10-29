@@ -25,7 +25,7 @@ RSpec.describe SearchFlip::JSON do
 
       described_class.parse(payload)
 
-      expect(Oj).to have_received(:load).with(payload, mode: :custom)
+      expect(Oj).to have_received(:load).with(payload)
     end
   end
 end
