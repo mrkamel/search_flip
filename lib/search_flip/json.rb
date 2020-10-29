@@ -14,7 +14,7 @@ module SearchFlip
     end
 
     def self.parse(json)
-      Oj.load(json)
+      Oj.load(json, default_options)
     end
   end
 end

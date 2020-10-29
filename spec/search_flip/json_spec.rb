@@ -35,7 +35,7 @@ RSpec.describe SearchFlip::JSON do
 
       described_class.parse(payload)
 
-      expect(Oj).to have_received(:load).with(payload)
+      expect(Oj).to have_received(:load).with(payload, mode: :custom, time_format: :xmlschema)
     end
   end
 end

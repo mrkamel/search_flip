@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.post_install_message = <<~MESSAGE
     Thanks for using search_flip!
-    When upgrading to 3.x, please check out
+    When upgrading major versions, please check out
     https://github.com/mrkamel/search_flip/blob/master/UPDATING.md
   MESSAGE
 
