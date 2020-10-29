@@ -1,4 +1,5 @@
 on: push
+name: test
 jobs:
   test:
     runs-on: ubuntu-latest
