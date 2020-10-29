@@ -5,7 +5,7 @@ module SearchFlip
     end
 
     def self.parse(str)
-      Oj.load(str)
+      Oj.load(str, mode: :compat)
     end
   end
 end
