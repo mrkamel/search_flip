@@ -5,7 +5,7 @@ module SearchFlip
     end
 
     def self.parse(str)
-      Oj.load(str, mode: :custom, object_class: SearchFlip::JsonHash)
+      Oj.load(str)
     end
   end
 end

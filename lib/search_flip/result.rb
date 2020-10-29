@@ -9,11 +9,45 @@ module SearchFlip
   #   result["some_key"] = "value"
   #   result.some_key # => "value"
 
-  class Result < JsonHash
+  class Result < Hash
+    def self.convert(hash)
+      res = self[hash]
+
+      res.each do |key, value|
+        if value.is_a?(Hash)
+          res[key] = convert(value)
+        elsif value.is_a?(Array)
+          res[key] = convert_array(value)
+        end
+      end
+
+      res
+    end
+
+    def self.convert_array(arr)
+      arr.map do |obj|
+        if obj.is_a?(Hash)
+          convert(obj)
+        elsif obj.is_a?(Array)
+          convert_array(obj)
+        else
+          obj
+        end
+      end
+    end
+
+    def method_missing(name, *args, &block)
+      self[name.to_s]
+    end
+
+    def respond_to_missing?(name, include_private = false)
+      key?(name.to_s) || super
+    end
+
     def self.from_hit(hit)
-      raw_result = self[hit["_source"] || {}]
-      raw_result["_hit"] = JsonHash[hit].tap { |json_hash| json_hash.delete("_source") }
-      raw_result
+      res = convert(hit["_source"] || {})
+      res["_hit"] = convert(self[hit].tap { |hash| hash.delete("_source") })
+      res
     end
   end
 end

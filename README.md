@@ -232,7 +232,7 @@ CommentIndex.where(username: "mrkamel").total_entries
 # => 13
 
 CommentIndex.aggregate(:username).aggregations(:username)
-# => {1=>#<SearchFlip::JsonHash doc_count=37 ...>, 2=>... }
+# => {1=>#<SearchFlip::Result doc_count=37 ...>, 2=>... }
 ...
 ```
 
@@ -474,7 +474,7 @@ end
 ```
 
 Generally, aggregation results returned by Elasticsearch are returned as a
-`SearchFlip::JsonHash`, which basically is a Hash with method-like access, such
+`SearchFlip::Result`, which basically is a Hash with method-like access, such
 that you can access them via:
 
 ```ruby
@@ -614,7 +614,7 @@ end
 * `find_results_in_batches`
 
 Used like `find_in_batches`, but yielding the raw results (as
-`SearchFlip::JsonHash` objects) instead of database records.
+`SearchFlip::Result` objects) instead of database records.
 
 ```ruby
 CommentIndex.search("hello world").find_results_in_batches(batch_size: 100) do |batch|

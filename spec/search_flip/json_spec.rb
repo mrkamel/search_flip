@@ -25,17 +25,7 @@ RSpec.describe SearchFlip::JSON do
 
       described_class.parse(payload)
 
-      expect(Oj).to have_received(:load).with(payload, mode: :custom, object_class: SearchFlip::JsonHash)
-    end
-
-    it "uses SearchFlip::JsonHash as object class" do
-      expect(described_class.parse(JSON.dump(key: "value")).class).to be(SearchFlip::JsonHash)
-    end
-
-    it "allowed deep method access" do
-      json = JSON.dump(parent: [{ child1: "value1" }, { child2: "value2" }])
-
-      expect(described_class.parse(json).parent[0].child1).to eq("value1")
+      expect(Oj).to have_received(:load).with(payload, mode: :custom)
     end
   end
 end

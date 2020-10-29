@@ -303,13 +303,13 @@ module SearchFlip
 
       @aggregations[key] =
         if response["aggregations"].nil? || response["aggregations"][key].nil?
-          SearchFlip::JsonHash.new
+          SearchFlip::Result.new
         elsif response["aggregations"][key]["buckets"].is_a?(Array)
-          response["aggregations"][key]["buckets"].each_with_object(SearchFlip::JsonHash.new) { |bucket, hash| hash[bucket["key"]] = bucket }
+          response["aggregations"][key]["buckets"].each_with_object({}) { |bucket, hash| hash[bucket["key"]] = SearchFlip::Result.convert(bucket) }
         elsif response["aggregations"][key]["buckets"].is_a?(Hash)
-          response["aggregations"][key]["buckets"]
+          SearchFlip::Result.convert(response["aggregations"][key]["buckets"])
         else
-          response["aggregations"][key]
+          SearchFlip::Result.convert(response["aggregations"][key])
         end
     end
   end
