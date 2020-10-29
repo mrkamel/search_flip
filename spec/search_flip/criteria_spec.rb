@@ -1301,7 +1301,7 @@ RSpec.describe SearchFlip::Criteria do
       ProductIndex.import create(:product)
 
       query = ProductIndex.match_all.explain(true)
-      expect(query.results.first._hit.key?(:_explanation)).to eq(true)
+      expect(query.results.first._hit.key?("_explanation")).to eq(true)
     end
   end
 

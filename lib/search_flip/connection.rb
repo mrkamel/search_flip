@@ -71,7 +71,7 @@ module SearchFlip
           .headers(accept: "application/json", content_type: "application/x-ndjson")
           .post("#{base_url}/_msearch", body: payload)
 
-      raw_response.parse["responses"].map.with_index do |response, index|
+      SearchFlip::JSON.parse(raw_response.to_s)["responses"].map.with_index do |response, index|
         SearchFlip::Response.new(criterias[index], response)
       end
     end

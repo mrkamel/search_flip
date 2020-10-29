@@ -3,7 +3,7 @@
 
 **Full-Featured Elasticsearch Ruby Client with a Chainable DSL**
 
-[![Build Status](https://secure.travis-ci.org/mrkamel/search_flip.svg?branch=master)](http://travis-ci.org/mrkamel/search_flip)
+[![Build](https://github.com/mrkamel/search_flip/workflows/test/badge.svg)](https://github.com/mrkamel/search_flip/actions?query=workflow%3Atest+branch%3Amaster)
 [![Gem Version](https://badge.fury.io/rb/search_flip.svg)](http://badge.fury.io/rb/search_flip)
 
 Using SearchFlip it is dead-simple to create index classes that correspond to
@@ -51,8 +51,7 @@ CommentIndex.search("hello world").where(available: true).sort(id: "desc").aggre
 
 ```
 
-Finally, SearchFlip comes with a minimal set of dependencies (http-rb, hashie
-and oj only).
+Finally, SearchFlip comes with a minimal set of dependencies (http-rb and oj only).
 
 ## Reference Docs
 
@@ -475,8 +474,8 @@ end
 ```
 
 Generally, aggregation results returned by Elasticsearch are returned as a
-`SearchFlip::Result`, which basically is a `Hashie::Mash`, such that you can
-access them via:
+`SearchFlip::Result`, which basically is a Hash with method-like access, such
+that you can access them via:
 
 ```ruby
 query.aggregations(:username)["mrkamel"].revenue.value
