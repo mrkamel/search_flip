@@ -2,6 +2,16 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 2.4
 
+Style/CaseLikeIf:
+  Enabled: false
+
+Lint/EmptyBlock:
+  Exclude:
+    - spec/**/*.rb
+
+Style/ExplicitBlockArgument:
+  Enabled: false
+
 Gemspec/RequiredRubyVersion:
   Enabled: false
 

@@ -34,13 +34,13 @@ module SearchFlip
       end
     end
 
-    # rubocop:disable Style/MethodMissingSuper
+    # rubocop:disable Style/MissingSuper
 
     def method_missing(name, *args, &block)
       self[name.to_s]
     end
 
-    # rubocop:enable Style/MethodMissingSuper
+    # rubocop:enable Style/MissingSuper
 
     def respond_to_missing?(name, include_private = false)
       key?(name.to_s) || super
