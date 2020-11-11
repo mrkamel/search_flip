@@ -12,7 +12,14 @@ Gemspec/RequiredRubyVersion:
 Style/CaseLikeIf:
   Enabled: false
 
+Lint/EmptyBlock:
+  Exclude:
+    - spec/**/*.rb
+
 Style/ExplicitBlockArgument:
+  Enabled: false
+
+Gemspec/RequiredRubyVersion:
   Enabled: false
 
 Style/HashTransformValues:
