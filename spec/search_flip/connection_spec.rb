@@ -36,11 +36,12 @@ RSpec.describe SearchFlip::Connection do
       connection.update_cluster_settings(persistent: { action: { auto_create_index: false } })
       connection.update_cluster_settings(persistent: { action: { auto_create_index: true } })
 
+      expect(connection.get_cluster_settings).to eq({})
       expect(connection.get_cluster_settings["persistent"]["action"]["auto_create_index"]).to eq("true")
     end
 
     it "returns true" do
-      expect(connection.update_cluster_settings({ persistent: { action: { auto_create_index: false } }})).to eq(true)
+      expect(connection.update_cluster_settings({ persistent: { action: { auto_create_index: false } } })).to eq(true)
     end
   end
 
