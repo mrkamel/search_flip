@@ -8,6 +8,8 @@
   * It no longer supports symbol based access like `result[:id]`
   * It no longer supports question mark methods like `result.title?`
   * It no longer supports method based assignment like `result.some_key = "value"`
+* Added `SearchFlip::Connection#get_cluster_settings` and
+  `#update_cluster_settings`
 
 ## v3.1.2
 
