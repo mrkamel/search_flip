@@ -29,11 +29,11 @@ RSpec.describe SearchFlip::Connection do
     let(:connection) { SearchFlip::Connection.new }
 
     after do
-      connection.update_cluster_settings(persistent: { action: { auto_create_index: false } }) if connection.version > 2
+      connection.update_cluster_settings(persistent: { action: { auto_create_index: false } }) if connection.version.to_i > 2
     end
 
     it "updates the cluster settings" do
-      if connection.version > 2
+      if connection.version.to_i > 2
         connection.update_cluster_settings(persistent: { action: { auto_create_index: false } })
         connection.update_cluster_settings(persistent: { action: { auto_create_index: true } })
 
@@ -42,7 +42,7 @@ RSpec.describe SearchFlip::Connection do
     end
 
     it "returns true" do
-      if connection.version > 2
+      if connection.version.to_i > 2
         expect(connection.update_cluster_settings({ persistent: { action: { auto_create_index: false } }})).to eq(true)
       end
     end
