@@ -43,7 +43,7 @@ RSpec.describe SearchFlip::Connection do
 
     it "returns true" do
       if connection.version.to_i > 2
-        expect(connection.update_cluster_settings({ persistent: { action: { auto_create_index: false } }})).to eq(true)
+        expect(connection.update_cluster_settings(persistent: { action: { auto_create_index: false } })).to eq(true)
       end
     end
   end
