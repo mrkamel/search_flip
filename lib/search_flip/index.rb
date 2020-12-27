@@ -153,7 +153,7 @@ module SearchFlip
       #   scope to be applied to the scope
 
       def each_record(scope, index_scope: false)
-        return enum_for(:each_record, scope) unless block_given?
+        return enum_for(:each_record, scope, index_scope: index_scope) unless block_given?
 
         if scope.respond_to?(:find_each)
           (index_scope ? self.index_scope(scope) : scope).find_each do |record|
