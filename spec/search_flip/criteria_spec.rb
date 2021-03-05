@@ -418,11 +418,13 @@ RSpec.describe SearchFlip::Criteria do
 
   describe "#match_none" do
     it "does not match any documents" do
-      ProductIndex.import create(:product)
+      if ProductIndex.connection.version.to_i >= 5
+        ProductIndex.import create(:product)
 
-      query = ProductIndex.match_none
+        query = ProductIndex.match_none
 
-      expect(query.records).to eq([])
+        expect(query.records).to eq([])
+      end
     end
   end
 
