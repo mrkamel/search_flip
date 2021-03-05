@@ -2,6 +2,9 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 2.4
 
+Layout/EmptyLineBetweenDefs:
+  EmptyLineBetweenClassDefs: false
+
 Gemspec/RequiredRubyVersion:
   Enabled: false
 

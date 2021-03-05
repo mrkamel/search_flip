@@ -7,7 +7,7 @@ RSpec.describe SearchFlip::NullInstrumenter do
     it "calls start" do
       allow(subject).to receive(:start)
 
-      subject.instrument("name", { key: "value" }) {}
+      subject.instrument("name", { key: "value" }) { true }
 
       expect(subject).to have_received(:start)
     end
@@ -15,7 +15,7 @@ RSpec.describe SearchFlip::NullInstrumenter do
     it "calls finish" do
       allow(subject).to receive(:finish)
 
-      subject.instrument("name", { key: "value" }) {}
+      subject.instrument("name", { key: "value" }) { true }
 
       expect(subject).to have_received(:finish)
     end
