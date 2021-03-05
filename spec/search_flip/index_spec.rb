@@ -211,11 +211,17 @@ RSpec.describe SearchFlip::Index do
         mapping = { properties: { id: { type: "long" } } }
 
         allow(TestIndex).to receive(:mapping).and_return(mapping)
-        allow(TestIndex.connection).to receive(:update_mapping).and_call_original
+        allow(TestIndex.connection).to receive(:update_mapping)
 
         TestIndex.update_mapping
 
         expect(TestIndex.connection).to have_received(:update_mapping).with("test", { "test" => mapping }, type_name: "test")
+      end
+
+      it "updates the mapping" do
+        TestIndex.create_index
+
+        expect(TestIndex.update_mapping).to eq(true)
       end
     end
   end
@@ -258,11 +264,18 @@ RSpec.describe SearchFlip::Index do
         TestIndex.create_index
         TestIndex.update_mapping
 
-        allow(TestIndex.connection).to receive(:get_mapping).and_call_original
+        allow(TestIndex.connection).to receive(:get_mapping)
 
         TestIndex.get_mapping
 
         expect(TestIndex.connection).to have_received(:get_mapping).with("test", type_name: "test")
+      end
+
+      it "returns the mapping" do
+        TestIndex.create_index
+        TestIndex.update_mapping
+
+        expect(TestIndex.get_mapping).to be_present
       end
     end
   end
