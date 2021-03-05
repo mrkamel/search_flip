@@ -416,6 +416,16 @@ RSpec.describe SearchFlip::Criteria do
     end
   end
 
+  describe "#match_none" do
+    it "does not match any documents" do
+      ProductIndex.import create(:product)
+
+      query = ProductIndex.match_none
+
+      expect(query.records).to eq([])
+    end
+  end
+
   describe "#exists" do
     it "sets up the constraints correctly and is chainable" do
       product1 = create(:product, title: "title1", description: "description1")
