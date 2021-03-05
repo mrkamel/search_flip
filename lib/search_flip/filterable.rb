@@ -235,6 +235,22 @@ module SearchFlip
       filter(match_all: options)
     end
 
+    # Adds a match none filter to the criteria, which simply matches none
+    # documents at all. Check out the Elasticsearch docs for further details.
+    #
+    # @example Basic usage
+    #   CommentIndex.match_none
+    #
+    # @example Filter chaining
+    #   query = CommentIndex.search("...")
+    #   query = query.match_none unless current_user.admin?
+    #
+    # @return [SearchFlip::Criteria] A newly created extended criteria
+
+    def match_none
+      filter(match_none: {})
+    end
+
     # Adds an exists filter to the criteria, which selects all documents for
     # which the specified field has a non-null value.
     #

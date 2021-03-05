@@ -5,6 +5,9 @@ AllCops:
 Style/CaseLikeIf:
   Enabled: false
 
+Layout/EmptyLineBetweenDefs:
+  EmptyLineBetweenClassDefs: false
+
 Lint/EmptyBlock:
   Exclude:
     - spec/**/*.rb
