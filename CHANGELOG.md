@@ -1,6 +1,11 @@
 
 # CHANGELOG
 
+## v3.2.0
+
+* Fix `index_scope` not being passed in `each_record` without block
+* Added `SearchFlip::Criteria#match_none`
+
 ## v3.1.2
 
 * Fix ignored false value for source when merging criterias

@@ -419,6 +419,14 @@ Simply matches all documents:
 CommentIndex.match_all
 ```
 
+* `match_none`
+
+Simply matches none documents at all:
+
+```ruby
+CommentIndex.match_none
+```
+
 * `all`
 
 Simply returns the criteria as is or an empty criteria when called on the index
@@ -926,6 +934,7 @@ require "search_flip/to_json"
 
 * for Elasticsearch 2.x, the delete-by-query plugin is required to delete
   records via queries
+* `#match_none` is only available with Elasticsearch >= 5
 * `#track_total_hits` is only available with Elasticsearch >= 7
 
 ## Keeping your Models and Indices in Sync
