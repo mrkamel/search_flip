@@ -272,7 +272,7 @@ module SearchFlip
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
     def refresh(index_names = nil)
-      http_client.post("#{index_names ? index_url(Array(index_names).join(",")) : base_url}/_refresh", json: {})
+      http_client.post("#{index_names ? index_url(Array(index_names).join(",")) : base_url}/_refresh")
 
       true
     end
