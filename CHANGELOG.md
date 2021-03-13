@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## v3.2.1
+
+* Fix `refresh` having a empty body breaking in elasticsearch 7.11
+
 ## v3.2.0
 
 * Fix `index_scope` not being passed in `each_record` without block
