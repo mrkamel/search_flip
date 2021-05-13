@@ -483,7 +483,9 @@ module SearchFlip
       # @return [Hash] The raw response
 
       def analyze(request, params = {})
-        connection.http_client.headers(accept: "application/json").post("#{index_url}/_analyze", json: request, params: params).parse
+        response = connection.http_client.headers(accept: "application/json").post("#{index_url}/_analyze", json: request, params: params)
+
+        SearchFlip::JSON.parse(response.to_s)
       end
 
       # Sends a index refresh request to Elasticsearch. Raises
