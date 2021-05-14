@@ -28,6 +28,7 @@ jobs:
     - uses: actions/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
+    - run: gem install bundler
     - run: bundle
     - run: sleep 10
     - run: bundle exec rspec
