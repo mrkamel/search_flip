@@ -12,5 +12,9 @@ module SearchFlip
     def self.generate(obj)
       Oj.dump(obj, default_options)
     end
+
+    def self.parse(json)
+      Oj.load(json)
+    end
   end
 end
