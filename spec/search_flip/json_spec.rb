@@ -8,6 +8,10 @@ RSpec.describe SearchFlip::JSON do
       end
     end
 
+    it "encodes bigdecimals as string" do
+      expect(described_class.generate(value: BigDecimal(1))).to eq('{"value":"1.0"}')
+    end
+
     it "delegates to Oj" do
       allow(Oj).to receive(:dump)
 
