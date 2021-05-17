@@ -28,7 +28,9 @@ module SearchFlip
     # @return [Hash] The cluster settings
 
     def get_cluster_settings
-      http_client.get("#{base_url}/_cluster/settings").parse
+      response = http_client.get("#{base_url}/_cluster/settings")
+
+      SearchFlip::JSON.parse(response.to_s)
     end
 
     # Updates the cluster settings according to the specified payload

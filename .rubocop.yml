@@ -3,14 +3,11 @@ AllCops:
   TargetRubyVersion: 2.5
   SuggestExtensions: false
 
-Layout/EmptyLineBetweenDefs:
-  EmptyLineBetweenClassDefs: false
-
-Gemspec/RequiredRubyVersion:
-  Enabled: false
-
 Style/CaseLikeIf:
   Enabled: false
+
+Layout/EmptyLineBetweenDefs:
+  EmptyLineBetweenClassDefs: false
 
 Lint/EmptyBlock:
   Exclude:
