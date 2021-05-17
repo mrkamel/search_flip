@@ -2,7 +2,8 @@ module SearchFlip
   class JSON
     @default_options = {
       mode: :custom,
-      time_format: :xmlschema
+      time_format: :xmlschema,
+      bigdecimal_as_decimal: false
     }
 
     def self.default_options

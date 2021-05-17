@@ -7,6 +7,10 @@ RSpec.describe SearchFlip::JSON do
         expect(described_class.generate(timestamp: Time.now.utc)).to eq('{"timestamp":"2020-06-01T12:00:00Z"}')
       end
     end
+
+    it "encodes bigdecimals as string" do
+      expect(described_class.generate(value: BigDecimal(1))).to eq('{"value":"1.0"}')
+    end
   end
 
   describe ".parse" do
