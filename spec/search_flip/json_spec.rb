@@ -15,7 +15,7 @@ RSpec.describe SearchFlip::JSON do
 
       described_class.generate(payload)
 
-      expect(Oj).to have_received(:dump).with(payload, mode: :custom, time_format: :xmlschema)
+      expect(Oj).to have_received(:dump).with(payload, mode: :custom, time_format: :xmlschema, bigdecimal_as_decimal: false)
     end
 
     it "generates json" do
@@ -35,7 +35,7 @@ RSpec.describe SearchFlip::JSON do
 
       described_class.parse(payload)
 
-      expect(Oj).to have_received(:load).with(payload, mode: :custom, time_format: :xmlschema)
+      expect(Oj).to have_received(:load).with(payload, mode: :custom, time_format: :xmlschema, bigdecimal_as_decimal: false)
     end
   end
 end
