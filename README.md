@@ -882,53 +882,6 @@ Thus, if your ORM supports `.find_each`, `#id` and `#where` you are already
 good to go. Otherwise, simply add your custom implementation of those methods
 that work with whatever ORM you use.
 
-## Date and Timestamps in JSON
-
-Elasticsearch requires dates and timestamps to have one of the formats listed
-here: [https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#strict-date-time](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#strict-date-time).
-
-However, `JSON.generate` in ruby by default outputs something like:
-
-```ruby
-JSON.generate(time: Time.now.utc)
-# => "{\"time\":\"2018-02-22 18:19:33 UTC\"}"
-```
-
-This format is not compatible with Elasticsearch by default. If you're on
-Rails, ActiveSupport adds its own `#to_json` methods to `Time`, `Date`, etc.
-However, ActiveSupport checks whether they are used in combination with
-`JSON.generate` or not and adapt:
-
-```ruby
-Time.now.utc.to_json
-=> "\"2018-02-22T18:18:22.088Z\""
-
-JSON.generate(time: Time.now.utc)
-=> "{\"time\":\"2018-02-22 18:18:59 UTC\"}"
-```
-
-SearchFlip is using the [Oj gem](https://github.com/ohler55/oj) to generate
-JSON. More concretely, SearchFlip is using:
-
-```ruby
-Oj.dump({ key: "value" }, mode: :custom, use_to_json: true)
-```
-
-This mitigates the issues if you're on Rails:
-
-```ruby
-Oj.dump(Time.now, mode: :custom, use_to_json: true)
-# => "\"2018-02-22T18:21:21.064Z\""
-```
-
-However, if you're not on Rails, you need to add `#to_json` methods to `Time`,
-`Date` and `DateTime` to get proper serialization. You can either add them on
-your own, via other libraries or by simply using:
-
-```ruby
-require "search_flip/to_json"
-```
-
 ## Feature Support
 
 * for Elasticsearch 2.x, the delete-by-query plugin is required to delete

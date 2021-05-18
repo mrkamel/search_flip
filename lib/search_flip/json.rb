@@ -1,11 +1,21 @@
 module SearchFlip
   class JSON
-    def self.generate(obj)
-      Oj.dump(obj, mode: :custom, use_to_json: true)
+    @default_options = {
+      mode: :custom,
+      time_format: :xmlschema,
+      bigdecimal_as_decimal: false
+    }
+
+    def self.default_options
+      @default_options
     end
 
-    def self.parse(str)
-      Oj.load(str, mode: :compat)
+    def self.generate(obj)
+      Oj.dump(obj, default_options)
+    end
+
+    def self.parse(json)
+      Oj.load(json, default_options)
     end
   end
 end

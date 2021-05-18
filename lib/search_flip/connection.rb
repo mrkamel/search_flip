@@ -28,7 +28,9 @@ module SearchFlip
     # @return [Hash] The cluster settings
 
     def get_cluster_settings
-      http_client.get("#{base_url}/_cluster/settings").parse
+      response = http_client.get("#{base_url}/_cluster/settings")
+
+      SearchFlip::JSON.parse(response.to_s)
     end
 
     # Updates the cluster settings according to the specified payload
@@ -55,7 +57,11 @@ module SearchFlip
 
     def version
       @version_mutex.synchronize do
-        @version ||= http_client.headers(accept: "application/json").get("#{base_url}/").parse["version"]["number"]
+        @version ||= begin
+          response = http_client.headers(accept: "application/json").get("#{base_url}/")
+
+          SearchFlip::JSON.parse(response.to_s)["version"]["number"]
+        end
       end
     end
 
@@ -67,7 +73,9 @@ module SearchFlip
     # @return [Hash] The raw response
 
     def cluster_health
-      http_client.headers(accept: "application/json").get("#{base_url}/_cluster/health").parse
+      response = http_client.headers(accept: "application/json").get("#{base_url}/_cluster/health")
+
+      SearchFlip::JSON.parse(response.to_s)
     end
 
     # Uses the Elasticsearch Multi Search API to execute multiple search requests
@@ -117,10 +125,11 @@ module SearchFlip
     # @return [Hash] The raw response
 
     def update_aliases(payload)
-      http_client
+      response = http_client
         .headers(accept: "application/json", content_type: "application/json")
         .post("#{base_url}/_aliases", body: SearchFlip::JSON.generate(payload))
-        .parse
+
+      SearchFlip::JSON.parse(response.to_s)
     end
 
     # Sends an analyze request to Elasticsearch. Raises
@@ -132,10 +141,11 @@ module SearchFlip
     # @return [Hash] The raw response
 
     def analyze(request, params = {})
-      http_client
+      response = http_client
         .headers(accept: "application/json")
         .post("#{base_url}/_analyze", json: request, params: params)
-        .parse
+
+      SearchFlip::JSON.parse(response.to_s)
     end
 
     # Fetches information about the specified index aliases. Raises
@@ -151,10 +161,11 @@ module SearchFlip
     # @return [Hash] The raw response
 
     def get_aliases(index_name: "*", alias_name: "*")
-      http_client
+      response = http_client
         .headers(accept: "application/json", content_type: "application/json")
         .get("#{base_url}/#{index_name}/_alias/#{alias_name}")
-        .parse
+
+      SearchFlip::JSON.parse(response.to_s)
     end
 
     # Returns whether or not the associated Elasticsearch alias already
@@ -186,10 +197,11 @@ module SearchFlip
     # @return [Array] The raw response
 
     def get_indices(name = "*", params: {})
-      http_client
+      response = http_client
         .headers(accept: "application/json", content_type: "application/json")
         .get("#{base_url}/_cat/indices/#{name}", params: params)
-        .parse
+
+      SearchFlip::JSON.parse(response.to_s)
     end
 
     alias_method :cat_indices, :get_indices
@@ -286,10 +298,11 @@ module SearchFlip
     # @return [Hash] The index settings
 
     def get_index_settings(index_name)
-      http_client
+      response = http_client
         .headers(accept: "application/json")
         .get("#{index_url(index_name)}/_settings")
-        .parse
+
+      SearchFlip::JSON.parse(response.to_s)
     end
 
     # Sends a refresh request to Elasticsearch. Raises
@@ -299,7 +312,7 @@ module SearchFlip
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
     def refresh(index_names = nil)
-      http_client.post("#{index_names ? index_url(Array(index_names).join(",")) : base_url}/_refresh", json: {})
+      http_client.post("#{index_names ? index_url(Array(index_names).join(",")) : base_url}/_refresh")
 
       true
     end
@@ -337,7 +350,9 @@ module SearchFlip
       url = type_name ? type_url(index_name, type_name) : index_url(index_name)
       params = type_name && version.to_f >= 6.7 ? { include_type_name: true } : {}
 
-      http_client.headers(accept: "application/json").get("#{url}/_mapping", params: params).parse
+      response = http_client.headers(accept: "application/json").get("#{url}/_mapping", params: params)
+
+      SearchFlip::JSON.parse(response.to_s)
     end
 
     # Deletes the specified index from Elasticsearch. Raises
