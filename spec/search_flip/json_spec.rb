@@ -4,7 +4,7 @@ RSpec.describe SearchFlip::JSON do
   describe ".generate" do
     it "encodes timestamps correctly" do
       Timecop.freeze "2020-06-01 12:00:00 UTC" do
-        expect(described_class.generate(timestamp: Time.now.utc)).to eq('{"timestamp":"2020-06-01T12:00:00Z"}')
+        expect(described_class.generate(timestamp: Time.now.utc)).to eq('{"timestamp":"2020-06-01T12:00:00.000Z"}')
       end
     end
 
