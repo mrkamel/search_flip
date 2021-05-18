@@ -883,6 +883,48 @@ Thus, if your ORM supports `.find_each`, `#id` and `#where` you are already
 good to go. Otherwise, simply add your custom implementation of those methods
 that work with whatever ORM you use.
 
+## JSON
+
+SearchFlip is using the [Oj gem](https://github.com/ohler55/oj) to generate
+and parse JSON. More concretely, SearchFlip is using:
+
+```ruby
+Oj.dump({ key: "value" }, mode: :custom, use_to_json: true, time_format: :xmlschema, bigdecimal_as_decimal: false)
+Oj.load('{"key":"value"}', mode: :custom, use_to_json: true, time_format: :xmlschema, bigdecimal_as_decimal: false)
+```
+
+The `use_to_json` option is used for maximum compatibility, most importantly
+when using rails `ActiveSupport::TimeWithZone` timestamps, which `oj` can not
+serialize natively. However, `use_to_json` adds performance overhead. You can
+change the json options via:
+
+```ruby
+SearchFlip::Config[:json_options] = {
+  mode: :custom,
+  use_to_json: false,
+  time_format: :xmlschema,
+  bigdecimal_as_decimal: false
+}
+```
+
+However, you then have to convert timestamps manually for indexation via e.g.:
+
+```ruby
+class MyIndex
+  # ...
+
+  def self.serialize(model)
+    {
+      # ...
+
+      created_at: model.created_at.to_time
+    }
+  end
+end
+```
+
+Please check out the oj docs for more details.
+
 ## Feature Support
 
 * for Elasticsearch 2.x, the delete-by-query plugin is required to delete

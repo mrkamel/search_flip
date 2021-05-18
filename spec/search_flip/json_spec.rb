@@ -11,11 +11,35 @@ RSpec.describe SearchFlip::JSON do
     it "encodes bigdecimals as string" do
       expect(described_class.generate(value: BigDecimal(1))).to eq('{"value":"1.0"}')
     end
+
+    it "delegates to Oj" do
+      allow(Oj).to receive(:dump)
+
+      payload = { key: "value" }
+
+      described_class.generate(payload)
+
+      expect(Oj).to have_received(:dump).with(payload, mode: :custom, use_to_json: true, time_format: :xmlschema, bigdecimal_as_decimal: false)
+    end
+
+    it "generates json" do
+      expect(described_class.generate(key: "value")).to eq('{"key":"value"}')
+    end
   end
 
   describe ".parse" do
     it "returns the parsed json payload" do
       expect(described_class.parse('{"key":"value"}')).to eq("key" => "value")
+    end
+
+    it "delegates to Oj" do
+      allow(Oj).to receive(:load)
+
+      payload = '{"key":"value"}'
+
+      described_class.parse(payload)
+
+      expect(Oj).to have_received(:load).with(payload, mode: :custom, use_to_json: true, time_format: :xmlschema, bigdecimal_as_decimal: false)
     end
   end
 end
