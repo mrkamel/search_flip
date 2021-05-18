@@ -4,7 +4,7 @@ RSpec.describe SearchFlip::JSON do
   describe ".generate" do
     it "encodes timestamps correctly" do
       Timecop.freeze "2020-06-01 12:00:00 UTC" do
-        expect(described_class.generate(timestamp: Time.now.utc)).to eq('{"timestamp":"2020-06-01T12:00:00Z"}')
+        expect(described_class.generate(timestamp: Time.now.utc)).to eq('{"timestamp":"2020-06-01T12:00:00.000Z"}')
       end
     end
 
@@ -19,7 +19,7 @@ RSpec.describe SearchFlip::JSON do
 
       described_class.generate(payload)
 
-      expect(Oj).to have_received(:dump).with(payload, mode: :custom, time_format: :xmlschema, bigdecimal_as_decimal: false)
+      expect(Oj).to have_received(:dump).with(payload, mode: :custom, use_to_json: true, time_format: :xmlschema, bigdecimal_as_decimal: false)
     end
 
     it "generates json" do
@@ -39,7 +39,7 @@ RSpec.describe SearchFlip::JSON do
 
       described_class.parse(payload)
 
-      expect(Oj).to have_received(:load).with(payload, mode: :custom, time_format: :xmlschema, bigdecimal_as_decimal: false)
+      expect(Oj).to have_received(:load).with(payload, mode: :custom, use_to_json: true, time_format: :xmlschema, bigdecimal_as_decimal: false)
     end
   end
 end
