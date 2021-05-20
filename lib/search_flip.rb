@@ -2,6 +2,7 @@ require "ruby2_keywords"
 require "forwardable"
 require "http"
 require "thread"
+require "json"
 require "oj"
 require "set"
 

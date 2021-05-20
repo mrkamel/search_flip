@@ -51,7 +51,7 @@ CommentIndex.search("hello world").where(available: true).sort(id: "desc").aggre
 
 ```
 
-Finally, SearchFlip comes with a minimal set of dependencies (http-rb and oj only).
+Finally, SearchFlip comes with a minimal set of dependencies.
 
 ## Reference Docs
 
@@ -885,11 +885,10 @@ that work with whatever ORM you use.
 ## JSON
 
 SearchFlip is using the [Oj gem](https://github.com/ohler55/oj) to generate
-and parse JSON. More concretely, SearchFlip is using:
+JSON. More concretely, SearchFlip is using:
 
 ```ruby
 Oj.dump({ key: "value" }, mode: :custom, use_to_json: true, time_format: :xmlschema, bigdecimal_as_decimal: false)
-Oj.load('{"key":"value"}', mode: :custom, use_to_json: true, time_format: :xmlschema, bigdecimal_as_decimal: false)
 ```
 
 The `use_to_json` option is used for maximum compatibility, most importantly
