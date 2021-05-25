@@ -3,6 +3,7 @@ require "forwardable"
 require "http"
 require "hashie"
 require "thread"
+require "json"
 require "oj"
 require "set"
 

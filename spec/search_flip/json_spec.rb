@@ -32,14 +32,14 @@ RSpec.describe SearchFlip::JSON do
       expect(described_class.parse('{"key":"value"}')).to eq("key" => "value")
     end
 
-    it "delegates to Oj" do
-      allow(Oj).to receive(:load)
+    it "delegates to JSON" do
+      allow(JSON).to receive(:parse)
 
       payload = '{"key":"value"}'
 
       described_class.parse(payload)
 
-      expect(Oj).to have_received(:load).with(payload, mode: :custom, use_to_json: true, time_format: :xmlschema, bigdecimal_as_decimal: false)
+      expect(JSON).to have_received(:parse).with(payload)
     end
   end
 end

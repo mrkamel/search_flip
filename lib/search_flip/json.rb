@@ -5,7 +5,7 @@ module SearchFlip
     end
 
     def self.parse(json)
-      Oj.load(json, SearchFlip::Config[:json_options])
+      ::JSON.parse(json)
     end
   end
 end
