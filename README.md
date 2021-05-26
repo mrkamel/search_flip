@@ -3,7 +3,7 @@
 
 **Full-Featured Elasticsearch Ruby Client with a Chainable DSL**
 
-[![Build Status](https://secure.travis-ci.org/mrkamel/search_flip.svg?branch=master)](http://travis-ci.org/mrkamel/search_flip)
+[![Build](https://github.com/mrkamel/search_flip/workflows/test/badge.svg)](https://github.com/mrkamel/search_flip/actions?query=workflow%3Atest+branch%3Amaster)
 [![Gem Version](https://badge.fury.io/rb/search_flip.svg)](http://badge.fury.io/rb/search_flip)
 
 Using SearchFlip it is dead-simple to create index classes that correspond to
@@ -51,8 +51,7 @@ CommentIndex.search("hello world").where(available: true).sort(id: "desc").aggre
 
 ```
 
-Finally, SearchFlip comes with a minimal set of dependencies (http-rb, hashie
-and oj only).
+Finally, SearchFlip comes with a minimal set of dependencies.
 
 ## Reference Docs
 
@@ -883,52 +882,46 @@ Thus, if your ORM supports `.find_each`, `#id` and `#where` you are already
 good to go. Otherwise, simply add your custom implementation of those methods
 that work with whatever ORM you use.
 
-## Date and Timestamps in JSON
-
-Elasticsearch requires dates and timestamps to have one of the formats listed
-here: [https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#strict-date-time](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#strict-date-time).
-
-However, `JSON.generate` in ruby by default outputs something like:
-
-```ruby
-JSON.generate(time: Time.now.utc)
-# => "{\"time\":\"2018-02-22 18:19:33 UTC\"}"
-```
-
-This format is not compatible with Elasticsearch by default. If you're on
-Rails, ActiveSupport adds its own `#to_json` methods to `Time`, `Date`, etc.
-However, ActiveSupport checks whether they are used in combination with
-`JSON.generate` or not and adapt:
-
-```ruby
-Time.now.utc.to_json
-=> "\"2018-02-22T18:18:22.088Z\""
-
-JSON.generate(time: Time.now.utc)
-=> "{\"time\":\"2018-02-22 18:18:59 UTC\"}"
-```
+## JSON
 
 SearchFlip is using the [Oj gem](https://github.com/ohler55/oj) to generate
 JSON. More concretely, SearchFlip is using:
 
 ```ruby
-Oj.dump({ key: "value" }, mode: :custom, use_to_json: true)
+Oj.dump({ key: "value" }, mode: :custom, use_to_json: true, time_format: :xmlschema, bigdecimal_as_decimal: false)
 ```
 
-This mitigates the issues if you're on Rails:
+The `use_to_json` option is used for maximum compatibility, most importantly
+when using rails `ActiveSupport::TimeWithZone` timestamps, which `oj` can not
+serialize natively. However, `use_to_json` adds performance overhead. You can
+change the json options via:
 
 ```ruby
-Oj.dump(Time.now, mode: :custom, use_to_json: true)
-# => "\"2018-02-22T18:21:21.064Z\""
+SearchFlip::Config[:json_options] = {
+  mode: :custom,
+  use_to_json: false,
+  time_format: :xmlschema,
+  bigdecimal_as_decimal: false
+}
 ```
 
-However, if you're not on Rails, you need to add `#to_json` methods to `Time`,
-`Date` and `DateTime` to get proper serialization. You can either add them on
-your own, via other libraries or by simply using:
+However, you then have to convert timestamps manually for indexation via e.g.:
 
 ```ruby
-require "search_flip/to_json"
+class MyIndex
+  # ...
+
+  def self.serialize(model)
+    {
+      # ...
+
+      created_at: model.created_at.to_time
+    }
+  end
+end
 ```
+
+Please check out the oj docs for more details.
 
 ## Feature Support
 

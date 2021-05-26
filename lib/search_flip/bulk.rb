@@ -143,7 +143,7 @@ module SearchFlip
 
       return if options[:raise] == false
 
-      parsed_response = response.parse
+      parsed_response = SearchFlip::JSON.parse(response.to_s)
 
       return unless parsed_response["errors"]
 

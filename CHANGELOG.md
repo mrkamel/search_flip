@@ -1,6 +1,12 @@
 
 # CHANGELOG
 
+## v3.3.0
+
+* Update httprb
+* Changed oj default options
+* Allow to set oj json options
+
 ## v3.2.1
 
 * Fix `refresh` having a empty body breaking in elasticsearch 7.11
