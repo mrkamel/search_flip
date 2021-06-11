@@ -14,11 +14,11 @@ module SearchFlip
     class << self
       extend Forwardable
 
-      def_delegators :new, :headers, :via, :basic_auth, :auth
+      def_delegators :new, :headers, :via, :basic_auth, :auth, :timeout
       def_delegators :new, :get, :post, :put, :delete, :head
     end
 
-    [:headers, :via, :basic_auth, :auth].each do |method|
+    [:headers, :via, :basic_auth, :auth, :timeout].each do |method|
       define_method method do |*args|
         dup.tap do |client|
           client.request = request.send(method, *args)
