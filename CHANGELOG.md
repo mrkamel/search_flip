@@ -11,6 +11,16 @@
 * Added `SearchFlip::Connection#get_cluster_settings` and
   `#update_cluster_settings`
 
+## v3.4.0
+
+* Expose `Http#timeout` via `SearchFlip::HTTPClient`
+
+## v3.3.0
+
+* Update httprb
+* Changed oj default options
+* Allow to set oj json options
+
 ## v3.2.1
 
 * Fix `refresh` having a empty body breaking in elasticsearch 7.11

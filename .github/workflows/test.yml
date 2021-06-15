@@ -13,9 +13,9 @@ jobs:
         - docker.elastic.co/elasticsearch/elasticsearch:7.0.0
         - docker.elastic.co/elasticsearch/elasticsearch:7.11.2
         ruby:
-        - 2.5
         - 2.6
         - 2.7
+        - 3.0
     services:
       elasticsearch:
         image: ${{ matrix.elasticsearch }}
