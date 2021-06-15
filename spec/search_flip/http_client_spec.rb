@@ -7,7 +7,7 @@ class HttpTestRequest
     self.calls = []
   end
 
-  [:via, :basic_auth, :auth].each do |method|
+  [:headers, :via, :basic_auth, :auth, :timeout].each do |method|
     define_method method do |*args|
       dup.tap do |request|
         request.calls = calls + [[method, args]]
@@ -20,7 +20,7 @@ RSpec.describe SearchFlip::HTTPClient do
   describe "delegation" do
     subject { SearchFlip::HTTPClient }
 
-    [:headers, :via, :basic_auth, :auth].each do |method|
+    [:headers, :via, :basic_auth, :auth, :timeout].each do |method|
       it { should delegate(method).to(:new) }
     end
 
@@ -56,8 +56,12 @@ RSpec.describe SearchFlip::HTTPClient do
     end
   end
 
-  [:via, :basic_auth, :auth].each do |method|
+  [:headers, :via, :basic_auth, :auth, :timeout].each do |method|
     describe "##{method}" do
+      it "is understood by HTTP" do
+        expect(HTTP.respond_to?(method)).to eq(true)
+      end
+
       it "creates a dupped instance" do
         client = SearchFlip::HTTPClient.new
         client.request = HttpTestRequest.new

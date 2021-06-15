@@ -756,7 +756,7 @@ end
 This allows to use different clusters per index e.g. when migrating indices to
 new versions of Elasticsearch.
 
-You can specify basic auth, additional headers, etc via:
+You can specify basic auth, additional headers, request timeouts, etc via:
 
 ```ruby
 http_client = SearchFlip::HTTPClient.new
@@ -772,6 +772,9 @@ http_client = http_client.via("proxy.host", 8080)
 
 # Custom headers
 http_client = http_client.headers(key: "value")
+
+# Timeouts
+http_client = http_client.timeout(20)
 
 SearchFlip::Connection.new(base_url: "...", http_client: http_client)
 ```

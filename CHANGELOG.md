@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## v3.4.0
+
+* Expose `Http#timeout` via `SearchFlip::HTTPClient`
+
 ## v3.3.0
 
 * Update httprb
