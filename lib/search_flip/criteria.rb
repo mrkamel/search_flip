@@ -521,8 +521,8 @@ module SearchFlip
     end
 
     # Executes the search request for the current criteria, ie sends the
-    # request to Elasticsearch and returns the response. Connection and
-    # response errors will be rescued if you specify the criteria to be
+    # request to Elasticsearch and returns the response. Connection, timeout
+    # and response errors will be rescued if you specify the criteria to be
     # #failsafe, such that an empty response is returned instead.
     #
     # @example
