@@ -66,6 +66,10 @@ module SearchFlip
       response
     rescue HTTP::ConnectionError => e
       raise SearchFlip::ConnectionError, e.message
+    rescue HTTP::TimeoutError => e
+      raise SearchFlip::TimeoutError, e.message
+    rescue HTTP::Error => e
+      raise SearchFlip::HttpError, e.message
     end
   end
 end
