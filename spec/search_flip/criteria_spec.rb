@@ -194,10 +194,17 @@ RSpec.describe SearchFlip::Criteria do
 
   describe "#http_timeout" do
     it "sets the query timeout" do
-      query = ProductIndex.http_timeout(1)
+      http_client = double("client").as_null_object
+      allow(http_client).to receive(:timeout).and_return(http_client)
+      allow(http_client).to receive(:post).and_raise(SearchFlip::TimeoutError)
+      allow(ProductIndex.connection).to receive(:http_client).and_return(http_client)
 
-      expect(query.request[:http_timeout]).to eq(1)
-      expect { query.execute }.not_to raise_error
+      expect { ProductIndex.http_timeout(1).execute }.to raise_error(SearchFlip::TimeoutError)
+      expect(http_client).to have_received(:timeout).with(1)
+    end
+
+    it "executes without errors" do
+      expect { ProductIndex.http_timeout(1).execute }.not_to raise_error
     end
   end
 
@@ -1214,13 +1221,19 @@ RSpec.describe SearchFlip::Criteria do
   end
 
   describe "#failsafe" do
-    it "prevents query syntax exceptions" do
-      expect { ProductIndex.search("syntax/error").records }.to raise_error(SearchFlip::ResponseError)
+    [SearchFlip::ConnectionError, SearchFlip::TimeoutError, SearchFlip::ResponseError.new(code: "code", body: "body")].each do |error|
+      it "prevents #{error}" do
+        http_client = double("client").as_null_object
+        allow(http_client).to receive(:post).and_raise(error)
+        allow(ProductIndex.connection).to receive(:http_client).and_return(http_client)
 
-      query = ProductIndex.failsafe(true).search("syntax/error")
+        expect { ProductIndex.all.execute }.to raise_error(error)
 
-      expect(query.records).to eq([])
-      expect(query.total_entries).to eq(0)
+        query = ProductIndex.failsafe(true)
+
+        expect(query.records).to eq([])
+        expect(query.total_entries).to eq(0)
+      end
     end
   end
 
