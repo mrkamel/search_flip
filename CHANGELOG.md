@@ -1,6 +1,11 @@
 
 # CHANGELOG
 
+## v3.5.0
+
+* Add `SearchFlip::Criteria#http_timeout` to allow specifying timeouts on
+  a query level
+
 ## v3.4.0
 
 * Expose `Http#timeout` via `SearchFlip::HTTPClient`

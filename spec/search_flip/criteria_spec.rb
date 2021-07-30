@@ -97,7 +97,8 @@ RSpec.describe SearchFlip::Criteria do
       methods = [
         :profile_value, :failsafe_value, :terminate_after_value, :timeout_value,
         :offset_value, :limit_value, :scroll_args, :source_value, :preference_value,
-        :search_type_value, :routing_value, :track_total_hits_value, :explain_value
+        :search_type_value, :routing_value, :track_total_hits_value, :explain_value,
+        :http_timeout_value
       ]
 
       methods.each do |method|
@@ -188,6 +189,22 @@ RSpec.describe SearchFlip::Criteria do
 
       expect(query.request[:timeout]).to eq("1s")
       expect { query.execute }.not_to raise_error
+    end
+  end
+
+  describe "#http_timeout" do
+    it "sets the query timeout" do
+      http_client = double("client").as_null_object
+      allow(http_client).to receive(:timeout).and_return(http_client)
+      allow(http_client).to receive(:post).and_raise(SearchFlip::TimeoutError)
+      allow(ProductIndex.connection).to receive(:http_client).and_return(http_client)
+
+      expect { ProductIndex.http_timeout(1).execute }.to raise_error(SearchFlip::TimeoutError)
+      expect(http_client).to have_received(:timeout).with(1)
+    end
+
+    it "executes without errors" do
+      expect { ProductIndex.http_timeout(1).execute }.not_to raise_error
     end
   end
 
@@ -1204,13 +1221,19 @@ RSpec.describe SearchFlip::Criteria do
   end
 
   describe "#failsafe" do
-    it "prevents query syntax exceptions" do
-      expect { ProductIndex.search("syntax/error").records }.to raise_error(SearchFlip::ResponseError)
+    [SearchFlip::ConnectionError, SearchFlip::TimeoutError, SearchFlip::ResponseError.new(code: "code", body: "body")].each do |error|
+      it "prevents #{error}" do
+        http_client = double("client").as_null_object
+        allow(http_client).to receive(:post).and_raise(error)
+        allow(ProductIndex.connection).to receive(:http_client).and_return(http_client)
 
-      query = ProductIndex.failsafe(true).search("syntax/error")
+        expect { ProductIndex.all.execute }.to raise_error(error)
 
-      expect(query.records).to eq([])
-      expect(query.total_entries).to eq(0)
+        query = ProductIndex.failsafe(true)
+
+        expect(query.records).to eq([])
+        expect(query.total_entries).to eq(0)
+      end
     end
   end
 
