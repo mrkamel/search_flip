@@ -26,7 +26,8 @@ module SearchFlip
 
     attr_accessor :target, :profile_value, :source_value, :suggest_values, :includes_values,
       :eager_load_values, :preload_values, :failsafe_value, :scroll_args, :terminate_after_value,
-      :timeout_value, :preference_value, :search_type_value, :routing_value, :track_total_hits_value
+      :timeout_value, :preference_value, :search_type_value, :routing_value, :track_total_hits_value,
+      :http_timeout_value
 
     # Creates a new criteria while merging the attributes (constraints,
     # settings, etc) of the current criteria with the attributes of another one
@@ -47,7 +48,7 @@ module SearchFlip
         [
           :profile_value, :failsafe_value, :terminate_after_value, :timeout_value, :offset_value,
           :limit_value, :scroll_args, :source_value, :preference_value, :search_type_value,
-          :routing_value, :track_total_hits_value, :explain_value
+          :routing_value, :track_total_hits_value, :explain_value, :http_timeout_value
         ].each do |name|
           criteria.send(:"#{name}=", other.send(name)) unless other.send(name).nil?
         end
@@ -145,6 +146,22 @@ module SearchFlip
     def timeout(value)
       fresh.tap do |criteria|
         criteria.timeout_value = value
+      end
+    end
+
+    # Specifies a http timeout, such that a SearchFlip::TimeoutError will be
+    # thrown when the request times out.
+    #
+    # @example
+    #   ProductIndex.http_timeout(3).search("hello world")
+    #
+    # @param value [Fixnum] The timeout value
+    #
+    # @return [SearchFlip::Criteria] A newly created extended criteria
+
+    def http_timeout(value)
+      fresh.tap do |criteria|
+        criteria.http_timeout_value = value
       end
     end
 
@@ -330,10 +347,13 @@ module SearchFlip
       dupped_request.delete(:from)
       dupped_request.delete(:size)
 
+      http_request = connection.http_client
+      http_request = http_request.timeout(http_timeout_value) if http_timeout_value
+
       if connection.version.to_i >= 5
-        connection.http_client.post("#{target.type_url}/_delete_by_query", params: request_params.merge(params), json: dupped_request)
+        http_request.post("#{target.type_url}/_delete_by_query", params: request_params.merge(params), json: dupped_request)
       else
-        connection.http_client.delete("#{target.type_url}/_query", params: request_params.merge(params), json: dupped_request)
+        http_request.delete("#{target.type_url}/_query", params: request_params.merge(params), json: dupped_request)
       end
 
       target.refresh if SearchFlip::Config[:auto_refresh]
@@ -501,8 +521,8 @@ module SearchFlip
     end
 
     # Executes the search request for the current criteria, ie sends the
-    # request to Elasticsearch and returns the response. Connection and
-    # response errors will be rescued if you specify the criteria to be
+    # request to Elasticsearch and returns the response. Connection, timeout
+    # and response errors will be rescued if you specify the criteria to be
     # #failsafe, such that an empty response is returned instead.
     #
     # @example
@@ -590,6 +610,7 @@ module SearchFlip
 
     def execute!
       http_request = connection.http_client.headers(accept: "application/json")
+      http_request = http_request.timeout(http_timeout_value) if http_timeout_value
 
       http_response =
         if scroll_args && scroll_args[:id]
@@ -609,7 +630,7 @@ module SearchFlip
         end
 
       SearchFlip::Response.new(self, SearchFlip::JSON.parse(http_response.to_s))
-    rescue SearchFlip::ConnectionError, SearchFlip::ResponseError => e
+    rescue SearchFlip::ConnectionError, SearchFlip::TimeoutError, SearchFlip::ResponseError => e
       raise e unless failsafe_value
 
       SearchFlip::Response.new(self, "took" => 0, "hits" => { "total" => 0, "hits" => [] })

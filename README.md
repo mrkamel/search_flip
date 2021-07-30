@@ -698,6 +698,14 @@ Specify a timeout to limit query processing time:
 CommentIndex.timeout("3s").execute
 ```
 
+* `http_timeout`
+
+Specify a http timeout for the request which will be send to Elasticsearch:
+
+```ruby
+CommentIndex.http_timeout(3).execute
+```
+
 * `terminate_after`
 
 Activate early query termination to stop query processing after the specified

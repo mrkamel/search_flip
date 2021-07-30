@@ -32,10 +32,15 @@ require "search_flip/index"
 require "search_flip/model"
 
 module SearchFlip
-  class NotSupportedError < StandardError; end
-  class ConnectionError < StandardError; end
+  class Error < StandardError; end
 
-  class ResponseError < StandardError
+  class NotSupportedError < Error; end
+
+  class HttpError < Error; end
+  class ConnectionError < HttpError; end
+  class TimeoutError < HttpError; end
+
+  class ResponseError < Error
     attr_reader :code, :body
 
     def initialize(code:, body:)
