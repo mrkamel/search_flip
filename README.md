@@ -700,7 +700,7 @@ CommentIndex.timeout("3s").execute
 
 * `http_timeout`
 
-Specify a http timeout for the http request which will be send to Elasticsearch:
+Specify a http timeout for the request which will be send to Elasticsearch:
 
 ```ruby
 CommentIndex.http_timeout(3).execute

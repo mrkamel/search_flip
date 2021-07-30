@@ -149,7 +149,7 @@ module SearchFlip
       end
     end
 
-    # Specifies a http timeout, such that the http request will be stopped after
+    # Specifies a http timeout, such that the request will be stopped after
     # that timeout and a SearchFlip::TimeoutError will be thrown.
     #
     # @example
