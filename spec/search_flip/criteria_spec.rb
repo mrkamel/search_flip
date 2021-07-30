@@ -98,7 +98,7 @@ RSpec.describe SearchFlip::Criteria do
         :profile_value, :failsafe_value, :terminate_after_value, :timeout_value,
         :offset_value, :limit_value, :scroll_args, :source_value, :preference_value,
         :search_type_value, :routing_value, :track_total_hits_value, :explain_value,
-        :http_timeout
+        :http_timeout_value
       ]
 
       methods.each do |method|
@@ -196,7 +196,7 @@ RSpec.describe SearchFlip::Criteria do
     it "sets the query timeout" do
       query = ProductIndex.http_timeout(1)
 
-      expect(query.request[:timeout]).to eq(1)
+      expect(query.request[:http_timeout]).to eq(1)
       expect { query.execute }.not_to raise_error
     end
   end
