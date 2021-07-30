@@ -149,8 +149,8 @@ module SearchFlip
       end
     end
 
-    # Specifies a http timeout, such that the request will be stopped after
-    # that timeout and a SearchFlip::TimeoutError will be thrown.
+    # Specifies a http timeout, such that a SearchFlip::TimeoutError will be
+    # thrown when the request times out.
     #
     # @example
     #   ProductIndex.http_timeout(3).search("hello world")
