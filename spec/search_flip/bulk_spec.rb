@@ -60,18 +60,15 @@ RSpec.describe SearchFlip::Bulk do
 
     it "uses the specified http_client" do
       product = create(:product)
+      url = ProductIndex.connection.version.to_i < 8 ? ProductIndex.type_url : ProductIndex.index_url
 
-      stub_request(:put, "#{ProductIndex.type_url}/_bulk")
-        .with(headers: { "X-Header" => "Value" })
-        .to_return(status: 500)
+      stub_request(:put, "#{url}/_bulk").with(headers: { "X-Header" => "Value" }).to_return(status: 200, body: "{}")
 
-      block = lambda do
-        ProductIndex.bulk http_client: ProductIndex.connection.http_client.headers("X-Header" => "Value") do |bulk|
-          bulk.index product.id, ProductIndex.serialize(product)
-        end
+      ProductIndex.bulk http_client: ProductIndex.connection.http_client.headers("X-Header" => "Value") do |bulk|
+        bulk.index product.id, ProductIndex.serialize(product)
       end
 
-      expect(&block).to raise_error(SearchFlip::ResponseError)
+      expect(WebMock).to have_requested(:put, "#{url}/_bulk").with(headers: { "X-Header" => "Value" })
     end
 
     it "transmits up to bulk_max_mb only" do

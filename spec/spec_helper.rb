@@ -84,7 +84,7 @@ class CommentIndex
   include SearchFlip::Index
 
   def self.type_name
-    "comments"
+    connection.version.to_i >= 8 ? "_doc" : "comments"
   end
 
   def self.index_name
@@ -134,7 +134,7 @@ class ProductIndex
   end
 
   def self.type_name
-    "products"
+    connection.version.to_i >= 8 ? "_doc" : "products"
   end
 
   def self.index_name
@@ -175,7 +175,7 @@ class TestIndex
   end
 
   def self.type_name
-    "test"
+    connection.version.to_i >= 8 ? "_doc" : "test"
   end
 
   def self.index_name

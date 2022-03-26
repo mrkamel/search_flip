@@ -3,6 +3,9 @@ AllCops:
   TargetRubyVersion: 2.5
   SuggestExtensions: false
 
+Gemspec/RequireMFA:
+  Enabled: false
+
 Layout/EmptyLineBetweenDefs:
   EmptyLineBetweenClassDefs: false
 
