@@ -64,7 +64,7 @@ module SearchFlip
     def msearch(criterias)
       payload = criterias.flat_map do |criteria|
         [
-          version.to_i < 8 ? SearchFlip::JSON.generate(index: criteria.target.index_name_with_prefix, type: criteria.target.type_name) : SearchFlip::JSON.generate(index: criteria.target.index_name_with_prefix),
+          SearchFlip::JSON.generate(index: criteria.target.index_name_with_prefix, **(version.to_i < 8 ? { type: criteria.target.type_name } : {})),
           SearchFlip::JSON.generate(criteria.request)
         ]
       end
