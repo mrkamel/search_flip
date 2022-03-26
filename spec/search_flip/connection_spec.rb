@@ -269,7 +269,7 @@ RSpec.describe SearchFlip::Connection do
         if connection.version.to_i < 8
           connection.update_mapping("index_name", { "type_name" => mapping }, type_name: "type_name")
 
-          expect(connection.get_mapping("index_name", type_name: "type_name")).to eq("index_name" => { "mappings" => { type_name => mapping } })
+          expect(connection.get_mapping("index_name", type_name: "type_name")).to eq("index_name" => { "mappings" => { "type_name" => mapping } })
         else
           connection.update_mapping("index_name", mapping)
 
