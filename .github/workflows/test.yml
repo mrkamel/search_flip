@@ -24,6 +24,11 @@ jobs:
           discovery.type: single-node
         ports:
           - 9200:9200
+        options: >-
+          --health-cmd "curl http://localhost:9200/_cluster/health"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
     - uses: actions/checkout@v1
     - uses: actions/setup-ruby@v1
@@ -31,6 +36,5 @@ jobs:
         ruby-version: ${{ matrix.ruby }}
     - run: gem install bundler
     - run: bundle
-    - run: sleep 10
     - run: bundle exec rspec
     - run: bundle exec rubocop
