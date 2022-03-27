@@ -351,7 +351,9 @@ module SearchFlip
       http_request = http_request.timeout(http_timeout_value) if http_timeout_value
 
       if connection.version.to_i >= 5
-        http_request.post("#{target.type_url}/_delete_by_query", params: request_params.merge(params), json: dupped_request)
+        url = connection.version.to_i < 8 ? target.type_url : target.index_url
+
+        http_request.post("#{url}/_delete_by_query", params: request_params.merge(params), json: dupped_request)
       else
         http_request.delete("#{target.type_url}/_query", params: request_params.merge(params), json: dupped_request)
       end
@@ -620,13 +622,17 @@ module SearchFlip
             json: { scroll: scroll_args[:timeout], scroll_id: scroll_args[:id] }
           )
         elsif scroll_args
+          url = connection.version.to_i < 8 ? target.type_url : target.index_url
+
           http_request.post(
-            "#{target.type_url}/_search",
+            "#{url}/_search",
             params: request_params.merge(scroll: scroll_args[:timeout]),
             json: request
           )
         else
-          http_request.post("#{target.type_url}/_search", params: request_params, json: request)
+          url = connection.version.to_i < 8 ? target.type_url : target.index_url
+
+          http_request.post("#{url}/_search", params: request_params, json: request)
         end
 
       SearchFlip::Response.new(self, SearchFlip::JSON.parse(http_response.to_s))

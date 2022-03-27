@@ -455,7 +455,8 @@ module SearchFlip
       # @return [Hash] The specified document
 
       def get(id, params = {})
-        response = connection.http_client.headers(accept: "application/json").get("#{type_url}/#{id}", params: params)
+        url = connection.version.to_i < 8 ? type_url : "#{index_url}/_doc"
+        response = connection.http_client.headers(accept: "application/json").get("#{url}/#{id}", params: params)
 
         SearchFlip::JSON.parse(response.to_s)
       end
@@ -473,7 +474,8 @@ module SearchFlip
       # @return [Hash] The raw response
 
       def mget(request, params = {})
-        response = connection.http_client.headers(accept: "application/json").post("#{type_url}/_mget", json: request, params: params)
+        url = connection.version.to_i < 8 ? type_url : index_url
+        response = connection.http_client.headers(accept: "application/json").post("#{url}/_mget", json: request, params: params)
 
         SearchFlip::JSON.parse(response.to_s)
       end
@@ -631,7 +633,9 @@ module SearchFlip
           bulk_max_mb: connection.bulk_max_mb
         }
 
-        SearchFlip::Bulk.new("#{type_url}/_bulk", default_options.merge(options)) do |indexer|
+        url = connection.version.to_i < 8 ? type_url : index_url
+
+        SearchFlip::Bulk.new("#{url}/_bulk", default_options.merge(options)) do |indexer|
           yield indexer
         end
 

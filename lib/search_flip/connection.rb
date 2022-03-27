@@ -93,7 +93,7 @@ module SearchFlip
     def msearch(criterias)
       payload = criterias.flat_map do |criteria|
         [
-          SearchFlip::JSON.generate(index: criteria.target.index_name_with_prefix, type: criteria.target.type_name),
+          SearchFlip::JSON.generate(index: criteria.target.index_name_with_prefix, **(version.to_i < 8 ? { type: criteria.target.type_name } : {})),
           SearchFlip::JSON.generate(criteria.request)
         ]
       end
@@ -329,8 +329,8 @@ module SearchFlip
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
     def update_mapping(index_name, mapping, type_name: nil)
-      url = type_name ? type_url(index_name, type_name) : index_url(index_name)
-      params = type_name && version.to_f >= 6.7 ? { include_type_name: true } : {}
+      url = type_name && version.to_i < 8 ? type_url(index_name, type_name) : index_url(index_name)
+      params = type_name && version.to_f >= 6.7 && version.to_i < 8 ? { include_type_name: true } : {}
 
       http_client.put("#{url}/_mapping", params: params, json: mapping)
 
@@ -347,8 +347,8 @@ module SearchFlip
     # @return [Hash] The current type mapping
 
     def get_mapping(index_name, type_name: nil)
-      url = type_name ? type_url(index_name, type_name) : index_url(index_name)
-      params = type_name && version.to_f >= 6.7 ? { include_type_name: true } : {}
+      url = type_name && version.to_i < 8 ? type_url(index_name, type_name) : index_url(index_name)
+      params = type_name && version.to_f >= 6.7 && version.to_i < 8 ? { include_type_name: true } : {}
 
       response = http_client.headers(accept: "application/json").get("#{url}/_mapping", params: params)
 

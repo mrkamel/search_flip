@@ -16,10 +16,12 @@ RSpec.describe SearchFlip::AwsSigv4Plugin do
     it "adds the signed headers to the request" do
       Timecop.freeze Time.parse("2020-01-01 12:00:00 UTC") do
         expect(client).to receive(:headers).with(
-          "host" => "localhost",
-          "authorization" => /.*/,
-          "x-amz-content-sha256" => /.*/,
-          "x-amz-date" => /20200101T120000Z/
+          an_object_matching(
+            "host" => "localhost",
+            "authorization" => /.*/,
+            "x-amz-content-sha256" => /.*/,
+            "x-amz-date" => /20200101T120000Z/
+          )
         )
 
         plugin.call(client, :get, "http://localhost/index")

@@ -12,6 +12,7 @@ jobs:
         - docker.elastic.co/elasticsearch/elasticsearch:6.7.0
         - docker.elastic.co/elasticsearch/elasticsearch:7.0.0
         - docker.elastic.co/elasticsearch/elasticsearch:7.11.2
+        - docker.elastic.co/elasticsearch/elasticsearch:8.1.1
         ruby:
         - 2.6
         - 2.7
@@ -21,6 +22,7 @@ jobs:
         image: ${{ matrix.elasticsearch }}
         env:
           discovery.type: single-node
+          xpack.security.enabled: false
         ports:
           - 9200:9200
     steps:
@@ -30,6 +32,5 @@ jobs:
         ruby-version: ${{ matrix.ruby }}
     - run: gem install bundler
     - run: bundle
-    - run: sleep 10
     - run: bundle exec rspec
     - run: bundle exec rubocop
