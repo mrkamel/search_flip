@@ -215,7 +215,11 @@ RSpec.describe SearchFlip::Index do
 
         TestIndex.update_mapping
 
-        expect(TestIndex.connection).to have_received(:update_mapping).with("test", { "test" => mapping }, type_name: "test")
+        if TestIndex.connection.version.to_i < 8
+          expect(TestIndex.connection).to have_received(:update_mapping).with("test", { "test" => mapping }, type_name: "test")
+        else
+          expect(TestIndex.connection).to have_received(:update_mapping).with("test", mapping)
+        end
       end
 
       it "updates the mapping" do
@@ -268,7 +272,11 @@ RSpec.describe SearchFlip::Index do
 
         TestIndex.get_mapping
 
-        expect(TestIndex.connection).to have_received(:get_mapping).with("test", type_name: "test")
+        if TestIndex.connection.version.to_i < 8
+          expect(TestIndex.connection).to have_received(:get_mapping).with("test", type_name: "test")
+        else
+          expect(TestIndex.connection).to have_received(:get_mapping).with("test")
+        end
       end
 
       it "returns the mapping" do
@@ -332,7 +340,7 @@ RSpec.describe SearchFlip::Index do
 
       TestIndex.type_url
 
-      expect(TestIndex.connection).to have_received(:type_url).with("test", "test")
+      expect(TestIndex.connection).to have_received(:type_url).with("test", TestIndex.connection.version.to_i < 8 ? "test" : "_doc")
     end
   end
 

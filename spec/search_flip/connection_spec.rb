@@ -170,7 +170,7 @@ RSpec.describe SearchFlip::Connection do
     it "freezes the specified index" do
       connection = SearchFlip::Connection.new
 
-      if connection.version.to_f >= 6.6
+      if connection.version.to_f >= 6.6 && connection.version.to_i < 8
         begin
           connection.create_index("index_name")
           connection.freeze_index("index_name")
@@ -187,7 +187,7 @@ RSpec.describe SearchFlip::Connection do
     it "unfreezes the specified index" do
       connection = SearchFlip::Connection.new
 
-      if connection.version.to_f >= 6.6
+      if connection.version.to_f >= 6.6 && connection.version.to_i < 8
         begin
           connection.create_index("index_name")
           connection.freeze_index("index_name")
@@ -262,12 +262,19 @@ RSpec.describe SearchFlip::Connection do
       begin
         connection = SearchFlip::Connection.new
 
-        mapping = { "type_name" => { "properties" => { "id" => { "type" => "long" } } } }
+        mapping = { "properties" => { "id" => { "type" => "long" } } }
 
         connection.create_index("index_name")
-        connection.update_mapping("index_name", mapping, type_name: "type_name")
 
-        expect(connection.get_mapping("index_name", type_name: "type_name")).to eq("index_name" => { "mappings" => mapping })
+        if connection.version.to_i < 8
+          connection.update_mapping("index_name", { "type_name" => mapping }, type_name: "type_name")
+
+          expect(connection.get_mapping("index_name", type_name: "type_name")).to eq("index_name" => { "mappings" => { "type_name" => mapping } })
+        else
+          connection.update_mapping("index_name", mapping)
+
+          expect(connection.get_mapping("index_name")).to eq("index_name" => { "mappings" => mapping })
+        end
       ensure
         connection.delete_index("index_name") if connection.index_exists?("index_name")
       end

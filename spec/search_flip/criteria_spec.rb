@@ -1350,28 +1350,40 @@ RSpec.describe SearchFlip::Criteria do
 
   describe "#preference" do
     it "sets the preference" do
-      stub_request(:post, "http://127.0.0.1:9200/products/products/_search?preference=value")
+      url = ProductIndex.connection.version.to_i < 8 ? "products/products" : "products"
+
+      stub_request(:post, "http://127.0.0.1:9200/#{url}/_search?preference=value")
         .to_return(status: 200, headers: { content_type: "application/json" }, body: "{}")
 
       ProductIndex.preference("value").execute
+
+      expect(WebMock).to have_requested(:post, "http://127.0.0.1:9200/#{url}/_search?preference=value")
     end
   end
 
   describe "#search_type" do
     it "sets the search_type" do
-      stub_request(:post, "http://127.0.0.1:9200/products/products/_search?search_type=value")
+      url = ProductIndex.connection.version.to_i < 8 ? "products/products" : "products"
+
+      stub_request(:post, "http://127.0.0.1:9200/#{url}/_search?search_type=value")
         .to_return(status: 200, headers: { content_type: "application/json" }, body: "{}")
 
       ProductIndex.search_type("value").execute
+
+      expect(WebMock).to have_requested(:post, "http://127.0.0.1:9200/#{url}/_search?search_type=value")
     end
   end
 
   describe "#routing" do
     it "sets the search_type" do
-      stub_request(:post, "http://127.0.0.1:9200/products/products/_search?routing=value")
+      url = ProductIndex.connection.version.to_i < 8 ? "products/products" : "products"
+
+      stub_request(:post, "http://127.0.0.1:9200/#{url}/_search?routing=value")
         .to_return(status: 200, headers: { content_type: "application/json" }, body: "{}")
 
       ProductIndex.routing("value").execute
+
+      expect(WebMock).to have_requested(:post, "http://127.0.0.1:9200/#{url}/_search?routing=value")
     end
   end
 end
