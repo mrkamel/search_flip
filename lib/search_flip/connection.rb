@@ -359,8 +359,8 @@ module SearchFlip
     # update and delete requests can be appended to the bulk request. Please
     # note that you need to manually pass the desired index name as well as
     # type name (depending on the Elasticsearch version) when using #bulk on a
-    # connection object. Otherwise, Elasticsearch will return an error. After
-    # the bulk requests are successfully processed all existing indices will
+    # connection object or Elasticsearch will return an error. After the bulk
+    # requests are successfully processed all existing indices will
     # subsequently be refreshed when auto_refresh is enabled.
     #
     # @see SearchFlip::Config See SearchFlip::Config for auto_refresh
