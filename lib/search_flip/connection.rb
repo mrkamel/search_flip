@@ -357,10 +357,11 @@ module SearchFlip
 
     # Initiates and yields a bulk object, such that index, import, create,
     # update and delete requests can be appended to the bulk request. You need
-    # to manually pass the desired index when using #bulk on a connection
-    # object. Otherwise, Elasticsearch will return an error. After the bulk
-    # requests are successfully processed all existing indices will subsequently
-    # be refreshed when auto_refresh is enabled.
+    # to manually pass the desired index name as well as type name (depending
+    # on the Elasticsearch version) when using #bulk on a connection object.
+    # Otherwise, Elasticsearch will return an error. After the bulk requests
+    # are successfully processed all existing indices will subsequently be
+    # refreshed when auto_refresh is enabled.
     #
     # @see SearchFlip::Config See SearchFlip::Config for auto_refresh
     #
