@@ -321,9 +321,9 @@ RSpec.describe SearchFlip::Connection do
 
       bulk = proc do
         connection.bulk do |indexer|
-          indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, ** connection.version.to_i < 7 ? { _type: ProductIndex.type_name } : {}
-          indexer.index 2, { id: 2 }, _index: ProductIndex.index_name, ** connection.version.to_i < 7 ? { _type: ProductIndex.type_name } : {}
-          indexer.index 1, { id: 1 }, _index: CommentIndex.index_name, ** connection.version.to_i < 7 ? { _type: CommentIndex.type_name } : {}
+          indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+          indexer.index 2, { id: 2 }, _index: ProductIndex.index_name, ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+          indexer.index 1, { id: 1 }, _index: CommentIndex.index_name, ** connection.version.to_i < 8 ? { _type: CommentIndex.type_name } : {}
         end
       end
 
@@ -346,14 +346,14 @@ RSpec.describe SearchFlip::Connection do
       connection = SearchFlip::Connection.new
 
       connection.bulk do |indexer|
-        indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, ** connection.version.to_i < 7 ? { _type: ProductIndex.type_name } : {}
-        indexer.index 2, { id: 2 }, _index: ProductIndex.index_name, ** connection.version.to_i < 7 ? { _type: ProductIndex.type_name } : {}
+        indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+        indexer.index 2, { id: 2 }, _index: ProductIndex.index_name, ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
       end
 
       bulk = proc do
         connection.bulk do |indexer|
-          indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, version: 1, version_type: "external", ** connection.version.to_i < 7 ? { _type: ProductIndex.type_name } : {}
-          indexer.index 2, { id: 2 }, _index: ProductIndex.index_name, version: 1, version_type: "external", ** connection.version.to_i < 7 ? { _type: ProductIndex.type_name } : {}
+          indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, version: 1, version_type: "external", ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+          indexer.index 2, { id: 2 }, _index: ProductIndex.index_name, version: 1, version_type: "external", ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
         end
       end
 
@@ -361,8 +361,8 @@ RSpec.describe SearchFlip::Connection do
 
       bulk = proc do
         connection.bulk ignore_errors: [409] do |indexer|
-          indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, version: 1, version_type: "external", ** connection.version.to_i < 7 ? { _type: ProductIndex.type_name } : {}
-          indexer.index 2, { id: 2 }, _index: ProductIndex.index_name, version: 1, version_type: "external", ** connection.version.to_i < 7 ? { _type: ProductIndex.type_name } : {}
+          indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, version: 1, version_type: "external", ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+          indexer.index 2, { id: 2 }, _index: ProductIndex.index_name, version: 1, version_type: "external", ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
         end
       end
 
@@ -375,7 +375,7 @@ RSpec.describe SearchFlip::Connection do
       connection = SearchFlip::Connection.new
 
       connection.bulk do |indexer|
-        indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, ** connection.version.to_i < 7 ? { _type: ProductIndex.type_name } : {}
+        indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
       end
 
       expect(SearchFlip::Bulk).to have_received(:new).with(
@@ -398,7 +398,7 @@ RSpec.describe SearchFlip::Connection do
       }
 
       connection.bulk(options) do |indexer|
-        indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, ** connection.version.to_i < 7 ? { _type: ProductIndex.type_name } : {}
+        indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
       end
 
       expect(SearchFlip::Bulk).to have_received(:new).with(anything, options)
