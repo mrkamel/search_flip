@@ -16,6 +16,8 @@ RSpec.configure do |config|
     TestIndex.delete_index if TestIndex.index_exists?
     ProductIndex.match_all.delete
     Product.delete_all
+    CommentIndex.match_all.delete
+    Comment.delete_all
   end
 end
 

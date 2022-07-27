@@ -315,6 +315,96 @@ RSpec.describe SearchFlip::Connection do
     end
   end
 
+  describe "#bulk" do
+    it "imports objects to the specified indices" do
+      connection = SearchFlip::Connection.new
+
+      bulk = proc do
+        connection.bulk do |indexer|
+          indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+          indexer.index 2, { id: 2 }, _index: ProductIndex.index_name, ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+          indexer.index 1, { id: 1 }, _index: CommentIndex.index_name, ** connection.version.to_i < 8 ? { _type: CommentIndex.type_name } : {}
+        end
+      end
+
+      expect(&bulk).to(change { CommentIndex.total_count }.by(1).and(change { CommentIndex.total_count }.by(1)))
+    end
+
+    it "raises when no index is given" do
+      connection = SearchFlip::Connection.new
+
+      bulk = proc do
+        connection.bulk do |indexer|
+          indexer.index 1, id: 1
+        end
+      end
+
+      expect(&bulk).to raise_error(SearchFlip::ResponseError)
+    end
+
+    it "respects options" do
+      connection = SearchFlip::Connection.new
+
+      connection.bulk do |indexer|
+        indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+        indexer.index 2, { id: 2 }, _index: ProductIndex.index_name, ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+      end
+
+      bulk = proc do
+        connection.bulk do |indexer|
+          indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, version: 1, version_type: "external", ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+          indexer.index 2, { id: 2 }, _index: ProductIndex.index_name, version: 1, version_type: "external", ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+        end
+      end
+
+      expect(&bulk).to raise_error(SearchFlip::Bulk::Error)
+
+      bulk = proc do
+        connection.bulk ignore_errors: [409] do |indexer|
+          indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, version: 1, version_type: "external", ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+          indexer.index 2, { id: 2 }, _index: ProductIndex.index_name, version: 1, version_type: "external", ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+        end
+      end
+
+      expect(&bulk).not_to(change { ProductIndex.total_count })
+    end
+
+    it "passes default options" do
+      allow(SearchFlip::Bulk).to receive(:new)
+
+      connection = SearchFlip::Connection.new
+
+      connection.bulk do |indexer|
+        indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+      end
+
+      expect(SearchFlip::Bulk).to have_received(:new).with(
+        anything,
+        http_client: connection.http_client,
+        bulk_limit: connection.bulk_limit,
+        bulk_max_mb: connection.bulk_max_mb
+      )
+    end
+
+    it "passes custom options" do
+      allow(SearchFlip::Bulk).to receive(:new)
+
+      connection = SearchFlip::Connection.new
+
+      options = {
+        bulk_limit: "bulk limit",
+        bulk_max_mb: "bulk max mb",
+        http_client: "http client"
+      }
+
+      connection.bulk(options) do |indexer|
+        indexer.index 1, { id: 1 }, _index: ProductIndex.index_name, ** connection.version.to_i < 8 ? { _type: ProductIndex.type_name } : {}
+      end
+
+      expect(SearchFlip::Bulk).to have_received(:new).with(anything, options)
+    end
+  end
+
   describe "#index_url" do
     it "returns the index url for the specified index" do
       connection = SearchFlip::Connection.new(base_url: "base_url")
