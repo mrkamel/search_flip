@@ -1,7 +1,7 @@
 
 # CHANGELOG
 
-## v3.6.1
+## v3.7.0
 
 * Add `SearchFlip::Connection#bulk` to allow more clean bulk indexing to
   multiple indices at once
