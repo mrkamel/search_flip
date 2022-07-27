@@ -601,7 +601,7 @@ module SearchFlip
         scope
       end
 
-      # Initiates and yields the bulk object, such that index, import, create,
+      # Initiates and yields a bulk object, such that index, import, create,
       # update and delete requests can be appended to the bulk request. Sends a
       # refresh request afterwards if auto_refresh is enabled.
       #

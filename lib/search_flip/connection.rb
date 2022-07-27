@@ -384,6 +384,51 @@ module SearchFlip
       raise e
     end
 
+    # Initiates and yields a bulk object, such that index, import, create,
+    # update and delete requests can be appended to the bulk request. Please
+    # note that you need to manually pass the desired index name as well as
+    # type name (depending on the Elasticsearch version) when using #bulk on a
+    # connection object or Elasticsearch will return an error. After the bulk
+    # requests are successfully processed all existing indices will
+    # subsequently be refreshed when auto_refresh is enabled.
+    #
+    # @see SearchFlip::Config See SearchFlip::Config for auto_refresh
+    #
+    # @example
+    #   connection = SearchFlip::Connection.new
+    #
+    #   connection.bulk ignore_errors: [409] do |bulk|
+    #     bulk.create comment.id, CommentIndex.serialize(comment),
+    #       _index: CommentIndex.index_name, version: comment.version, version_type: "external_gte"
+    #
+    #     bulk.delete product.id, _index: ProductIndex.index_name, routing: product.user_id
+    #
+    #     # ...
+    #   end
+    #
+    # @param options [Hash] Specifies options regarding the bulk indexing
+    # @option options ignore_errors [Array] Specifies an array of http status
+    #   codes that shouldn't raise any exceptions, like eg 409 for conflicts,
+    #   ie when optimistic concurrency control is used.
+    # @option options raise [Boolean] Prevents any exceptions from being
+    #   raised. Please note that this only applies to the bulk response, not to
+    #   the request in general, such that connection errors, etc will still
+    #   raise.
+
+    def bulk(options = {})
+      default_options = {
+        http_client: http_client,
+        bulk_limit: bulk_limit,
+        bulk_max_mb: bulk_max_mb
+      }
+
+      SearchFlip::Bulk.new("#{base_url}/_bulk", default_options.merge(options)) do |indexer|
+        yield indexer
+      end
+
+      refresh if SearchFlip::Config[:auto_refresh]
+    end
+
     # Returns the full Elasticsearch type URL, ie base URL, index name with
     # prefix and type name.
     #

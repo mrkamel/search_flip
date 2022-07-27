@@ -11,6 +11,11 @@
 * Added `SearchFlip::Connection#get_cluster_settings` and
   `#update_cluster_settings`
 
+## v3.7.0
+
+* Add `SearchFlip::Connection#bulk` to allow more clean bulk indexing to
+  multiple indices at once
+
 ## v3.6.0
 
 * Support Elasticsearch v8
