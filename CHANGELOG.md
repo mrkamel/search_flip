@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## v3.7.1
+
+* Fix thread-safety issue of http-rb
+
 ## v3.7.0
 
 * Add `SearchFlip::Connection#bulk` to allow more clean bulk indexing to

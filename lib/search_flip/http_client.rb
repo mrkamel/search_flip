@@ -59,6 +59,7 @@ module SearchFlip
 
     def execute(method, uri, options = {})
       final_request = plugins.inject(self) { |res, cur| cur.call(res, method, uri, options) }
+      final_request = final_request.headers({}) # Prevent thread-safety issue of http-rb: https://github.com/httprb/http/issues/558
       response = final_request.request.send(method, uri, options)
 
       raise SearchFlip::ResponseError.new(code: response.code, body: response.body.to_s) unless response.status.success?
