@@ -11,6 +11,10 @@
 * Added `SearchFlip::Connection#get_cluster_settings` and
   `#update_cluster_settings`
 
+## v3.7.1
+
+* Fix thread-safety issue of http-rb
+
 ## v3.7.0
 
 * Add `SearchFlip::Connection#bulk` to allow more clean bulk indexing to
