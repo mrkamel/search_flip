@@ -29,15 +29,17 @@ RSpec.describe SearchFlip::AwsSigv4Plugin do
     end
 
     it "feeds the http method, full url and body to the signer" do
+      body = JSON.generate(key: "value")
+
       signing_request = {
         http_method: "GET",
         url: "http://localhost/index?param=value",
-        body: JSON.generate(key: "value")
+        body: body
       }
 
       expect(plugin.signer).to receive(:sign_request).with(signing_request).and_call_original
 
-      plugin.call(client, :get, "http://localhost/index", params: { param: "value" }, json: { key: "value" })
+      plugin.call(client, :get, "http://localhost/index", params: { param: "value" }, body: body)
     end
   end
 end

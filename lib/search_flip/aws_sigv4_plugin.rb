@@ -37,7 +37,6 @@ module SearchFlip
       }
 
       signature_request[:body] = options[:body] if options.key?(:body)
-      signature_request[:body] = options[:json].respond_to?(:to_str) ? options[:json] : JSON.generate(options[:json]) if options[:json]
 
       signature = signer.sign_request(signature_request)
 
