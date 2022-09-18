@@ -58,9 +58,22 @@ module SearchFlip
     private
 
     def execute(method, uri, options = {})
-      final_request = plugins.inject(self) { |res, cur| cur.call(res, method, uri, options) }
+      opts = options.dup
+      final_request = self
+
+      if opts[:json]
+        # Manually generate and pass the json body to http-rb to guarantee that
+        # we have the same json which is used for aws signatures and to
+        # guarantee that json is always generated as stated in the config
+
+        opts[:body] = JSON.generate(opts.delete(:json))
+        final_request = final_request.headers("Content-Type" => "application/json")
+      end
+
+      final_request = plugins.inject(final_request) { |res, cur| cur.call(res, method, uri, opts) }
       final_request = final_request.headers({}) # Prevent thread-safety issue of http-rb: https://github.com/httprb/http/issues/558
-      response = final_request.request.send(method, uri, options)
+
+      response = final_request.request.send(method, uri, opts)
 
       raise SearchFlip::ResponseError.new(code: response.code, body: response.body.to_s) unless response.status.success?
 
