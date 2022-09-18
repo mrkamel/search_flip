@@ -36,6 +36,12 @@ RSpec.describe SearchFlip::HTTPClient do
 
         expect(SearchFlip::HTTPClient.new.send(method, "http://localhost/path", body: "body", params: { key: "value" }).body.to_s).to eq("success")
       end
+
+      it "generates json, passes it as body and sets the content type when the json option is used" do
+        stub_request(method, "http://localhost/path").with(body: '{"key":"value"}', headers: { "Content-Type" => "application/json" }).to_return(body: "success")
+
+        expect(SearchFlip::HTTPClient.new.send(method, "http://localhost/path", json: { "key" => "value" }).body.to_s).to eq("success")
+      end
     end
   end
 
