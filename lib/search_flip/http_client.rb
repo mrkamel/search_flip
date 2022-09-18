@@ -67,7 +67,7 @@ module SearchFlip
         # guarantee that json is always generated as stated in the config
 
         opts[:body] = JSON.generate(opts.delete(:json))
-        final_request = final_request.headers("Content-Type" => "application/json")
+        final_request = final_request.headers(content_type: "application/json")
       end
 
       final_request = plugins.inject(final_request) { |res, cur| cur.call(res, method, uri, opts) }
