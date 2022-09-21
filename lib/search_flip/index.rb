@@ -249,7 +249,7 @@ module SearchFlip
 
       def_delegators :criteria, :all, :profile, :where, :where_not, :filter, :range, :match_all, :match_none,
         :exists, :exists_not, :post_where, :post_where_not, :post_range, :post_exists, :post_exists_not,
-        :post_filter, :post_must, :post_must_not, :post_should, :aggregate, :scroll, :source,
+        :post_filter, :post_must, :post_must_not, :post_should, :aggregate, :scroll, :source, :merge,
         :includes, :eager_load, :preload, :sort, :resort, :order, :reorder, :offset, :limit, :paginate,
         :page, :per, :search, :highlight, :suggest, :custom, :find_in_batches, :find_results_in_batches,
         :find_each, :find_each_result, :failsafe, :total_entries, :total_count, :timeout, :terminate_after,
