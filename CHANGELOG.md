@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## v3.7.2
+
+* Add missing delegate `SearchFlip::Index.merge`
+
 ## v3.7.1
 
 * Fix thread-safety issue of http-rb

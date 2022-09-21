@@ -9,7 +9,7 @@ RSpec.describe SearchFlip::Index do
       :exists, :exists_not, :post_where, :post_where_not, :post_filter, :post_must,
       :post_must_not, :post_should, :post_range, :post_exists, :post_exists_not,
       :aggregate, :scroll, :source, :includes, :eager_load, :preload, :sort, :resort,
-      :order, :reorder, :offset, :limit, :paginate, :page, :per, :search,
+      :order, :reorder, :offset, :limit, :paginate, :page, :per, :search, :merge,
       :find_in_batches, :highlight, :suggest, :custom, :find_each, :failsafe,
       :total_entries, :total_count, :terminate_after, :timeout, :records, :results,
       :must, :must_not, :should, :find_each_result,
