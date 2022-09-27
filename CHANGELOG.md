@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## v3.7.2
+
+* Fix wrong AWS signatures by generating the json before passing it to http-rb
+
 ## v3.7.1
 
 * Fix thread-safety issue of http-rb
