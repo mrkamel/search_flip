@@ -852,7 +852,7 @@ performance tracing, etc.
 To use instrumentation, configure the instrumenter:
 
 ```ruby
-SearchFlip::Config[:instrumenter] = ActiveSupport::Notifications.notifier
+SearchFlip::Config[:instrumenter] = ActiveSupport::Notifications
 ```
 
 Subsequently, you can subscribe to notifcations for `request.search_flip`:
