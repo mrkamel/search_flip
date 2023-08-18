@@ -92,7 +92,7 @@ RSpec.describe SearchFlip::Connection do
     it "returns the specified indices" do
       connection = SearchFlip::Connection.new
 
-      expect(connection.get_indices.map { |index| index["index"] }.to_set).to eq(["comments", "products"].to_set)
+      expect(connection.get_indices.to_set { |index| index["index"] }).to eq(["comments", "products"].to_set)
       expect(connection.get_indices("com*").map { |index| index["index"] }).to eq(["comments"])
     end
 
