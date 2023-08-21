@@ -82,7 +82,7 @@ RSpec.describe SearchFlip::Response do
 
       ProductIndex.import products
 
-      expect(ProductIndex.match_all.results.map(&:id).to_set).to eq(products.map(&:id).to_set)
+      expect(ProductIndex.match_all.results.to_set(&:id)).to eq(products.to_set(&:id))
     end
   end
 
@@ -126,7 +126,7 @@ RSpec.describe SearchFlip::Response do
 
       response = ProductIndex.match_all.response
 
-      expect(response.ids.to_set).to eq(products.map(&:id).map(&:to_s).to_set)
+      expect(response.ids.to_set).to eq(products.map(&:id).to_set(&:to_s))
       expect(response.ids).to eq(response.raw_response["hits"]["hits"].map { |hit| hit["_id"] })
     end
   end
