@@ -970,7 +970,6 @@ SearchFlip is using Semantic Versioning: [SemVer](http://semver.org/)
 
 * Elasticsearch: [https://www.elastic.co/](https://www.elastic.co/)
 * Reference Docs: [http://www.rubydoc.info/github/mrkamel/search_flip](http://www.rubydoc.info/github/mrkamel/search_flip)
-* Travis: [http://travis-ci.org/mrkamel/search_flip](http://travis-ci.org/mrkamel/search_flip)
 * will_paginate: [https://github.com/mislav/will_paginate](https://github.com/mislav/will_paginate)
 * kaminari: [https://github.com/kaminari/kaminari](https://github.com/kaminari/kaminari)
 * Oj: [https://github.com/ohler55/oj](https://github.com/ohler55/oj)
