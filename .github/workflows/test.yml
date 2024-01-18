@@ -40,7 +40,8 @@ jobs:
         - image: opensearchproject/opensearch:2.11.1
           env:
             discovery.type: single-node
-          base_url: https://admin:admin@localhost:9200
+            plugins.security.disabled: true
+          base_url: https://127.0.0.1:9200
         ruby:
         - 2.7
         - 3.0
