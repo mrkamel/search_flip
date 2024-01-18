@@ -60,7 +60,7 @@ RSpec.describe SearchFlip::Bulk do
 
     it "uses the specified http_client" do
       product = create(:product)
-      url = ProductIndex.connection.version.to_i < 8 ? ProductIndex.type_url : ProductIndex.index_url
+      url = ProductIndex.connection.distribution.nil? && ProductIndex.connection.version.to_i < 8 ? ProductIndex.type_url : ProductIndex.index_url
 
       stub_request(:put, "#{url}/_bulk").with(headers: { "X-Header" => "Value" }).to_return(status: 200, body: "{}")
 

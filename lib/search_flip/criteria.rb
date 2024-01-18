@@ -350,7 +350,7 @@ module SearchFlip
       http_request = connection.http_client
       http_request = http_request.timeout(http_timeout_value) if http_timeout_value
 
-      if connection.distribution.nil? && connection.version.to_i >= 5
+      if connection.distribution || connection.version.to_i >= 5
         url = connection.version.to_i < 8 ? target.type_url : target.index_url
 
         http_request.post("#{url}/_delete_by_query", params: request_params.merge(params), json: dupped_request)
