@@ -11,29 +11,36 @@ jobs:
           env:
             discovery.type: single-node
             xpack.security.enabled: false
+          base_url: http://127.0.0.1:9200
         - image: elasticsearch:5.4
           env:
             discovery.type: single-node
             xpack.security.enabled: false
+          base_url: http://127.0.0.1:9200
         - image: docker.elastic.co/elasticsearch/elasticsearch:6.7.0
           env:
             discovery.type: single-node
             xpack.security.enabled: false
+          base_url: http://127.0.0.1:9200
         - image: docker.elastic.co/elasticsearch/elasticsearch:7.0.0
           env:
             discovery.type: single-node
             xpack.security.enabled: false
+          base_url: http://127.0.0.1:9200
         - image: docker.elastic.co/elasticsearch/elasticsearch:7.11.2
           env:
             discovery.type: single-node
             xpack.security.enabled: false
+          base_URL: http://127.0.0.1:9200
         - image: docker.elastic.co/elasticsearch/elasticsearch:8.1.1
           env:
             discovery.type: single-node
             xpack.security.enabled: false
+          base_url: http://127.0.0.1:9200
         - image: opensearchproject/opensearch:2.11.1
           env:
             discovery.type: single-node
+          base_url: https://127.0.0.1:9200
         ruby:
         - 2.7
         - 3.0
@@ -45,6 +52,8 @@ jobs:
         env: ${{ matrix.elasticsearch.env }}
         ports:
           - 9200:9200
+    env:
+      ELASTICSEARCH_BASE_URL: ${{ matrix.elasticsearch.base_url }}
     steps:
     - uses: actions/checkout@v1
     - uses: ruby/setup-ruby@v1
