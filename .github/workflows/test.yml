@@ -13,6 +13,7 @@ jobs:
         - docker.elastic.co/elasticsearch/elasticsearch:7.0.0
         - docker.elastic.co/elasticsearch/elasticsearch:7.11.2
         - docker.elastic.co/elasticsearch/elasticsearch:8.1.1
+        - opensearchproject/opensearch:2.11.1
         ruby:
         - 2.7
         - 3.0
