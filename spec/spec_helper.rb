@@ -24,7 +24,6 @@ end
 ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 
 SearchFlip::Config[:auto_refresh] = true
-SearchFlip::Config[:base_url] = ENV["ELASTICSEARCH_BASE_URL"] if ENV["ELASTICSEARCH_BASE_URL"]
 
 ActiveRecord::Base.connection.execute "DROP TABLE IF EXISTS products"
 
