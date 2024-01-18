@@ -479,7 +479,7 @@ RSpec.describe SearchFlip::Criteria do
 
   describe "#post_search" do
     it "sets up the constraints correctly and is chainable" do
-      if Productindex.connection.distribution || ProductIndex.connection.version.to_i >= 2
+      if ProductIndex.connection.distribution || ProductIndex.connection.version.to_i >= 2
         product1 = create(:product, title: "title1", category: "category1")
         product2 = create(:product, title: "title2", category: "category2")
         product3 = create(:product, title: "title3", category: "category1")

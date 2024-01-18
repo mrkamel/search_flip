@@ -447,7 +447,7 @@ RSpec.describe SearchFlip::Index do
     it "allows respects class options" do
       products = create_list(:product, 2)
 
-      if Productindex.connection.distribution || ProductIndex.connection.version.to_i >= 5
+      if ProductIndex.connection.distribution || ProductIndex.connection.version.to_i >= 5
         allow(ProductIndex).to receive(:index_options).and_return(routing: "r1")
 
         expect { ProductIndex.create products }.to(change { ProductIndex.total_count }.by(2))
