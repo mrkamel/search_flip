@@ -7,13 +7,33 @@ jobs:
       fail-fast: false
       matrix:
         elasticsearch:
-        - plainpicture/elasticsearch:2.4.1_delete-by-query
-        - elasticsearch:5.4
-        - docker.elastic.co/elasticsearch/elasticsearch:6.7.0
-        - docker.elastic.co/elasticsearch/elasticsearch:7.0.0
-        - docker.elastic.co/elasticsearch/elasticsearch:7.11.2
-        - docker.elastic.co/elasticsearch/elasticsearch:8.1.1
-        - opensearchproject/opensearch:2.11.1
+        - image: plainpicture/elasticsearch:2.4.1_delete-by-query
+          env:
+            discovery.type: single-node
+            xpack.security.enabled: false
+        - image: elasticsearch:5.4
+          env:
+            discovery.type: single-node
+            xpack.security.enabled: false
+        - image: docker.elastic.co/elasticsearch/elasticsearch:6.7.0
+          env:
+            discovery.type: single-node
+            xpack.security.enabled: false
+        - image: docker.elastic.co/elasticsearch/elasticsearch:7.0.0
+          env:
+            discovery.type: single-node
+            xpack.security.enabled: false
+        - image: docker.elastic.co/elasticsearch/elasticsearch:7.11.2
+          env:
+            discovery.type: single-node
+            xpack.security.enabled: false
+        - image: docker.elastic.co/elasticsearch/elasticsearch:8.1.1
+          env:
+            discovery.type: single-node
+            xpack.security.enabled: false
+        - image: opensearchproject/opensearch:2.11.1
+          env:
+            discovery.type: single-node
         ruby:
         - 2.7
         - 3.0
@@ -21,10 +41,8 @@ jobs:
         - 3.2
     services:
       elasticsearch:
-        image: ${{ matrix.elasticsearch }}
-        env:
-          discovery.type: single-node
-          xpack.security.enabled: false
+        image: ${{ matrix.elasticsearch.image }}
+        env: ${{ matrix.elasticsearch.env }}
         ports:
           - 9200:9200
     steps:
