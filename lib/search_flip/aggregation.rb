@@ -30,7 +30,7 @@ module SearchFlip
       res[:aggregations] = aggregation_values if aggregation_values
 
       if must_values || must_not_values || filter_values
-        if target.connection.version.to_i >= 2
+        if target.connection.distribution || target.connection.version.to_i >= 2
           res[:filter] = {
             bool: {}
               .merge(must_values ? { must: must_values } : {})
