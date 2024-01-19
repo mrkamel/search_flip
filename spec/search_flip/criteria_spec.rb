@@ -435,7 +435,7 @@ RSpec.describe SearchFlip::Criteria do
 
   describe "#match_none" do
     it "does not match any documents" do
-      if ProductIndex.connection.version.to_i >= 5
+      if ProductIndex.connection.distribution || ProductIndex.connection.version.to_i >= 5
         ProductIndex.import create(:product)
 
         query = ProductIndex.match_none
@@ -479,7 +479,7 @@ RSpec.describe SearchFlip::Criteria do
 
   describe "#post_search" do
     it "sets up the constraints correctly and is chainable" do
-      if ProductIndex.connection.version.to_i >= 2
+      if ProductIndex.connection.distribution || ProductIndex.connection.version.to_i >= 2
         product1 = create(:product, title: "title1", category: "category1")
         product2 = create(:product, title: "title2", category: "category2")
         product3 = create(:product, title: "title3", category: "category1")
@@ -886,7 +886,7 @@ RSpec.describe SearchFlip::Criteria do
 
   describe "#profile" do
     it "sets up the constraints correctly" do
-      if ProductIndex.connection.version.to_i >= 2
+      if ProductIndex.connection.distribution || ProductIndex.connection.version.to_i >= 2
         expect(ProductIndex.profile(true).raw_response["profile"]).not_to be_nil
       end
     end
@@ -1322,7 +1322,7 @@ RSpec.describe SearchFlip::Criteria do
 
   describe "#track_total_hits" do
     it "is added to the request" do
-      if ProductIndex.connection.version.to_i >= 7
+      if ProductIndex.connection.distribution || ProductIndex.connection.version.to_i >= 7
         query = ProductIndex.track_total_hits(false)
 
         expect(query.request[:track_total_hits]).to eq(false)
@@ -1350,7 +1350,7 @@ RSpec.describe SearchFlip::Criteria do
 
   describe "#preference" do
     it "sets the preference" do
-      url = ProductIndex.connection.version.to_i < 8 ? "products/products" : "products"
+      url = ProductIndex.connection.distribution.nil? && ProductIndex.connection.version.to_i < 8 ? "products/products" : "products"
 
       stub_request(:post, "http://127.0.0.1:9200/#{url}/_search?preference=value")
         .to_return(status: 200, headers: { content_type: "application/json" }, body: "{}")
@@ -1363,7 +1363,7 @@ RSpec.describe SearchFlip::Criteria do
 
   describe "#search_type" do
     it "sets the search_type" do
-      url = ProductIndex.connection.version.to_i < 8 ? "products/products" : "products"
+      url = ProductIndex.connection.distribution.nil? && ProductIndex.connection.version.to_i < 8 ? "products/products" : "products"
 
       stub_request(:post, "http://127.0.0.1:9200/#{url}/_search?search_type=value")
         .to_return(status: 200, headers: { content_type: "application/json" }, body: "{}")
@@ -1376,7 +1376,7 @@ RSpec.describe SearchFlip::Criteria do
 
   describe "#routing" do
     it "sets the search_type" do
-      url = ProductIndex.connection.version.to_i < 8 ? "products/products" : "products"
+      url = ProductIndex.connection.distribution.nil? && ProductIndex.connection.version.to_i < 8 ? "products/products" : "products"
 
       stub_request(:post, "http://127.0.0.1:9200/#{url}/_search?routing=value")
         .to_return(status: 200, headers: { content_type: "application/json" }, body: "{}")

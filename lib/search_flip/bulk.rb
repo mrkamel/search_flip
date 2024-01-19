@@ -148,7 +148,7 @@ module SearchFlip
       return unless parsed_response["errors"]
 
       parsed_response["items"].each do |item|
-        item.each do |_, element|
+        item.each_value do |element|
           status = element["status"]
 
           next if status.between?(200, 299)

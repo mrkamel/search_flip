@@ -438,7 +438,7 @@ module SearchFlip
       # equal to _doc.
 
       def include_type_name?
-        type_name != "_doc" || connection.version.to_i < 7
+        type_name != "_doc" || (connection.distribution.nil? && connection.version.to_i < 7)
       end
 
       # Retrieves the document specified by id from Elasticsearch. Raises
@@ -455,7 +455,7 @@ module SearchFlip
       # @return [Hash] The specified document
 
       def get(id, params = {})
-        url = connection.version.to_i < 8 ? type_url : "#{index_url}/_doc"
+        url = connection.distribution.nil? && connection.version.to_i < 8 ? type_url : "#{index_url}/_doc"
         response = connection.http_client.headers(accept: "application/json").get("#{url}/#{id}", params: params)
 
         SearchFlip::JSON.parse(response.to_s)
@@ -474,7 +474,7 @@ module SearchFlip
       # @return [Hash] The raw response
 
       def mget(request, params = {})
-        url = connection.version.to_i < 8 ? type_url : index_url
+        url = connection.distribution.nil? && connection.version.to_i < 8 ? type_url : index_url
         response = connection.http_client.headers(accept: "application/json").post("#{url}/_mget", json: request, params: params)
 
         SearchFlip::JSON.parse(response.to_s)
@@ -633,7 +633,7 @@ module SearchFlip
           bulk_max_mb: connection.bulk_max_mb
         }
 
-        url = connection.version.to_i < 8 ? type_url : index_url
+        url = connection.distribution.nil? && connection.version.to_i < 8 ? type_url : index_url
 
         SearchFlip::Bulk.new("#{url}/_bulk", default_options.merge(options)) do |indexer|
           yield indexer
