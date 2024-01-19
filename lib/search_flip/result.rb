@@ -1,29 +1,51 @@
 module SearchFlip
-  # The SearchFlip::Result class basically is a hash wrapper that uses
-  # Hashie::Mash to provide convenient method access to the hash attributes.
+  # The SearchFlip::Result class is a simple Hash, but extended with
+  # method-like access. Keys assigned via methods are stored as strings.
+  #
+  # @example method access
+  #   result = SearchFlip::Result.new
+  #   result["some_key"] = "value"
+  #   result.some_key # => "value"
 
-  class Result < Hashie::Mash
-    def self.disable_warnings?(*args)
-      true
-    end
+  class Result < Hash
+    def self.convert(hash)
+      res = self[hash]
 
-    # Creates a SearchFlip::Result object from a raw hit. Useful for e.g.
-    # top hits aggregations.
-    #
-    # @example
-    #   query = ProductIndex.aggregate(top_sales: { top_hits: "..." })
-    #   top_sales_hits = query.aggregations(:top_sales).top_hits.hits.hits
-    #
-    #   SearchFlip::Result.from_hit(top_sales_hits.first)
-
-    def self.from_hit(hit)
-      raw_result = (hit["_source"] || {}).dup
-
-      raw_result["_hit"] = hit.each_with_object({}) do |(key, value), hash|
-        hash[key] = value if key != "_source"
+      res.each do |key, value|
+        if value.is_a?(Hash)
+          res[key] = convert(value)
+        elsif value.is_a?(Array)
+          res[key] = convert_array(value)
+        end
       end
 
-      new(raw_result)
+      res
+    end
+
+    def self.convert_array(arr)
+      arr.map do |obj|
+        if obj.is_a?(Hash)
+          convert(obj)
+        elsif obj.is_a?(Array)
+          convert_array(obj)
+        else
+          obj
+        end
+      end
+    end
+
+    def method_missing(name, *args, &block)
+      self[name.to_s]
+    end
+
+    def respond_to_missing?(name, include_private = false)
+      key?(name.to_s) || super
+    end
+
+    def self.from_hit(hit)
+      res = convert(hit["_source"] || {})
+      res["_hit"] = convert(self[hit].tap { |hash| hash.delete("_source") })
+      res
     end
   end
 end
