@@ -16,7 +16,17 @@ module SearchFlip
       @base_url = options[:base_url] || SearchFlip::Config[:base_url]
       @http_client = options[:http_client] || SearchFlip::HTTPClient.new
       @bulk_limit = options[:bulk_limit] || SearchFlip::Config[:bulk_limit]
-      @version_mutex = Mutex.new
+    end
+
+    # Queries and returns the Elasticsearch distribution used.
+    #
+    # @example
+    #   connection.distribution # => e.g. "opensearch"
+    #
+    # @return [String] The Elasticsearch distribution
+
+    def distribution
+      @distribution ||= SearchFlip::JSON.parse(version_response.to_s)["version"]["distribution"]
     end
 
     # Queries the cluster settings from Elasticsearch
@@ -51,18 +61,12 @@ module SearchFlip
     # Queries and returns the Elasticsearch version used.
     #
     # @example
-    #   connection.version # => e.g. 2.4.1
+    #   connection.version # => e.g. "2.4.1"
     #
     # @return [String] The Elasticsearch version
 
     def version
-      @version_mutex.synchronize do
-        @version ||= begin
-          response = http_client.headers(accept: "application/json").get("#{base_url}/")
-
-          SearchFlip::JSON.parse(response.to_s)["version"]["number"]
-        end
-      end
+      @version ||= SearchFlip::JSON.parse(version_response.to_s)["version"]["number"]
     end
 
     # Queries and returns the Elasticsearch cluster health.
@@ -93,7 +97,7 @@ module SearchFlip
     def msearch(criterias)
       payload = criterias.flat_map do |criteria|
         [
-          SearchFlip::JSON.generate(index: criteria.target.index_name_with_prefix, **(version.to_i < 8 ? { type: criteria.target.type_name } : {})),
+          SearchFlip::JSON.generate(index: criteria.target.index_name_with_prefix, **(distribution.nil? && version.to_i < 8 ? { type: criteria.target.type_name } : {})),
           SearchFlip::JSON.generate(criteria.request)
         ]
       end
@@ -329,8 +333,8 @@ module SearchFlip
     # @return [Boolean] Returns true or raises SearchFlip::ResponseError
 
     def update_mapping(index_name, mapping, type_name: nil)
-      url = type_name && version.to_i < 8 ? type_url(index_name, type_name) : index_url(index_name)
-      params = type_name && version.to_f >= 6.7 && version.to_i < 8 ? { include_type_name: true } : {}
+      url = type_name && distribution.nil? && version.to_i < 8 ? type_url(index_name, type_name) : index_url(index_name)
+      params = type_name && distribution.nil? && version.to_f >= 6.7 && version.to_i < 8 ? { include_type_name: true } : {}
 
       http_client.put("#{url}/_mapping", params: params, json: mapping)
 
@@ -347,8 +351,8 @@ module SearchFlip
     # @return [Hash] The current type mapping
 
     def get_mapping(index_name, type_name: nil)
-      url = type_name && version.to_i < 8 ? type_url(index_name, type_name) : index_url(index_name)
-      params = type_name && version.to_f >= 6.7 && version.to_i < 8 ? { include_type_name: true } : {}
+      url = type_name && distribution.nil? && version.to_i < 8 ? type_url(index_name, type_name) : index_url(index_name)
+      params = type_name && distribution.nil? && version.to_f >= 6.7 && version.to_i < 8 ? { include_type_name: true } : {}
 
       response = http_client.headers(accept: "application/json").get("#{url}/_mapping", params: params)
 
@@ -450,6 +454,12 @@ module SearchFlip
 
     def index_url(index_name)
       "#{base_url}/#{index_name}"
+    end
+
+    private
+
+    def version_response
+      @version_response ||= http_client.headers(accept: "application/json").get("#{base_url}/")
     end
   end
 end

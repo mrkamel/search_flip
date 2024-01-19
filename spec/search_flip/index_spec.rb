@@ -77,7 +77,7 @@ RSpec.describe SearchFlip::Index do
         include SearchFlip::Index
       end
 
-      expect(klass.include_type_name?).to eq(klass.connection.version.to_i < 7)
+      expect(klass.include_type_name?).to eq(klass.connection.distribution.nil? && klass.connection.version.to_i < 7)
     end
 
     it "returns true if the type name is not equal to _doc" do
@@ -185,7 +185,7 @@ RSpec.describe SearchFlip::Index do
   end
 
   describe ".update_mapping" do
-    if TestIndex.connection.version.to_i >= 7
+    if TestIndex.connection.distribution || TestIndex.connection.version.to_i >= 7
       context "without type name" do
         it "delegates to connection" do
           TestIndex.create_index
@@ -215,7 +215,7 @@ RSpec.describe SearchFlip::Index do
 
         TestIndex.update_mapping
 
-        if TestIndex.connection.version.to_i < 8
+        if TestIndex.connection.distribution.nil? && TestIndex.connection.version.to_i < 8
           expect(TestIndex.connection).to have_received(:update_mapping).with("test", { "test" => mapping }, type_name: "test")
         else
           expect(TestIndex.connection).to have_received(:update_mapping).with("test", mapping)
@@ -245,7 +245,7 @@ RSpec.describe SearchFlip::Index do
   end
 
   describe ".get_mapping" do
-    if TestIndex.connection.version.to_i >= 7
+    if TestIndex.connection.distribution || TestIndex.connection.version.to_i >= 7
       context "without type name" do
         it "delegates to connection" do
           allow(TestIndex).to receive(:include_type_name?).and_return(false)
@@ -272,7 +272,7 @@ RSpec.describe SearchFlip::Index do
 
         TestIndex.get_mapping
 
-        if TestIndex.connection.version.to_i < 8
+        if TestIndex.connection.distribution.nil? && TestIndex.connection.version.to_i < 8
           expect(TestIndex.connection).to have_received(:get_mapping).with("test", type_name: "test")
         else
           expect(TestIndex.connection).to have_received(:get_mapping).with("test")
@@ -340,7 +340,7 @@ RSpec.describe SearchFlip::Index do
 
       TestIndex.type_url
 
-      expect(TestIndex.connection).to have_received(:type_url).with("test", TestIndex.connection.version.to_i < 8 ? "test" : "_doc")
+      expect(TestIndex.connection).to have_received(:type_url).with("test", TestIndex.connection.distribution.nil? && TestIndex.connection.version.to_i < 8 ? "test" : "_doc")
     end
   end
 
@@ -433,7 +433,7 @@ RSpec.describe SearchFlip::Index do
 
       products = create_list(:product, 2)
 
-      if ProductIndex.connection.version.to_i >= 5
+      if ProductIndex.connection.distribution || ProductIndex.connection.version.to_i >= 5
         expect { ProductIndex.create products, {}, routing: "r1" }.to(change { ProductIndex.total_count }.by(2))
 
         expect(ProductIndex.get(products.first.id, routing: "r1")["_routing"]).to eq("r1")
@@ -447,7 +447,7 @@ RSpec.describe SearchFlip::Index do
     it "allows respects class options" do
       products = create_list(:product, 2)
 
-      if ProductIndex.connection.version.to_i >= 5
+      if ProductIndex.connection.distribution || ProductIndex.connection.version.to_i >= 5
         allow(ProductIndex).to receive(:index_options).and_return(routing: "r1")
 
         expect { ProductIndex.create products }.to(change { ProductIndex.total_count }.by(2))

@@ -9,8 +9,9 @@
 Using SearchFlip it is dead-simple to create index classes that correspond to
 [Elasticsearch](https://www.elastic.co/) indices and to manipulate, query and
 aggregate these indices using a chainable, concise, yet powerful DSL. Finally,
-SearchFlip supports Elasticsearch 2.x, 5.x, 6.x, 7.x and 8.x. Check section
-[Feature Support](#feature-support) for version dependent features.
+SearchFlip supports Elasticsearch 2.x, 5.x, 6.x, 7.x and 8.x as well as
+Opensearch 1.x and 2.x. Check section [Feature Support](#feature-support) for
+version dependent features.
 
 ```ruby
 CommentIndex.search("hello world", default_field: "title").where(visible: true).aggregate(:user_id).sort(id: "desc")
