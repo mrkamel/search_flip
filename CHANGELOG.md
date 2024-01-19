@@ -15,7 +15,6 @@
 
 * Support Opensearch 1.x and 2.x
 
-
 ## v3.7.2
 
 * Fix wrong AWS signatures by generating the json before passing it to http-rb
