@@ -1,6 +1,12 @@
 require File.expand_path("../spec_helper", __dir__)
 
 RSpec.describe SearchFlip::Connection do
+  describe "#distribution" do
+    it "reutrns the distribution" do
+      expect([nil, "opensearch"]).to include(SearchFlip::Connection.new.distribution)
+    end
+  end
+
   describe "#version" do
     it "returns the version" do
       expect(SearchFlip::Connection.new.version).to match(/\A[0-9.]+\z/)
