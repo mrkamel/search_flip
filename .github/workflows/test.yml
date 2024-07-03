@@ -39,6 +39,10 @@ jobs:
           env:
             discovery.type: single-node
             plugins.security.disabled: true
+        - image: opensearchproject/opensearch:2.13.0
+          env:
+            discovery.type: single-node
+            plugins.security.disabled: true
         ruby:
         - 2.7
         - 3.0
