@@ -98,6 +98,13 @@ Available config options are:
 * `auto_refresh` tells SearchFlip to automatically refresh an index after
   import, index, delete, etc operations. This is e.g. useful for testing, etc.
   Defaults to false.
+* `version` Enforce a specific Elasticsearch version and distribution no matter
+  which Elasticsearch version is actually installed. Can also be used to prevent
+  sending requests to determine the version:
+
+```ruby
+SearchFlip::Config[:version] = { number: "2.13", distribution: "opensearch" }
+```
 
 ## Usage
 
