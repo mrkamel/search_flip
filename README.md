@@ -103,6 +103,7 @@ Available config options are:
   sending requests to determine the version:
 
 ```ruby
+SearchFlip::Config[:version] = { number: "8.1.1" }
 SearchFlip::Config[:version] = { number: "2.13", distribution: "opensearch" }
 ```
 
