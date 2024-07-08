@@ -6,13 +6,20 @@ AllCops:
 Gemspec/RequireMFA:
   Enabled: false
 
+Style/CaseLikeIf:
+  Enabled: false
+
 Layout/EmptyLineBetweenDefs:
   EmptyLineBetweenClassDefs: false
 
-Gemspec/RequiredRubyVersion:
-  Enabled: false
+Lint/EmptyBlock:
+  Exclude:
+    - spec/**/*.rb
 
 Style/ExplicitBlockArgument:
+  Enabled: false
+
+Gemspec/RequiredRubyVersion:
   Enabled: false
 
 Style/HashTransformValues:

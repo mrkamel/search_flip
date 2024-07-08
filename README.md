@@ -493,8 +493,8 @@ end
 ```
 
 Generally, aggregation results returned by Elasticsearch are returned as a
-`SearchFlip::Result`, which basically is a `Hashie::Mash`, such that you can
-access them via:
+`SearchFlip::Result`, which basically is a Hash with method-like access, such
+that you can access them via:
 
 ```ruby
 query.aggregations(:username)["mrkamel"].revenue.value

@@ -1,6 +1,50 @@
 
 # Updating from previous SearchFlip versions
 
+## Update 3.x to 4.x
+
+**[BREAKING]** For performance reasons, `SearchFlip::Result` no longer
+inherits `Hashie::Mash`
+
+* It no longer supports symbol based access like `result[:id]`
+
+3.x:
+
+```ruby
+CommentIndex.match_all.results.first[:id]
+CommentIndex.aggregate(:tags).aggregations(:tags).values.first[:doc_count]
+```
+
+4.x
+
+```ruby
+CommentIndex.match_all.results.first["id"] # or .id
+CommentIndex.aggregate(:tags).aggregations(:tags).values.first["doc_count"] # or .doc_count
+```
+
+* It no longer supports question mark methods like `result.title?`
+
+3.x:
+
+```ruby
+CommentIndex.match_all.results.first.is_published?
+```
+
+4.x
+
+```ruby
+CommentIndex.match_all.results.first.is_published == true
+
+# or
+
+!! CommentIndex.match_all.results.first.is_published
+```
+
+* It no longer supports method based assignment like `result.some_key = "value"`.
+
+However, this should not have any practical implications, as changing the
+results is not considered to be a common use case.
+
 ## Update 2.x to 3.x
 
 * **[BREAKING]**  No longer pass multiple arguments to `#must`, `#must_not`,

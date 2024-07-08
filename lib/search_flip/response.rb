@@ -156,8 +156,7 @@ module SearchFlip
     end
 
     # Returns the results, ie hits, wrapped in a SearchFlip::Result object
-    # which basically is a Hashie::Mash. Check out the Hashie docs for further
-    # details.
+    # which basically is a Hash with method-like access.
     #
     # @example
     #   CommentIndex.search("hello world").results
@@ -166,7 +165,7 @@ module SearchFlip
     # @return [Array] An array of results
 
     def results
-      @results ||= hits["hits"].map { |hit| Result.from_hit(hit) }
+      @results ||= hits["hits"].map { |hit| SearchFlip::Result.from_hit(hit) }
     end
 
     # Returns the named sugggetion, if a name is specified or alle suggestions.
@@ -304,13 +303,13 @@ module SearchFlip
 
       @aggregations[key] =
         if response["aggregations"].nil? || response["aggregations"][key].nil?
-          Result.new
+          SearchFlip::Result.new
         elsif response["aggregations"][key]["buckets"].is_a?(Array)
-          response["aggregations"][key]["buckets"].each_with_object({}) { |bucket, hash| hash[bucket["key"]] = Result.new(bucket) }
+          response["aggregations"][key]["buckets"].each_with_object({}) { |bucket, hash| hash[bucket["key"]] = SearchFlip::Result.convert(bucket) }
         elsif response["aggregations"][key]["buckets"].is_a?(Hash)
-          Result.new response["aggregations"][key]["buckets"]
+          SearchFlip::Result.convert(response["aggregations"][key]["buckets"])
         else
-          Result.new response["aggregations"][key]
+          SearchFlip::Result.convert(response["aggregations"][key])
         end
     end
   end

@@ -29,6 +29,35 @@ module SearchFlip
       @distribution ||= SearchFlip::Config.dig(:version, :distribution) || SearchFlip::JSON.parse(version_response.to_s)["version"]["distribution"]
     end
 
+    # Queries the cluster settings from Elasticsearch
+    #
+    # @example
+    #   connection.get_cluster_settings
+    #   # => { "persistent" => { ... }, ... }
+    #
+    # @return [Hash] The cluster settings
+
+    def get_cluster_settings
+      response = http_client.get("#{base_url}/_cluster/settings")
+
+      SearchFlip::JSON.parse(response.to_s)
+    end
+
+    # Updates the cluster settings according to the specified payload
+    #
+    # @example
+    #   connection.update_cluster_settings(persistent: { action: { auto_create_index: false } })
+    #
+    # @param cluster_settings [Hash] The cluster settings
+    #
+    # @return [Boolean] Returns true or raises SearchFlip::ResponseError
+
+    def update_cluster_settings(cluster_settings)
+      http_client.put("#{base_url}/_cluster/settings", json: cluster_settings)
+
+      true
+    end
+
     # Queries and returns the Elasticsearch version used.
     #
     # @example

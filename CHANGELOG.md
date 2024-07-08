@@ -1,6 +1,16 @@
 
 # CHANGELOG
 
+## v4.0.0
+
+* [BREAKING] For performance reasons, `SearchFlip::Result` now no longer
+  inherits `Hashie::Mash`
+  * It no longer supports symbol based access like `result[:id]`
+  * It no longer supports question mark methods like `result.title?`
+  * It no longer supports method based assignment like `result.some_key = "value"`
+* Added `SearchFlip::Connection#get_cluster_settings` and
+  `#update_cluster_settings`
+
 ## v3.9.0
 
 * Allow to configure the elasticsearch version no matter which elasticsearch

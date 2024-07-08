@@ -1,7 +1,6 @@
 require "ruby2_keywords"
 require "forwardable"
 require "http"
-require "hashie"
 require "thread"
 require "json"
 require "oj"
