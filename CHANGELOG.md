@@ -1,7 +1,20 @@
 
 # CHANGELOG
 
-## v3.8.0.
+## v3.9.0
+
+* Allow to configure the elasticsearch version no matter which elasticsearch
+  version is actually in use. The version information is needed to support
+  version dependent features. Please note that manually configuring the version
+  is usually not need as the version by default is determined by sending one
+  request to elasticsearch.
+
+```ruby
+SearchFlip::Config[:version] = { number: "8.1.1" }
+SearchFlip::Config[:version] = { number: "2.13", distribution: "opensearch" }
+```
+
+## v3.8.0
 
 * Support Opensearch 1.x and 2.x
 
