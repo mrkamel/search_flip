@@ -5,11 +5,27 @@ RSpec.describe SearchFlip::Connection do
     it "reutrns the distribution" do
       expect([nil, "opensearch"]).to include(SearchFlip::Connection.new.distribution)
     end
+
+    it "returns the distribution from the config when given" do
+      SearchFlip::Config[:version] = { distribution: "distribution" }
+
+      expect(SearchFlip::Connection.new.distribution).to eq("distribution")
+    ensure
+      SearchFlip::Config.delete(:version)
+    end
   end
 
   describe "#version" do
     it "returns the version" do
       expect(SearchFlip::Connection.new.version).to match(/\A[0-9.]+\z/)
+    end
+
+    it "returns the version from the config when given" do
+      SearchFlip::Config[:version] = { number: "1.2.3" }
+
+      expect(SearchFlip::Connection.new.version).to eq("1.2.3")
+    ensure
+      SearchFlip::Config.delete(:version)
     end
   end
 

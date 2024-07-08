@@ -26,7 +26,7 @@ module SearchFlip
     # @return [String] The Elasticsearch distribution
 
     def distribution
-      @distribution ||= SearchFlip::JSON.parse(version_response.to_s)["version"]["distribution"]
+      @distribution ||= SearchFlip::Config.dig(:version, :distribution) || SearchFlip::JSON.parse(version_response.to_s)["version"]["distribution"]
     end
 
     # Queries the cluster settings from Elasticsearch
@@ -66,7 +66,7 @@ module SearchFlip
     # @return [String] The Elasticsearch version
 
     def version
-      @version ||= SearchFlip::JSON.parse(version_response.to_s)["version"]["number"]
+      @version ||= SearchFlip::Config.dig(:version, :number) || SearchFlip::JSON.parse(version_response.to_s)["version"]["number"]
     end
 
     # Queries and returns the Elasticsearch cluster health.
