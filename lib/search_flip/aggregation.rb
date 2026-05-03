@@ -33,9 +33,9 @@ module SearchFlip
         if target.connection.distribution || target.connection.version.to_i >= 2
           res[:filter] = {
             bool: {}
-              .merge(must_values ? { must: must_values } : {})
-              .merge(must_not_values ? { must_not: must_not_values } : {})
-              .merge(filter_values ? { filter: filter_values } : {})
+                .merge(must_values ? { must: must_values } : {})
+                .merge(must_not_values ? { must_not: must_not_values } : {})
+                .merge(filter_values ? { filter: filter_values } : {})
           }
         else
           filters = (filter_values || []) + (must_not_values || []).map { |must_not_value| { not: must_not_value } }

@@ -1,6 +1,10 @@
 
 # CHANGELOG
 
+## v3.9.1
+
+* Fix compatibility with http.rb version 6
+
 ## v3.9.0
 
 * Allow to configure the elasticsearch version no matter which elasticsearch
